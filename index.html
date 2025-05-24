@@ -8,12 +8,22 @@
   <script>
     $(document).ready(function(){
       $('.collapsible h3').click(function(){
+        $(this).toggleClass('active');
         $(this).siblings('ul').slideToggle();
       });
-      $('.collapsible ul').hide(); // Start collapsed
+      $('.collapsible ul').hide();
     });
   </script>
   <style>
+    .collapsible h3::after {
+      content: " ▼";
+      font-size: 0.8em;
+      color: #666;
+    }
+    .collapsible h3.active::after {
+      content: " ▲";
+      color: #333;
+    }
     body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
     header, footer { background: #1e1e1e; color: white; text-align: center; padding: 1rem; }
     section { max-width: 900px; margin: auto; padding: 2rem; background: white; margin-top: 1rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
@@ -47,7 +57,18 @@
 </section>
 
 <section>
-  <h2>Selected Projects</h2>
+  <h2>Relevant Coursework</h2>
+  <ul>
+    <li>Advanced Computer Architecture 2</li>
+    <li>High Performance Computing</li>
+    <li>Machine Learning</li>
+    <li>Computer Architecture</li>
+    <li>Digital System Design</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Projects</h2>
 
   <div class="project collapsible">
     <h3>ML-Guided CUDA Kernel Configuration</h3>
