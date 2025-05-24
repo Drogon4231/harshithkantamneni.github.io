@@ -62,7 +62,58 @@
 
   <section>
     <h2>Projects</h2>
-    <!-- Project sections remain unchanged -->
+
+    <div class="project">
+      <h3>ML-Guided CUDA Kernel Configuration</h3>
+      <p><strong>GitHub:</strong> <a href="https://github.com/Drogon4231/Ml-Guided-CUDA-Config" target="_blank">Ml-Guided-CUDA-Config</a></p>
+      <ul>
+        <li>Trained a PyTorch model to predict optimal CUDA launch configurations based on matrix size</li>
+        <li>Integrated prediction with runtime execution for automatic tuning</li>
+        <li>Achieved up to 30% runtime improvement over fixed-thread baselines</li>
+        <li>Profiled kernel performance and bottlenecks using Nsight Systems</li>
+      </ul>
+    </div>
+
+    <div class="project">
+      <h3>Runtime Prediction for TDG Partitioning</h3>
+      <p><strong>GitHub:</strong> <a href="https://github.com/Drogon4231/ml-guided-tdg-runtime" target="_blank">ml-guided-tdg-runtime</a></p>
+      <ul>
+        <li>Engineered graph and workload features from TDG structures and matrix operations</li>
+        <li>Trained an XGBoost regression model to predict runtime-optimal partition sizes</li>
+        <li>Validated predictions with less than 5% error compared to simulated annealing</li>
+        <li>Reduced overall partition selection time by avoiding exhaustive runtime searches</li>
+      </ul>
+    </div>
+
+    <div class="project">
+      <h3>5-Stage Pipelined RISC Processor (WISC-F24 ISA)</h3>
+      <ul>
+        <li>Designed a pipelined RISC processor in Verilog with full hazard detection and data forwarding</li>
+        <li>Implemented branch prediction, MEM-EX, EX-EX forwarding, and stall logic</li>
+        <li>Verified ISA coverage and performance through cycle-accurate ModelSim simulation</li>
+        <li>Improved instruction throughput by 2× over single-cycle baseline</li>
+      </ul>
+    </div>
+
+    <div class="project">
+      <h3>Knight’s Tour Solver on FPGA</h3>
+      <ul>
+        <li>Developed recursive backtracking algorithm in SystemVerilog and synthesized for Basys3 FPGA</li>
+        <li>Achieved 333 MHz timing target with pipelined control logic</li>
+        <li>Integrated UART for solution output and SPI interface for potential debugging extensions</li>
+      </ul>
+    </div>
+
+    <div class="project">
+      <h3>Embedded CO/CO₂ Monitoring System</h3>
+      <ul>
+        <li>Built a FreeRTOS-based PSoC 6 embedded platform to monitor CO and CO₂ levels</li>
+        <li>Implemented I2C drivers for SCD-41 and MQ-7 gas sensors from scratch in C</li>
+        <li>Designed and validated a custom 2-layer PCB in Altium for sensor integration</li>
+        <li>Enabled real-time sampling, UART logging, and interrupt-based alerts</li>
+      </ul>
+    </div>
+
   </section>
 
   <section>
