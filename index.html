@@ -61,7 +61,54 @@
 
   <section>
     <h2>Projects</h2>
-    <!-- Project sections remain unchanged -->
+
+    <div class="project">
+      <h3>ML-Guided CUDA Kernel Configuration</h3>
+      <p><strong>GitHub:</strong> <a href="https://github.com/Drogon4231/Ml-Guided-CUDA-Config" target="_blank">Ml-Guided-CUDA-Config</a></p>
+      <ul>
+        <li>Built a PyTorch model to predict optimal CUDA launch configurations based on matrix size</li>
+        <li>Integrated kernel prediction and runtime execution pipeline</li>
+        <li>Achieved up to 30% runtime improvement compared to fixed-thread baselines</li>
+      </ul>
+    </div>
+
+    <div class="project">
+      <h3>Runtime Prediction for TDG Partitioning</h3>
+      <p><strong>GitHub:</strong> <a href="https://github.com/Drogon4231/ml-guided-tdg-runtime" target="_blank">ml-guided-tdg-runtime</a></p>
+      <ul>
+        <li>Engineered graph and matrix workload features for task dependency graphs</li>
+        <li>Trained a regression model to predict runtime-optimal partition sizes on CPU</li>
+        <li>Validated predictions against simulated annealing with &lt;5% average error</li>
+      </ul>
+    </div>
+
+    <div class="project">
+      <h3>5-Stage Pipelined RISC Processor (WISC-F24 ISA)</h3>
+      <ul>
+        <li>Designed a pipelined processor in Verilog with hazard detection and data forwarding logic</li>
+        <li>Implemented MEM-EX, EX-EX forwarding and branch prediction in ID stage</li>
+        <li>Verified with 100% instruction coverage and cycle-accurate simulation in ModelSim</li>
+      </ul>
+    </div>
+
+    <div class="project">
+      <h3>Knight’s Tour Solver on FPGA</h3>
+      <ul>
+        <li>Implemented a backtracking-based solver in SystemVerilog for the Knight’s Tour problem</li>
+        <li>Achieved 333 MHz synthesis target; reduced LUT usage by 10% with pipelining</li>
+        <li>Added SPI/UART interfaces for debug and input injection</li>
+      </ul>
+    </div>
+
+    <div class="project">
+      <h3>Embedded CO/CO₂ Monitoring System</h3>
+      <ul>
+        <li>Built a real-time embedded system on PSoC 6 for monitoring air quality</li>
+        <li>Wrote custom I2C drivers for SCD-41 and MQ-7 gas sensors</li>
+        <li>Designed a 2-layer PCB using Altium; integrated with FreeRTOS for task scheduling</li>
+      </ul>
+    </div>
+
   </section>
 
   <section>
