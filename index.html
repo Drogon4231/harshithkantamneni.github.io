@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function(){
+      $('.collapsible h3').click(function(){
+        $(this).next('ul').slideToggle();
+      });
+      $('.collapsible ul').hide(); // Start collapsed
+    });
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Harshith Kantamneni | ML + Hardware Portfolio</title>
@@ -8,7 +17,7 @@
     body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
     header, footer { background: #1e1e1e; color: white; text-align: center; padding: 1rem; }
     section { max-width: 900px; margin: auto; padding: 2rem; background: white; margin-top: 1rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    h1, h2, h3 { color: #1e1e1e; }
+    h1, h2, h3 { color: #1e1e1e; cursor: pointer; }
     ul { padding-left: 1.2rem; }
     li { margin-bottom: 0.5rem; }
     a { color: #007acc; text-decoration: none; }
@@ -40,9 +49,9 @@
 <section>
   <h2>Selected Projects</h2>
 
-  <div class="project">
+  <div class="project collapsible">
     <h3>ML-Guided CUDA Kernel Configuration</h3>
-    <p><strong>Python, PyTorch, CUDA</strong> &nbsp;&nbsp; | &nbsp;&nbsp; <a href="https://github.com/Drogon4231/Ml-Guided-CUDA-Config">GitHub</a></p>
+    <p><strong>Python, PyTorch, CUDA</strong> | <a href="https://github.com/Drogon4231/Ml-Guided-CUDA-Config">GitHub</a></p>
     <ul>
       <li>Built a PyTorch model to predict optimal CUDA launch configurations based on matrix size.</li>
       <li>Integrated predictions into kernel launcher achieving 30% speedup over static tuning.</li>
@@ -51,9 +60,9 @@
     </ul>
   </div>
 
-  <div class="project">
+  <div class="project collapsible">
     <h3>ML-Based Partition Size Prediction for TDG Workloads</h3>
-    <p><strong>Python, XGBoost</strong> &nbsp;&nbsp; | &nbsp;&nbsp; <a href="https://github.com/Drogon4231/ML-Partition-Predictor">GitHub</a></p>
+    <p><strong>Python, XGBoost</strong> | <a href="https://github.com/Drogon4231/ML-Partition-Predictor">GitHub</a></p>
     <ul>
       <li>Trained an XGBoost regression model to predict runtime-optimal partition sizes from graph features.</li>
       <li>Reduced configuration tuning time by 25% with sub-5% prediction error.</li>
@@ -61,7 +70,7 @@
     </ul>
   </div>
 
-  <div class="project">
+  <div class="project collapsible">
     <h3>5-Stage Pipelined RISC Processor</h3>
     <p><strong>Verilog, ModelSim</strong></p>
     <ul>
@@ -71,8 +80,8 @@
     </ul>
   </div>
 
-  <div class="project">
-    <h3>Knight’s Tour FSM Design</h3>
+  <div class="project collapsible">
+    <h3>Knight’s Tour FSM Design (ECE 551)</h3>
     <p><strong>SystemVerilog, Quartus Prime, ModelSim</strong></p>
     <ul>
       <li>Designed a pipelined FSM to solve the Knight’s Tour problem in hardware logic.</li>
@@ -81,7 +90,7 @@
     </ul>
   </div>
 
-  <div class="project">
+  <div class="project collapsible">
     <h3>Embedded CO/CO₂ Monitoring System</h3>
     <p><strong>FreeRTOS, C, PSoC 6, Altium Designer</strong></p>
     <ul>
