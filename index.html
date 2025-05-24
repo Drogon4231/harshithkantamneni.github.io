@@ -10,9 +10,10 @@
     header { background-color: #1e1e1e; color: white; padding: 2rem; text-align: center; }
     section { padding: 2rem; max-width: 800px; margin: auto; }
     h1, h2, h3 { color: #1e1e1e; }
-    .project { background: white; padding: 1rem; margin: 1rem 0; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
-    .project h3 { cursor: pointer; margin-bottom: 0.5rem; }
-    .project ul { display: none; margin-top: 0; }
+    .project { background: white; padding: 1rem; margin: 1rem 0; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); transition: 0.3s ease; }
+    .project h3 { cursor: pointer; margin-bottom: 0.5rem; color: #007acc; transition: 0.2s ease; }
+    .project ul, .project .github-link { display: none; margin-top: 0.5rem; }
+    .project.open { border-left: 4px solid #007acc; background-color: #fdfdfd; }
     .links a { margin-right: 15px; text-decoration: none; color: #007acc; }
     footer { text-align: center; padding: 1rem; font-size: 0.9em; background: #f0f0f0; }
     ul.skills li { margin-bottom: 4px; }
@@ -35,7 +36,7 @@
   <section>
     <h2>About Me</h2>
     <p>
-      I'm Harshith Kantamneni, a master's student in Electrical and Computer Engineering at UW–Madison. I specialize in building intelligent hardware systems, using machine learning to drive design and optimization at the architecture and embedded levels. My work blends theory and implementation — from CUDA kernel tuning to custom processors and real-world sensor systems.
+      I'm Harshith Kantamneni, a master's student in Electrical and Computer Engineering at UW–Madison. I specialize in building intelligent hardware systems, using machine learning to drive design and optimization at the architecture and embedded levels.
     </p>
   </section>
 
@@ -43,7 +44,7 @@
     <h2>Technical Skills</h2>
     <ul class="skills">
       <li><strong>Languages:</strong> Python, Embedded C, Verilog, SystemVerilog, Assembly</li>
-      <li><strong>Tools & Frameworks:</strong> PyTorch, MATLAB, Simulink, ModelSim, Quartus, Altium Designer, Nsight Systems, Synopsis Design Compiler, gem5</li>
+      <li><strong>Tools & Frameworks:</strong> PyTorch, MATLAB, Simulink, ModelSim, Quartus, Altium Designer, Synopsis Design Compiler, gem5</li>
       <li><strong>Platforms:</strong> PSoC 6, FPGA (Basys3), Raspberry Pi, ESP32</li>
       <li><strong>Technologies:</strong> Embedded Systems, Computer Architecture, ML for Hardware, RTL Design, PCB Design, CUDA, OpenMP</li>
       <li><strong>Protocols:</strong> I2C, SPI, UART, CAN, CAN FD, LIN, UDS, WiFi, Bluetooth</li>
@@ -69,17 +70,18 @@
 
     <div class="project">
       <h3>ML-Guided CUDA Kernel Configuration</h3>
+      <div class="github-link"><a href="https://github.com/Drogon4231/Ml-Guided-CUDA-Config" target="_blank">View on GitHub</a></div>
       <ul>
         <li>Trained a PyTorch model to predict optimal CUDA launch configurations based on matrix size</li>
         <li>Integrated prediction with runtime execution for automatic tuning</li>
         <li>Achieved up to 30% runtime improvement over fixed-thread baselines</li>
-        <li>Profiled kernel performance and bottlenecks using Nsight Systems</li>
+        <li>Evaluated kernel performance using timing-based benchmarks across configurations</li>
       </ul>
     </div>
 
     <div class="project">
       <h3>Runtime Prediction for TDG Partitioning</h3>
-      <p><strong>GitHub:</strong> <a href="https://github.com/Drogon4231/ML-Partition-Predictor" target="_blank">ML-Partition-Predictor</a></p>
+      <div class="github-link"><a href="https://github.com/Drogon4231/ML-Partition-Predictor" target="_blank">View on GitHub</a></div>
       <ul>
         <li>Engineered graph and workload features from TDG structures and matrix operations</li>
         <li>Trained an XGBoost regression model to predict runtime-optimal partition sizes</li>
@@ -132,7 +134,8 @@
   <script>
     $(document).ready(function () {
       $(".project h3").click(function () {
-        $(this).next("ul").slideToggle();
+        $(this).parent().toggleClass("open");
+        $(this).siblings("ul, .github-link").slideToggle();
       });
     });
   </script>
