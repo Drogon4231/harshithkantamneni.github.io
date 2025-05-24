@@ -7,7 +7,7 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
     $(document).ready(function(){
-      $('.collapsible h3').click(function(){
+      $('.collapsible h2, .collapsible h3').click(function(){
         $(this).toggleClass('active');
         $(this).siblings('ul').slideToggle();
       });
@@ -15,12 +15,12 @@
     });
   </script>
   <style>
-    .collapsible h3::after {
+    .collapsible h2::after, .collapsible h3::after {
       content: " ▼";
       font-size: 0.8em;
       color: #666;
     }
-    .collapsible h3.active::after {
+    .collapsible h2.active::after, .collapsible h3.active::after {
       content: " ▲";
       color: #333;
     }
@@ -38,7 +38,7 @@
 
 <header>
   <h1>Harshith Kantamneni</h1>
-  <p>M.S. ECE @ UW–Madison • ML + Hardware • CUDA & Verilog Enthusiast</p>
+  <p>M.S. ECE @ UW–Madison • ML + Hardware • CUDA & Verilog Systems Developer</p>
   <p>
     <a href="mailto:kantamneniharshith@gmail.com">kantamneniharshith@gmail.com</a> |
     <a href="https://linkedin.com/in/hk4231" target="_blank">LinkedIn</a> |
@@ -56,7 +56,7 @@
   </p>
 </section>
 
-<section>
+<section class="collapsible">
   <h2>Relevant Coursework</h2>
   <ul>
     <li>Advanced Computer Architecture 2</li>
@@ -141,7 +141,7 @@
 </section>
 
 <footer>
-  <p>&copy; May 2025 &bullet; Harshith Kantamneni</p>
+  <p>&copy; May 2025 • Harshith Kantamneni</p>
 </footer>
 
 </body>
