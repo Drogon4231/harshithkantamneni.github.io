@@ -10,15 +10,13 @@
     header { background-color: #1e1e1e; color: white; padding: 2rem; text-align: center; }
     section { padding: 2rem; max-width: 800px; margin: auto; }
     h1, h2, h3 { color: #1e1e1e; }
-    .project { background: white; padding: 1rem; margin: 1rem 0; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); transition: 0.3s ease; }
-    .project h3 { cursor: pointer; margin-bottom: 0.5rem; color: #007acc; transition: 0.2s ease; }
-    .project ul, .project .github-link { display: none; margin-top: 0.5rem; }
-    .project.open { border-left: 4px solid #007acc; background-color: #fdfdfd; }
+    .project, .coursework { background: white; padding: 1rem; margin: 1rem 0; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); transition: 0.3s ease; }
+    .project h3, .coursework h3 { cursor: pointer; margin-bottom: 0.5rem; color: #007acc; transition: 0.2s ease; }
+    .project ul, .project .github-link, .coursework p { display: none; margin-top: 0.5rem; }
+    .project.open, .coursework.open { border-left: 4px solid #007acc; background-color: #fdfdfd; }
     .links a { margin-right: 15px; text-decoration: none; color: #007acc; }
     footer { text-align: center; padding: 1rem; font-size: 0.9em; background: #f0f0f0; }
     ul.skills li { margin-bottom: 4px; }
-    details { margin-top: 1rem; }
-    summary { cursor: pointer; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -51,18 +49,15 @@
     </ul>
   </section>
 
-  <section>
-    <h2>Academic Focus</h2>
-    <details>
-      <summary>View Relevant Coursework</summary>
-      <p>
-        ECE 757 – Computer Architecture<br>
-        ECE 759 – High-Performance Computing Architecture<br>
-        ECE 760 – Machine Learning<br>
-        ECE 551 – Digital System Design<br>
-        ECE 453 – Embedded Microprocessor System Design
-      </p>
-    </details>
+  <section class="coursework">
+    <h3>Relevant Coursework</h3>
+    <p>
+      ECE 757 – Computer Architecture<br>
+      ECE 759 – High-Performance Computing Architecture<br>
+      ECE 760 – Machine Learning<br>
+      ECE 551 – Digital System Design<br>
+      ECE 453 – Embedded Microprocessor System Design
+    </p>
   </section>
 
   <section>
@@ -133,9 +128,9 @@
 
   <script>
     $(document).ready(function () {
-      $(".project h3").click(function () {
+      $(".project h3, .coursework h3").click(function () {
         $(this).parent().toggleClass("open");
-        $(this).siblings("ul, .github-link").slideToggle();
+        $(this).siblings("ul, p, .github-link").slideToggle();
       });
     });
   </script>
