@@ -4,12 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Harshith Kantamneni | ML + Hardware Portfolio</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; color: #333; }
     header { background-color: #1e1e1e; color: white; padding: 2rem; text-align: center; }
     section { padding: 2rem; max-width: 800px; margin: auto; }
     h1, h2, h3 { color: #1e1e1e; }
     .project { background: white; padding: 1rem; margin: 1rem 0; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+    .project h3 { cursor: pointer; margin-bottom: 0.5rem; }
+    .project ul { display: none; margin-top: 0; }
     .links a { margin-right: 15px; text-decoration: none; color: #007acc; }
     footer { text-align: center; padding: 1rem; font-size: 0.9em; background: #f0f0f0; }
     ul.skills li { margin-bottom: 4px; }
@@ -18,6 +21,7 @@
   </style>
 </head>
 <body>
+
   <header>
     <h1>Harshith Kantamneni</h1>
     <p>MS ECE @ UW–Madison | ML + Hardware | CUDA + Embedded Systems</p>
@@ -65,7 +69,6 @@
 
     <div class="project">
       <h3>ML-Guided CUDA Kernel Configuration</h3>
-      <p><strong>GitHub:</strong> <a href="https://github.com/Drogon4231/Ml-Guided-CUDA-Config" target="_blank">Ml-Guided-CUDA-Config</a></p>
       <ul>
         <li>Trained a PyTorch model to predict optimal CUDA launch configurations based on matrix size</li>
         <li>Integrated prediction with runtime execution for automatic tuning</li>
@@ -74,9 +77,9 @@
       </ul>
     </div>
 
-   <div class="project">
+    <div class="project">
       <h3>Runtime Prediction for TDG Partitioning</h3>
-      <p><strong>GitHub:</strong> <a href="https://github.com/Drogon4231/ML-Partition-Predictor" target="_blank">ML-guided-TDG-runtime</a></p>
+      <p><strong>GitHub:</strong> <a href="https://github.com/Drogon4231/ML-Partition-Predictor" target="_blank">ML-Partition-Predictor</a></p>
       <ul>
         <li>Engineered graph and workload features from TDG structures and matrix operations</li>
         <li>Trained an XGBoost regression model to predict runtime-optimal partition sizes</li>
@@ -100,7 +103,7 @@
       <ul>
         <li>Developed recursive backtracking algorithm in SystemVerilog and synthesized for Basys3 FPGA</li>
         <li>Achieved 333 MHz timing target with pipelined control logic</li>
-        <li>Integrated UART for solution output and SPI interface for potential debugging extensions</li>
+        <li>Integrated UART for solution output and SPI interface for debugging extensions</li>
       </ul>
     </div>
 
@@ -125,5 +128,14 @@
   <footer>
     &copy; 2024 Harshith Kantamneni — Designed & Developed by Harshith
   </footer>
+
+  <script>
+    $(document).ready(function () {
+      $(".project h3").click(function () {
+        $(this).next("ul").slideToggle();
+      });
+    });
+  </script>
+
 </body>
 </html>
