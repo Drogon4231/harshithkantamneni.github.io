@@ -150,7 +150,7 @@ export default function Portfolio() {
               See my work
             </a>
             <a
-              href={`${import.meta.env.BASE_URL}resume.pdf`}
+              href={`${import.meta.env.BASE_URL}Resume.pdf`}
               className="px-6 py-3 rounded-full border border-emerald-500 text-emerald-500 font-medium hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors"
             >
               Resume
