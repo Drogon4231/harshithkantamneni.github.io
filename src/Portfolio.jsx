@@ -150,7 +150,7 @@ export default function Portfolio() {
               See my work
             </a>
             <a
-              href={`${import.meta.env.BASE_URL}Resume.pdf`}
+              href="https://drogon4231.github.io/harshithkantamneni.github.io/Resume.pdf"
               className="px-6 py-3 rounded-full border border-emerald-500 text-emerald-500 font-medium hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors"
             >
               Resume
@@ -162,7 +162,7 @@ export default function Portfolio() {
         <section id="about" className="max-w-4xl mx-auto px-6">
           <SectionTitle>About Me</SectionTitle>
           <p className="text-lg leading-relaxed">
-            I’m a graduate student in Electrical and Computer Engineering at UW–Madison, graduating December 2025. I specialize in building intelligent hardware systems — blending machine learning, embedded design, and low-level optimization.
+              I'm a graduate student in Electrical and Computer Engineering at UW–Madison (Dec 2025), focused on bridging AI and hardware through performance-aware design. My projects span ML-accelerated CUDA tuning, task graph partitioning, embedded sensing, and pipelined processor design. I’m driven by systems that turn data into silicon-level speed-ups — and I’m ready to build them with you.
           </p>
         </section>
 
@@ -228,7 +228,7 @@ export default function Portfolio() {
           </a>
           <div className="flex justify-center gap-6 mt-8">
             <a
-              href="https://github.com/harshith"
+              href="https://github.com/Drogon4231"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-emerald-500"
@@ -236,7 +236,7 @@ export default function Portfolio() {
               <Github size={22} />
             </a>
             <a
-              href="https://linkedin.com/in/harshith"
+              href="https://linkedin.com/in/hk4231"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-emerald-500"
