@@ -10,7 +10,7 @@ const projects = [
     title: 'ML-Guided CUDA Kernel Configuration',
     bullets: [
       'PyTorch MLP predicts grid / block sizes on-the-fly, boosting GEMM throughput 30 % on A100 GPUs.',
-      'One inference call replaces exhaustive grid-search—cuts kernel-tuning time > 95 %.',
+      'One inference replaces exhaustive grid-search—cuts kernel-tuning time > 95 %.',
       'Deployed cluster-wide via Slurm; forked by peers for benchmark suites.',
     ],
     link: 'https://github.com/Drogon4231/Ml-Guided-CUDA-Config',
@@ -107,7 +107,11 @@ export default function Portfolio() {
               </li>
             ))}
           </ul>
-          <button onClick={() => setDark(!dark)} aria-label="Toggle theme" className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
+          <button
+            onClick={() => setDark(!dark)}
+            aria-label="Toggle theme"
+            className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+          >
             {dark ? <Sun size={18} /> : <Moon size={18} />}
           </button>
         </nav>
@@ -139,8 +143,18 @@ export default function Portfolio() {
             Architecting intelligent hardware at the intersection of <span className="font-semibold">AI</span>, <span className="font-semibold">ML</span>, and <span className="font-semibold">high-performance compute</span>.
           </motion.p>
           <div className="flex gap-4">
-            <a href="#projects" className="px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-medium shadow-lg hover:shadow-xl transition-shadow">See my work</a>
-            <a href="/resume.pdf" className="px-6 py-3 rounded-full border border-emerald-500 text-emerald-500 font-medium hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors">Resume</a>
+            <a
+              href="#projects"
+              className="px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-medium shadow-lg hover:shadow-xl transition-shadow"
+            >
+              See my work
+            </a>
+            <a
+              href={`${import.meta.env.BASE_URL}resume.pdf`}
+              className="px-6 py-3 rounded-full border border-emerald-500 text-emerald-500 font-medium hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors"
+            >
+              Resume
+            </a>
           </div>
         </section>
 
@@ -148,7 +162,7 @@ export default function Portfolio() {
         <section id="about" className="max-w-4xl mx-auto px-6">
           <SectionTitle>About Me</SectionTitle>
           <p className="text-lg leading-relaxed">
-            M.S. ECE candidate at <span className="font-semibold">UW–Madison</span> building acceleration stacks that turn silicon into lightning.
+            I’m a graduate student in Electrical and Computer Engineering at UW–Madison, graduating December 2025. I specialize in building intelligent hardware systems — blending machine learning, embedded design, and low-level optimization.
           </p>
         </section>
 
@@ -156,16 +170,18 @@ export default function Portfolio() {
         <section id="projects" className="max-w-6xl mx-auto px-6">
           <SectionTitle>Featured Projects</SectionTitle>
           <div className="grid gap-8 md:grid-cols-2">
-            {projects.map((p, idx) => (
+            {projects.map((p) => (
               <motion.a
-                key={idx}
+                key={p.title}
                 href={p.link}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group block bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-2xl p-6 hover:-translate-y-1 hover:shadow-xl transition transform duration-300"
                 whileHover={{ scale: 1.02 }}
               >
-                <h3 className="text-xl font-bold mb-3 group-hover:text-emerald-500 transition-colors">{p.title}</h3>
+                <h3 className="text-xl font-bold mb-3 group-hover:text-emerald-500 transition-colors">
+                  {p.title}
+                </h3>
                 <ul className="list-disc pl-5 space-y-1 text-sm leading-relaxed">
                   {p.bullets.map((b) => (
                     <li key={b}>{b}</li>
@@ -185,7 +201,10 @@ export default function Portfolio() {
                 <h3 className="mb-2 font-semibold">{bucket.title}</h3>
                 <ul className="flex flex-wrap gap-2">
                   {bucket.items.map((item) => (
-                    <li key={item} className="px-3 py-1 rounded-full bg-emerald-500/10 text-sm text-emerald-600 dark:text-emerald-400">
+                    <li
+                      key={item}
+                      className="px-3 py-1 rounded-full bg-emerald-500/10 text-sm text-emerald-600 dark:text-emerald-400"
+                    >
                       {item}
                     </li>
                   ))}
@@ -199,22 +218,36 @@ export default function Portfolio() {
         <section id="contact" className="max-w-md mx-auto text-center px-6">
           <SectionTitle>Let’s Connect</SectionTitle>
           <p className="mb-6 text-lg">
-            Have an opportunity or want to geek out about GPUs? Drop a line—my inbox is always open.
+            Have an opportunity or want to geek out about GPUs? Drop a line — my inbox is always open.
           </p>
-          <a href="mailto:hkantamneni2@wisc.edu" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white font-medium shadow-lg hover:shadow-xl transition-shadow">
+          <a
+            href="mailto:hkantamneni2@wisc.edu"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white font-medium shadow-lg hover:shadow-xl transition-shadow"
+          >
             <Mail size={18} /> Say Hello
           </a>
           <div className="flex justify-center gap-6 mt-8">
-            <a href="https://github.com/harshith" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-500">
+            <a
+              href="https://github.com/harshith"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-emerald-500"
+            >
               <Github size={22} />
             </a>
-            <a href="https://linkedin.com/in/harshith" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-500">
+            <a
+              href="https://linkedin.com/in/harshith"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-emerald-500"
+            >
               <Linkedin size={22} />
             </a>
           </div>
         </section>
       </main>
 
+      {/* FOOTER */}
       <footer className="py-8 text-center text-sm opacity-70">
         © {new Date().getFullYear()} Harshith Kantamneni — Built with React ⚛︎ & TailwindCSS
       </footer>
