@@ -7,44 +7,44 @@ import { Sun, Moon, Github, Linkedin, Mail } from 'lucide-react';
 // ------------------------------------------
 const projects = [
   {
-    title: 'ML‑Guided CUDA Kernel Configuration',
+    title: 'ML-Guided CUDA Kernel Configuration',
     bullets: [
-      'PyTorch MLP predicts grid / block sizes on‑the‑fly, boosting GEMM throughput 30 % on A100 GPUs.',
-      'One inference call replaces exhaustive grid‑search—cuts kernel‑tuning time > 95 %.',
-      'Deployed cluster‑wide via Slurm; forked by peers for benchmark suites.',
+      'PyTorch MLP predicts grid / block sizes on-the-fly, boosting GEMM throughput 30 % on A100 GPUs.',
+      'One inference call replaces exhaustive grid-search—cuts kernel-tuning time > 95 %.',
+      'Deployed cluster-wide via Slurm; forked by peers for benchmark suites.',
     ],
     link: 'https://github.com/Drogon4231/Ml-Guided-CUDA-Config',
   },
   {
     title: 'TDG Partition Size Prediction',
     bullets: [
-      '< 5 % MAE XGBoost regressor predicts runtime‑optimal partition sizes for 2 000 task graphs.',
-      'Speeds simulation pipeline 25 % vs. exhaustive sweeps; nightly CI now feasible.',
-      'Packaged as Python API + CLI; adopted by future ECE 757 cohorts.',
+      '< 5 % MAE XGBoost regressor predicts runtime-optimal partition sizes for 2 000 task graphs.',
+      'Speeds simulation pipeline 25 % vs. exhaustive sweeps; nightly CI now feasible.',
+      'Packaged as Python API + CLI; adopted by future ECE 757 cohorts.',
     ],
     link: 'https://github.com/Drogon4231/ML-Partition-Predictor',
   },
   {
-    title: '5‑Stage Pipelined RISC Processor (WISC‑F24)',
+    title: '5-Stage Pipelined RISC Processor (WISC-F24)',
     bullets: [
-      'Hazard‑free pipeline in Verilog with full forwarding & branch prediction.',
-      '100 % instruction coverage in ModelSim with cycle‑accurate testbench.',
+      'Hazard-free pipeline in Verilog with full forwarding & branch prediction.',
+      '100 % instruction coverage in ModelSim with cycle-accurate testbench.',
     ],
     link: '#',
   },
   {
     title: "Knight’s Tour FSM on FPGA",
     bullets: [
-      'Pipelined state machine synthesizes to 333 MHz on Artix‑7 (Vivado).',
-      'Bluetooth‑controlled via custom UART / SPI bridge.',
+      'Pipelined state machine synthesizes to 333 MHz on Artix-7 (Vivado).',
+      'Bluetooth-controlled via custom UART / SPI bridge.',
     ],
     link: '#',
   },
   {
     title: 'Embedded CO / CO₂ Monitoring System',
     bullets: [
-      'FreeRTOS app on PSoC 6 reading SCD41 & MQ‑7 via I²C / ADC.',
-      'Four‑layer Altium PCB streams real‑time data over Ethernet.',
+      'FreeRTOS app on PSoC 6 reading SCD41 & MQ-7 via I²C / ADC.',
+      'Four-layer Altium PCB streams real-time data over Ethernet.',
     ],
     link: '#',
   },
@@ -116,12 +116,27 @@ export default function Portfolio() {
       <main className="pt-24 space-y-32 overflow-x-hidden">
         {/* HERO */}
         <section id="hero" className="relative min-h-screen flex flex-col items-center justify-center text-center px-6">
-          <motion.div className="absolute top-0 left-1/2 w-[120%] h-[120%] -translate-x-1/2 -z-10 bg-gradient-to-tr from-emerald-400/40 via-cyan-500/30 to-fuchsia-500/20 blur-3xl rotate-12" initial={{ scale: 1.2, y: -80 }} animate={{ scale: 1.0, y: 0 }} transition={{ duration: 2, ease: 'easeOut' }} />
-          <motion.h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight" initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-            Harshith Kantamneni
+          <motion.div
+            className="absolute top-0 left-1/2 w-[120%] h-[120%] -translate-x-1/2 -z-10 bg-gradient-to-tr from-emerald-400/40 via-cyan-500/30 to-fuchsia-500/20 blur-3xl rotate-12"
+            initial={{ scale: 1.2, y: -80 }}
+            animate={{ scale: 1.0, y: 0 }}
+            transition={{ duration: 2, ease: 'easeOut' }}
+          />
+          <motion.h1
+            className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            Harshith Kantamneni
           </motion.h1>
-          <motion.p className="text-xl md:text-2xl max-w-2xl mb-8 leading-relaxed" initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.8 }}>
-            Architecting intelligent hardware at the intersection of <span className="font-semibold">AI</span>, <span className="font-semibold">ML</span>, and <span className="font-semibold">high‑performance compute</span>.
+          <motion.p
+            className="text-xl md:text-2xl max-w-2xl mb-8 leading-relaxed"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+          >
+            Architecting intelligent hardware at the intersection of <span className="font-semibold">AI</span>, <span className="font-semibold">ML</span>, and <span className="font-semibold">high-performance compute</span>.
           </motion.p>
           <div className="flex gap-4">
             <a href="#projects" className="px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-medium shadow-lg hover:shadow-xl transition-shadow">See my work</a>
@@ -132,7 +147,9 @@ export default function Portfolio() {
         {/* ABOUT */}
         <section id="about" className="max-w-4xl mx-auto px-6">
           <SectionTitle>About Me</SectionTitle>
-          <p className="text-lg leading-relaxed">M.S. ECE candidate at <span className="font-semibold">UW–Madison</span> building acceleration stacks that turn silicon into lightning.</p>
+          <p className="text-lg leading-relaxed">
+            M.S. ECE candidate at <span className="font-semibold">UW–Madison</span> building acceleration stacks that turn silicon into lightning.
+          </p>
         </section>
 
         {/* PROJECTS */}
@@ -140,5 +157,67 @@ export default function Portfolio() {
           <SectionTitle>Featured Projects</SectionTitle>
           <div className="grid gap-8 md:grid-cols-2">
             {projects.map((p, idx) => (
-              <motion.a key={idx} href={p.link} target="_blank" rel="noopener noreferrer" className="group block bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-2xl p-6 hover:-translate-y-1 hover:shadow-xl transition transform duration-300" whileHover={{ scale: 1.02 }}>
-                <h3 className="text-xl font-bold mb-3 group-hover:text-emerald-500 transition-colors">{p.title}</
+              <motion.a
+                key={idx}
+                href={p.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group block bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-2xl p-6 hover:-translate-y-1 hover:shadow-xl transition transform duration-300"
+                whileHover={{ scale: 1.02 }}
+              >
+                <h3 className="text-xl font-bold mb-3 group-hover:text-emerald-500 transition-colors">{p.title}</h3>
+                <ul className="list-disc pl-5 space-y-1 text-sm leading-relaxed">
+                  {p.bullets.map((b) => (
+                    <li key={b}>{b}</li>
+                  ))}
+                </ul>
+              </motion.a>
+            ))}
+          </div>
+        </section>
+
+        {/* SKILLS */}
+        <section id="skills" className="max-w-5xl mx-auto px-6">
+          <SectionTitle>Skills</SectionTitle>
+          <div className="grid gap-8 md:grid-cols-2">
+            {skillBuckets.map((bucket) => (
+              <div key={bucket.title}>
+                <h3 className="mb-2 font-semibold">{bucket.title}</h3>
+                <ul className="flex flex-wrap gap-2">
+                  {bucket.items.map((item) => (
+                    <li key={item} className="px-3 py-1 rounded-full bg-emerald-500/10 text-sm text-emerald-600 dark:text-emerald-400">
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* CONTACT */}
+        <section id="contact" className="max-w-md mx-auto text-center px-6">
+          <SectionTitle>Let’s Connect</SectionTitle>
+          <p className="mb-6 text-lg">
+            Have an opportunity or want to geek out about GPUs? Drop a line—my inbox is always open.
+          </p>
+          <a href="mailto:hkantamneni2@wisc.edu" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white font-medium shadow-lg hover:shadow-xl transition-shadow">
+            <Mail size={18} /> Say Hello
+          </a>
+          <div className="flex justify-center gap-6 mt-8">
+            <a href="https://github.com/harshith" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-500">
+              <Github size={22} />
+            </a>
+            <a href="https://linkedin.com/in/harshith" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-500">
+              <Linkedin size={22} />
+            </a>
+          </div>
+        </section>
+      </main>
+
+      <footer className="py-8 text-center text-sm opacity-70">
+        © {new Date().getFullYear()} Harshith Kantamneni — Built with React ⚛︎ & TailwindCSS
+      </footer>
+    </div>
+  );
+}
