@@ -2,29 +2,38 @@ name: Deploy Vite site to GitHub Pages
 
 on:
   push:
-    branches: [ main ]   # redeploy on every push to main
+    branches: [ main ]          # redeploy every push to main
 
 permissions:
   contents: read
   pages: write
-  id-token: write
+  id-token: write               # required for deploy-pages
 
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
+
     steps:
+      # 1) Check out your repo
       - uses: actions/checkout@v4
 
+      # 2) Set up Node and cache node_modules
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
+      # 3) Install dependencies & build
       - run: npm ci
-      - run: npm run build        # Vite outputs dist/
+      - run: npm run build       # Vite outputs to ./dist
 
+      # 4) Prep the GitHub Pages environment
+      - uses: actions/configure-pages@v4
+
+      # 5) Upload the build output as a Pages artifact
       - uses: actions/upload-pages-artifact@v2
         with:
-          path: ./dist
+          path: ./dist           # folder Vite just built
 
+      # 6) Deploy to GitHub Pages
       - uses: actions/deploy-pages@v2
