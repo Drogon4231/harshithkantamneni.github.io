@@ -221,7 +221,7 @@ export default function Portfolio() {
             Have an opportunity or want to geek out about GPUs? Drop a line — my inbox is always open.
           </p>
           <a
-            href="mailto:hkantamneni2@wisc.edu"
+            href="mailto:kantamneniharshith@gmail.com"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white font-medium shadow-lg hover:shadow-xl transition-shadow"
           >
             <Mail size={18} /> Say Hello
