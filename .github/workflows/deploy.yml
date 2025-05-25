@@ -1,0 +1,32 @@
+name: Build & Publish to gh-pages
+
+on:
+  push:
+    branches: [ main ]        # rebuild on every push to main
+
+permissions:
+  contents: write             # needed to push to gh-pages
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # 1 ▸ Check out source
+      - uses: actions/checkout@v4
+
+      # 2 ▸ Set up Node + cache
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # 3 ▸ Install deps & build with Vite
+      - run: npm ci
+      - run: npm run build          # outputs ./dist
+
+      # 4 ▸ Publish ./dist to gh-pages branch
+      - uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          force_orphan: true        # clean history on gh-pages
