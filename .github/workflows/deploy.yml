@@ -1,43 +1,32 @@
-name: Deploy Vite site to GitHub Pages
+name: Build & Publish to gh-pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main ]        # rebuild on every push to main
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write          # required for deploy-pages
+  contents: write             # needed to push to gh-pages
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
-      # 1 ▸ Check out the code
+      # 1 ▸ Check out source
       - uses: actions/checkout@v4
 
-      # 2 ▸ Set up Node (with npm cache)
+      # 2 ▸ Set up Node + cache
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
-      # 3 ▸ Install dependencies & build with Vite
+      # 3 ▸ Install deps & build with Vite
       - run: npm ci
-      - run: npm run build              # Vite outputs ./dist
+      - run: npm run build          # outputs ./dist
 
-      # 4 ▸ Configure the GitHub Pages environment  (stable v3)
-      - uses: actions/configure-pages@v3
-
-      # 5 ▸ Upload the built site       (stable v1)
-      - uses: actions/upload-pages-artifact@v1
+      # 4 ▸ Publish ./dist to gh-pages branch
+      - uses: peaceiris/actions-gh-pages@v3
         with:
-          path: ./dist
-
-      # 6 ▸ Deploy to GitHub Pages      (stable v1)
-      - id: deployment
-        uses: actions/deploy-pages@v1
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          force_orphan: true        # clean history on gh-pages
