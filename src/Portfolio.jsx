@@ -3,14 +3,14 @@ import { motion } from 'framer-motion';
 import { Sun, Moon, Github, Linkedin, Mail } from 'lucide-react';
 
 // ------------------------------------------
-// 1 ▸ Data (projects + bucketed skills)
+// 1 ▸ Data (projects + skills + certs)
 // ------------------------------------------
 const projects = [
   {
     title: 'ML-Guided CUDA Kernel Configuration',
     bullets: [
-      'PyTorch MLP predicts grid / block sizes on-the-fly, boosting GEMM throughput 30 % on A100 GPUs.',
-      'One inference replaces exhaustive grid-search—cuts kernel-tuning time > 95 %.',
+      'PyTorch MLP predicts grid / block sizes on-the-fly, boosting GEMM throughput 30% on A100 GPUs.',
+      'One inference replaces exhaustive grid-search—cuts kernel-tuning time > 95%.',
       'Deployed cluster-wide via Slurm; forked by peers for benchmark suites.',
     ],
     link: 'https://github.com/Drogon4231/Ml-Guided-CUDA-Config',
@@ -18,17 +18,18 @@ const projects = [
   {
     title: 'TDG Partition Size Prediction',
     bullets: [
-      '< 5 % MAE XGBoost regressor predicts runtime-optimal partition sizes for 2 000 task graphs.',
-      'Speeds simulation pipeline 25 % vs. exhaustive sweeps; nightly CI now feasible.',
+      '< 5% MAE XGBoost regressor predicts runtime-optimal partition sizes for 2,000+ task graphs.',
+      'Speeds simulation pipeline 25% vs. exhaustive sweeps; nightly CI now feasible.',
       'Packaged as Python API + CLI; adopted by future ECE 757 cohorts.',
     ],
     link: 'https://github.com/Drogon4231/ML-Partition-Predictor',
   },
+
   {
     title: '5-Stage Pipelined RISC Processor (WISC-F24)',
     bullets: [
       'Hazard-free pipeline in Verilog with full forwarding & branch prediction.',
-      '100 % instruction coverage in ModelSim with cycle-accurate testbench.',
+      'Achieved 100% instruction coverage in ModelSim with cycle-accurate testbench.',
     ],
     link: '#',
   },
@@ -50,6 +51,20 @@ const projects = [
   },
 ];
 
+const certifications = [
+  {
+    title: 'NVIDIA Deep Learning Institute (DLI)',
+    subtitle: 'Getting Started with Accelerated Computing using CUDA C++',
+    year: '2025',
+    link: 'https://developer.nvidia.com/dli/certificates', // update with actual cert link
+  },
+  {
+    title: '(Upcoming) NVIDIA Deep Learning Institute (DLI)',
+    subtitle: 'Deep Learning Performance for TensorRT',
+    year: '2025',
+  },
+];
+
 const skillBuckets = [
   {
     title: '⚙️ Hardware / RTL',
@@ -61,7 +76,7 @@ const skillBuckets = [
   },
   {
     title: '📈 Acceleration / GPUs',
-    items: ['CUDA'],
+    items: ['CUDA', 'Nsight (basic)', 'OpenMP'],
   },
   {
     title: '🧠 ML Frameworks',
@@ -69,7 +84,7 @@ const skillBuckets = [
   },
   {
     title: '💻 Languages / Systems',
-    items: ['C', 'C++17', 'Python', 'Bash', 'OpenMP'],
+    items: ['C', 'C++17', 'Python', 'Bash'],
   },
   {
     title: '📡 Embedded / PCB',
@@ -99,7 +114,7 @@ export default function Portfolio() {
         <nav className="max-w-6xl mx-auto flex items-center justify-between px-6 py-3">
           <a href="#hero" className="text-lg font-bold tracking-tight">HK</a>
           <ul className="hidden md:flex gap-6 text-sm font-medium">
-            {['About', 'Projects', 'Skills', 'Contact'].map((label) => (
+            {['About', 'Projects', 'Certifications', 'Skills', 'Contact'].map((label) => (
               <li key={label}>
                 <a href={`#${label.toLowerCase()}`} className="hover:text-emerald-500 transition-colors">
                   {label}
@@ -162,7 +177,10 @@ export default function Portfolio() {
         <section id="about" className="max-w-4xl mx-auto px-6">
           <SectionTitle>About Me</SectionTitle>
           <p className="text-lg leading-relaxed">
-              I'm a graduate student in Electrical and Computer Engineering at UW–Madison (Dec 2025), focused on bridging AI and hardware through performance-aware design. My projects span ML-accelerated CUDA tuning, task graph partitioning, embedded sensing, and pipelined processor design. I’m driven by systems that turn data into silicon-level speed-ups — and I’m ready to build them with you.
+            I'm a graduate student in Electrical and Computer Engineering at UW–Madison (Dec 2025), focused on <strong>GPU performance optimization, CUDA programming, and ML-accelerated systems</strong>. 
+            My projects span ML-guided CUDA tuning, task graph partitioning, embedded sensing, and pipelined processor design. 
+            <br /><br />
+            I’m completing NVIDIA Deep Learning Institute certifications on CUDA C++ and TensorRT performance, while actively seeking opportunities in <strong>Deep Learning Performance, GPU Systems Engineering, and AI hardware/software co-design.</strong>
           </p>
         </section>
 
@@ -188,6 +206,33 @@ export default function Portfolio() {
                   ))}
                 </ul>
               </motion.a>
+            ))}
+          </div>
+        </section>
+
+        {/* CERTIFICATIONS */}
+        <section id="certifications" className="max-w-4xl mx-auto px-6">
+          <SectionTitle>Certifications</SectionTitle>
+          <div className="space-y-6">
+            {certifications.map((c) => (
+              <motion.div
+                key={c.title + c.subtitle}
+                className="p-5 rounded-xl bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-sm"
+                whileHover={{ scale: 1.02 }}
+              >
+                <h3 className="text-lg font-bold">{c.title}</h3>
+                <p className="text-sm opacity-80">{c.subtitle} <span className="opacity-50">({c.year})</span></p>
+                {c.link && (
+                  <a
+                    href={c.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block mt-2 text-emerald-500 hover:underline"
+                  >
+                    View Certificate →
+                  </a>
+                )}
+              </motion.div>
             ))}
           </div>
         </section>
