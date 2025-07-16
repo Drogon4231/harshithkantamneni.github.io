@@ -56,7 +56,7 @@ const certifications = [
     title: 'NVIDIA Deep Learning Institute (DLI)',
     subtitle: 'Getting Started with Accelerated Computing using CUDA C++',
     year: '2025',
-    link: 'https://drogon4231.github.io/harshithkantamneni.github.io/', // update with actual cert link
+    link: 'https://drogon4231.github.io/harshithkantamneni.github.io/public/My Learning | NVIDIA.pdf', // update with actual cert link
   },
 ];
 
