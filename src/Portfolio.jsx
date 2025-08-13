@@ -71,7 +71,7 @@ const skillBuckets = [
   },
   {
     title: '📈 Acceleration / GPUs',
-    items: ['CUDA', 'Nsight', 'OpenMP'],
+    items: ['CUDA', 'Nsight', 'OpenMP', 'TensorRT'],
   },
   {
     title: '🧠 ML Frameworks',
