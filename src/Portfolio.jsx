@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Sun, Moon, Github, Linkedin, Mail } from 'lucide-react';
 
@@ -6,46 +6,61 @@ import { Sun, Moon, Github, Linkedin, Mail } from 'lucide-react';
 // 1 ▸ Data (projects + skills + certs)
 // ------------------------------------------
 const projects = [
+  // GPU / Performance
   {
-    title: 'ML-Guided CUDA Kernel Configuration',
+    title: 'ML-Guided CUDA Kernel Optimizer',
+    category: 'GPU',
+    stack: ['Python', 'PyTorch', 'CUDA'],
     bullets: [
-      'PyTorch MLP predicts grid / block sizes on-the-fly, boosting GEMM throughput 30% on A100 GPUs.',
-      'One inference replaces exhaustive grid-search—cuts kernel-tuning time > 95%.',
-      'Deployed cluster-wide via Slurm; forked by peers for benchmark suites.',
+      'PyTorch MLP predicts grid/block sizes on-the-fly to improve kernel throughput (~30% speedup vs. static configs).',
+      'One inference replaces exhaustive grid-search, cutting tuning time by >95% for GEMM-like workloads.',
+      'Benchmarked with CUDA event timers and workload-scaling tests; validated prediction stability across problem sizes.',
     ],
     link: 'https://github.com/Drogon4231/Ml-Guided-CUDA-Config',
   },
   {
-    title: 'TDG Partition Size Prediction',
+    title: 'ML-Assisted Task Graph Partitioning',
+    category: 'GPU',
+    stack: ['Python', 'XGBoost', 'pandas'],
     bullets: [
       '< 5% MAE XGBoost regressor predicts runtime-optimal partition sizes for 2,000+ task graphs.',
-      'Speeds simulation pipeline 25% vs. exhaustive sweeps; nightly CI now feasible.',
-      'Packaged as Python API + CLI; adopted by future ECE 757 cohorts.',
+      'Speeds simulation/design-space exploration by ~25% vs. exhaustive sweeps; enables reliable nightly CI.',
+      'Packaged as Python API + CLI; reproducible runs with fixed seeds and version-pinned dependencies.',
     ],
     link: 'https://github.com/Drogon4231/ML-Partition-Predictor',
   },
 
+  // RTL / Architecture
   {
-    title: '5-Stage Pipelined RISC Processor (WISC-F24)',
+    title: '5-Stage Pipelined RISC CPU (WISC-F24)',
+    category: 'RTL',
+    stack: ['Verilog', 'ModelSim', 'WISC-F24'],
     bullets: [
-      'Hazard-free pipeline in Verilog with full forwarding & branch prediction.',
-      'Achieved 100% instruction coverage in ModelSim with cycle-accurate testbench.',
+      'Hazard-free pipeline with full forwarding and branch handling.',
+      'Cycle-accurate ModelSim testbench achieves 100% instruction coverage; modular verification benches.',
+      'Waveform-driven debug for stall/flush corner cases; parameterized modules for clean synthesis.',
     ],
     link: '#',
   },
   {
-    title: "Knight’s Tour FSM on FPGA",
+    title: 'High-Performance FSM (Knight’s Tour) on FPGA',
+    category: 'RTL',
+    stack: ['SystemVerilog', 'Intel Quartus', 'UART/SPI'],
     bullets: [
-      'Pipelined state machine synthesizes to 333 MHz on Artix-7 (Vivado).',
-      'Bluetooth-controlled via custom UART / SPI bridge.',
+      'Pipelined state machine meets 333 MHz timing closure on FPGA (Quartus Prime).',
+      'Host control via custom UART/SPI bridge; live step/undo commands.',
+      'Post-synthesis gate-level checks confirm timing + functional correctness.',
     ],
     link: '#',
   },
   {
-    title: 'Embedded CO / CO₂ Monitoring System',
+    title: 'Smart CO/CO₂ Monitoring System',
+    category: 'RTL',
+    stack: ['FreeRTOS', 'PSoC 6', 'Altium (2-layer)'],
     bullets: [
-      'FreeRTOS app on PSoC 6 reading SCD41 & MQ-7 via I²C / ADC.',
-      'Four-layer Altium PCB streams real-time data over Ethernet.',
+      'FreeRTOS app with custom I²C drivers for SCD41 (CO₂) and ADC sampling for MQ-7 (CO).',
+      '2-layer Altium PCB with EMI-aware layout; robust sensor readout and network logging.',
+      'End-to-end validation of sampling latency and data integrity under load.',
     ],
     link: '#',
   },
@@ -56,22 +71,26 @@ const certifications = [
     title: 'NVIDIA Deep Learning Institute (DLI)',
     subtitle: 'Getting Started with Accelerated Computing using CUDA C++',
     year: '2025',
-    link: 'https://drogon4231.github.io/harshithkantamneni.github.io/public/My Learning | NVIDIA.pdf', // update with actual cert link
+    link: 'https://drogon4231.github.io/harshithkantamneni.github.io/public/My%20Learning%20%7C%20NVIDIA.pdf', // update if needed
   },
 ];
 
 const skillBuckets = [
   {
     title: '⚙️ Hardware / RTL',
-    items: ['Verilog / SystemVerilog', 'Synopsys Design Compiler', 'Static Timing Analysis'],
+    items: ['Verilog', 'SystemVerilog', 'RTL Design & Verification', 'Static Timing Analysis'],
   },
   {
     title: '🔧 EDA / FPGA Tools',
-    items: ['ModelSim', 'Intel Quartus', 'Xilinx Vivado'],
+    items: ['ModelSim', 'Intel Quartus', 'Altium Designer'],
+  },
+  {
+    title: '🏗️ Sim / Arch Tools',
+    items: ['gem5'], // ← gem5 now clearly shown here
   },
   {
     title: '📈 Acceleration / GPUs',
-    items: ['CUDA', 'Nsight', 'OpenMP', 'TensorRT'],
+    items: ['CUDA', 'TensorRT'], // keep if you’re covering basics via DLI; remove if you prefer
   },
   {
     title: '🧠 ML Frameworks',
@@ -79,11 +98,11 @@ const skillBuckets = [
   },
   {
     title: '💻 Languages / Systems',
-    items: ['C', 'C++17', 'Python', 'Bash'],
+    items: ['C', 'C++17', 'Python', 'Bash', 'Git'],
   },
   {
-    title: '📡 Embedded / PCB',
-    items: ['Altium Designer', 'PSoC 6', 'I²C / SPI / UART / CAN'],
+    title: '📡 Embedded / Interfaces',
+    items: ['PSoC 6', 'FreeRTOS', 'I²C / SPI / UART / CAN'],
   },
 ];
 
@@ -96,11 +115,17 @@ const SectionTitle = ({ children }) => (
 
 export default function Portfolio() {
   const [dark, setDark] = useState(true);
+  const [track, setTrack] = useState('ALL'); // ALL | GPU | RTL
 
   useEffect(() => {
     const root = document.documentElement;
     dark ? root.classList.add('dark') : root.classList.remove('dark');
   }, [dark]);
+
+  const filteredProjects = useMemo(() => {
+    if (track === 'ALL') return projects;
+    return projects.filter(p => p.category === track);
+  }, [track]);
 
   return (
     <div className="font-sans bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
@@ -129,7 +154,7 @@ export default function Portfolio() {
 
       <main className="pt-24 space-y-32 overflow-x-hidden">
         {/* HERO */}
-        <section id="hero" className="relative min-h-screen flex flex-col items-center justify-center text-center px-6">
+        <section id="hero" className="relative min-h-[80vh] flex flex-col items-center justify-center text-center px-6">
           <motion.div
             className="absolute top-0 left-1/2 w-[120%] h-[120%] -translate-x-1/2 -z-10 bg-gradient-to-tr from-emerald-400/40 via-cyan-500/30 to-fuchsia-500/20 blur-3xl rotate-12"
             initial={{ scale: 1.2, y: -80 }}
@@ -145,25 +170,49 @@ export default function Portfolio() {
             Harshith Kantamneni
           </motion.h1>
           <motion.p
-            className="text-xl md:text-2xl max-w-2xl mb-8 leading-relaxed"
+            className="text-xl md:text-2xl max-w-3xl mb-10 leading-relaxed"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.8 }}
           >
-            Architecting intelligent hardware at the intersection of <span className="font-semibold">AI</span>, <span className="font-semibold">ML</span>, and <span className="font-semibold">high-performance compute</span>.
+            Building at the intersection of <span className="font-semibold">Computer Architecture</span> and <span className="font-semibold">GPU Performance</span>.
+            I design pipelines and verification flows, and accelerate ML workloads with CUDA and data-driven tuning.
           </motion.p>
-          <div className="flex gap-4">
+
+          {/* Track Selector */}
+          <div className="flex flex-wrap justify-center gap-3 mb-6">
+            {[
+              { key: 'ALL', label: 'All Projects' },
+              { key: 'RTL', label: 'Explore RTL / Architecture' },
+              { key: 'GPU', label: 'Explore GPU / Performance' },
+            ].map(btn => (
+              <button
+                key={btn.key}
+                onClick={() => setTrack(btn.key)}
+                className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors ${
+                  track === btn.key
+                    ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white border-transparent'
+                    : 'border-emerald-500 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
+                }`}
+              >
+                {btn.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Resume Buttons */}
+          <div className="flex flex-wrap justify-center gap-3">
             <a
-              href="#projects"
-              className="px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-medium shadow-lg hover:shadow-xl transition-shadow"
+              href="/GPU_Resume.pdf"
+              className="px-5 py-2.5 rounded-full bg-gray-900 text-white dark:bg-white dark:text-gray-900 font-medium shadow hover:shadow-lg transition-shadow"
             >
-              See my work
+              Download GPU Resume
             </a>
             <a
-              href="https://drogon4231.github.io/harshithkantamneni.github.io/Resume.pdf"
-              className="px-6 py-3 rounded-full border border-emerald-500 text-emerald-500 font-medium hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors"
+              href="/RTL_Resume.pdf"
+              className="px-5 py-2.5 rounded-full border border-gray-300 dark:border-gray-700 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
-              Resume
+              Download RTL Resume
             </a>
           </div>
         </section>
@@ -172,10 +221,12 @@ export default function Portfolio() {
         <section id="about" className="max-w-4xl mx-auto px-6">
           <SectionTitle>About Me</SectionTitle>
           <p className="text-lg leading-relaxed">
-            I'm a graduate student in Electrical and Computer Engineering at UW–Madison (Dec 2025), focused on <strong>GPU performance optimization, CUDA programming, and ML-accelerated systems</strong>. 
-            My projects span ML-guided CUDA tuning, task graph partitioning, embedded sensing, and pipelined processor design. 
+            I’m an M.S. ECE student at UW–Madison (Dec 2025). My focus spans <strong>GPU performance optimization</strong>, 
+            <strong> CUDA programming</strong>, and <strong>computer architecture / RTL design</strong>. 
+            Recent work includes an ML-guided CUDA launch optimizer (~30% speedup) and a 5-stage pipelined RISC core with 100% instruction coverage.
             <br /><br />
-            I’m completing NVIDIA Deep Learning Institute certifications on CUDA C++ and TensorRT performance, while actively seeking opportunities in <strong>Deep Learning Performance, GPU Systems Engineering, and AI hardware/software co-design.</strong>
+            I enjoy bridging hardware and ML: using models to guide low-level decisions (kernel configs, graph partitioning) while maintaining
+            correctness through principled verification and measurement (CUDA event timers, cycle-accurate sims).
           </p>
         </section>
 
@@ -183,21 +234,38 @@ export default function Portfolio() {
         <section id="projects" className="max-w-6xl mx-auto px-6">
           <SectionTitle>Featured Projects</SectionTitle>
           <div className="grid gap-8 md:grid-cols-2">
-            {projects.map((p) => (
+            {filteredProjects.map((p) => (
               <motion.a
                 key={p.title}
                 href={p.link}
-                target="_blank"
-                rel="noopener noreferrer"
+                target={p.link?.startsWith('http') ? "_blank" : undefined}
+                rel={p.link?.startsWith('http') ? "noopener noreferrer" : undefined}
                 className="group block bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-2xl p-6 hover:-translate-y-1 hover:shadow-xl transition transform duration-300"
                 whileHover={{ scale: 1.02 }}
               >
-                <h3 className="text-xl font-bold mb-3 group-hover:text-emerald-500 transition-colors">
-                  {p.title}
-                </h3>
-                <ul className="list-disc pl-5 space-y-1 text-sm leading-relaxed">
-                  {p.bullets.map((b) => (
-                    <li key={b}>{b}</li>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xl font-bold group-hover:text-emerald-500 transition-colors">
+                    {p.title}
+                  </h3>
+                  <span className="text-xs px-2 py-0.5 rounded-full border border-gray-300 dark:border-gray-700 opacity-80">
+                    {p.category}
+                  </span>
+                </div>
+
+                {/* Stack badges */}
+                {p.stack?.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {p.stack.map((t) => (
+                      <span key={t} className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-xs text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <ul className="list-disc pl-5 space-y-1.5 text-sm leading-relaxed">
+                  {p.bullets.map((b, i) => (
+                    <li key={i}>{b}</li>
                   ))}
                 </ul>
               </motion.a>
@@ -243,7 +311,7 @@ export default function Portfolio() {
                   {bucket.items.map((item) => (
                     <li
                       key={item}
-                      className="px-3 py-1 rounded-full bg-emerald-500/10 text-sm text-emerald-600 dark:text-emerald-400"
+                      className="px-3 py-1 rounded-full bg-emerald-500/10 text-sm text-emerald-700 dark:text-emerald-300 border border-emerald-500/20"
                     >
                       {item}
                     </li>
@@ -258,7 +326,7 @@ export default function Portfolio() {
         <section id="contact" className="max-w-md mx-auto text-center px-6">
           <SectionTitle>Let’s Connect</SectionTitle>
           <p className="mb-6 text-lg">
-            Have an opportunity or want to geek out about GPUs? Drop a line — my inbox is always open.
+            Have an opportunity or want to geek out about GPUs or pipelines? My inbox is always open.
           </p>
           <a
             href="mailto:kantamneniharshith@gmail.com"
