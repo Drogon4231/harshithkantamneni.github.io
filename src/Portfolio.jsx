@@ -4,10 +4,12 @@ import { Sun, Moon, Github, Linkedin, Mail } from 'lucide-react';
 
 // ---- RESUME URLS (GitHub Pages-safe) ---------------------------------------
 // Place both PDFs in your /public folder as GPU_Resume.pdf and RTL_Resume.pdf.
-// For Vite:
-const BASE = (import.meta?.env?.BASE_URL as string) || '/';
-// For CRA, use this instead:
-// const BASE = process.env.PUBLIC_URL || '/';
+// Vite exposes BASE_URL at build-time; no TS syntax in .jsx files.
+const BASE =
+  (typeof import.meta !== 'undefined' &&
+    import.meta.env &&
+    import.meta.env.BASE_URL) ||
+  '/';
 
 const GPU_RESUME_URL = `${BASE}GPU_Resume.pdf`;
 const RTL_RESUME_URL = `${BASE}RTL_Resume.pdf`;
@@ -122,7 +124,7 @@ const skillBuckets = [
 ];
 
 // ------------------------------------------
-const SectionTitle = ({ children }: { children: React.ReactNode }) => (
+const SectionTitle = ({ children }) => (
   <h2 className="text-3xl md:text-4xl font-extrabold mb-8 tracking-tight relative inline-block after:content-[''] after:absolute after:left-0 after:-bottom-2 after:w-full after:h-1 after:bg-gradient-to-r after:from-emerald-400 after:to-cyan-500 dark:after:from-emerald-500/60 dark:after:to-cyan-500/60">
     {children}
   </h2>
@@ -130,8 +132,8 @@ const SectionTitle = ({ children }: { children: React.ReactNode }) => (
 
 export default function Portfolio() {
   const [dark, setDark] = useState(true);
-  const [track, setTrack] = useState<'ALL' | 'GPU' | 'RTL'>('ALL');
-  const [primaryResume, setPrimaryResume] = useState<'GPU' | 'RTL'>('GPU');
+  const [track, setTrack] = useState('ALL'); // 'ALL' | 'GPU' | 'RTL'
+  const [primaryResume, setPrimaryResume] = useState('GPU'); // 'GPU' | 'RTL'
 
   useEffect(() => {
     const root = document.documentElement;
@@ -149,7 +151,7 @@ export default function Portfolio() {
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const handleTrackSelect = (key: 'ALL' | 'GPU' | 'RTL') => {
+  const handleTrackSelect = (key) => {
     setTrack(key);
     if (key === 'GPU') setPrimaryResume('GPU');
     if (key === 'RTL') setPrimaryResume('RTL');
@@ -214,9 +216,9 @@ export default function Portfolio() {
           {/* Track Selector */}
           <div className="flex flex-wrap justify-center gap-3 mb-6">
             {[
-              { key: 'ALL' as const, label: 'All Projects' },
-              { key: 'RTL' as const, label: 'Explore RTL / Architecture' },
-              { key: 'GPU' as const, label: 'Explore GPU / Performance' },
+              { key: 'ALL', label: 'All Projects' },
+              { key: 'RTL', label: 'Explore RTL / Architecture' },
+              { key: 'GPU', label: 'Explore GPU / Performance' },
             ].map((btn) => (
               <button
                 key={btn.key}
