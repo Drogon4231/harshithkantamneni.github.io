@@ -2,12 +2,23 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Sun, Moon, Github, Linkedin, Mail } from 'lucide-react';
 
+// ---- RESUME URLS (GitHub Pages-safe) ---------------------------------------
+// Place both PDFs in your /public folder as GPU_Resume.pdf and RTL_Resume.pdf.
+// For Vite:
+const BASE = (import.meta?.env?.BASE_URL as string) || '/';
+// For CRA, use this instead:
+// const BASE = process.env.PUBLIC_URL || '/';
+
+const GPU_RESUME_URL = `${BASE}GPU_Resume.pdf`;
+const RTL_RESUME_URL = `${BASE}RTL_Resume.pdf`;
+
 // ------------------------------------------
 // 1 ▸ Data (projects + skills + certs)
 // ------------------------------------------
 const projects = [
   // GPU / Performance
   {
+    id: 'cuda-optimizer',
     title: 'ML-Guided CUDA Kernel Optimizer',
     category: 'GPU',
     stack: ['Python', 'PyTorch', 'CUDA'],
@@ -19,6 +30,7 @@ const projects = [
     link: 'https://github.com/Drogon4231/Ml-Guided-CUDA-Config',
   },
   {
+    id: 'xgb-partitioning',
     title: 'ML-Assisted Task Graph Partitioning',
     category: 'GPU',
     stack: ['Python', 'XGBoost', 'pandas'],
@@ -32,6 +44,19 @@ const projects = [
 
   // RTL / Architecture
   {
+    id: 'gem5-arch-modeling',
+    title: 'Architectural Performance Modeling using gem5',
+    category: 'RTL', // keep RTL so the RTL filter shows this card
+    stack: ['gem5', 'Python', 'McPAT'],
+    bullets: [
+      'Profiled TimingSimple, Minor, and O3 CPU models; analyzed CPI and energy trade-offs.',
+      'Benchmarked IAXPY, SAXPY, and DAXPY workloads; studied instruction mix and cache/memory behavior.',
+      'Automated runs + metric extraction; correlated gem5/McPAT outputs with RTL design trade-offs.',
+    ],
+    link: '#',
+  },
+  {
+    id: 'wisc-f24',
     title: '5-Stage Pipelined RISC CPU (WISC-F24)',
     category: 'RTL',
     stack: ['Verilog', 'ModelSim', 'WISC-F24'],
@@ -43,24 +68,14 @@ const projects = [
     link: '#',
   },
   {
-    title: 'High-Performance FSM (Knight’s Tour) on FPGA',
+    id: 'knights-tour',
+    title: 'FSM-Based Knight’s Tour Solver (FPGA Accelerator)',
     category: 'RTL',
     stack: ['SystemVerilog', 'Intel Quartus', 'UART/SPI'],
     bullets: [
       'Pipelined state machine meets 333 MHz timing closure on FPGA (Quartus Prime).',
       'Host control via custom UART/SPI bridge; live step/undo commands.',
       'Post-synthesis gate-level checks confirm timing + functional correctness.',
-    ],
-    link: '#',
-  },
-  {
-    title: 'Smart CO/CO₂ Monitoring System',
-    category: 'RTL',
-    stack: ['FreeRTOS', 'PSoC 6', 'Altium (2-layer)'],
-    bullets: [
-      'FreeRTOS app with custom I²C drivers for SCD41 (CO₂) and ADC sampling for MQ-7 (CO).',
-      '2-layer Altium PCB with EMI-aware layout; robust sensor readout and network logging.',
-      'End-to-end validation of sampling latency and data integrity under load.',
     ],
     link: '#',
   },
@@ -71,7 +86,7 @@ const certifications = [
     title: 'NVIDIA Deep Learning Institute (DLI)',
     subtitle: 'Getting Started with Accelerated Computing using CUDA C++',
     year: '2025',
-    link: 'https://drogon4231.github.io/harshithkantamneni.github.io/public/My%20Learning%20%7C%20NVIDIA.pdf', // update if needed
+    link: 'https://drogon4231.github.io/harshithkantamneni.github.io/public/My%20Learning%20%7C%20NVIDIA.pdf',
   },
 ];
 
@@ -86,11 +101,11 @@ const skillBuckets = [
   },
   {
     title: '🏗️ Sim / Arch Tools',
-    items: ['gem5'], // ← gem5 now clearly shown here
+    items: ['gem5'],
   },
   {
     title: '📈 Acceleration / GPUs',
-    items: ['CUDA', 'TensorRT'], // keep if you’re covering basics via DLI; remove if you prefer
+    items: ['CUDA', 'TensorRT'],
   },
   {
     title: '🧠 ML Frameworks',
@@ -107,7 +122,7 @@ const skillBuckets = [
 ];
 
 // ------------------------------------------
-const SectionTitle = ({ children }) => (
+const SectionTitle = ({ children }: { children: React.ReactNode }) => (
   <h2 className="text-3xl md:text-4xl font-extrabold mb-8 tracking-tight relative inline-block after:content-[''] after:absolute after:left-0 after:-bottom-2 after:w-full after:h-1 after:bg-gradient-to-r after:from-emerald-400 after:to-cyan-500 dark:after:from-emerald-500/60 dark:after:to-cyan-500/60">
     {children}
   </h2>
@@ -115,7 +130,8 @@ const SectionTitle = ({ children }) => (
 
 export default function Portfolio() {
   const [dark, setDark] = useState(true);
-  const [track, setTrack] = useState('ALL'); // ALL | GPU | RTL
+  const [track, setTrack] = useState<'ALL' | 'GPU' | 'RTL'>('ALL');
+  const [primaryResume, setPrimaryResume] = useState<'GPU' | 'RTL'>('GPU');
 
   useEffect(() => {
     const root = document.documentElement;
@@ -124,8 +140,21 @@ export default function Portfolio() {
 
   const filteredProjects = useMemo(() => {
     if (track === 'ALL') return projects;
-    return projects.filter(p => p.category === track);
+    return projects.filter((p) => p.category === track);
   }, [track]);
+
+  // Smoothly scroll to the projects grid when a track is chosen
+  const scrollToProjects = () => {
+    const el = document.getElementById('projects');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleTrackSelect = (key: 'ALL' | 'GPU' | 'RTL') => {
+    setTrack(key);
+    if (key === 'GPU') setPrimaryResume('GPU');
+    if (key === 'RTL') setPrimaryResume('RTL');
+    scrollToProjects();
+  };
 
   return (
     <div className="font-sans bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
@@ -169,26 +198,29 @@ export default function Portfolio() {
           >
             Harshith Kantamneni
           </motion.h1>
+
+          {/* Hero subtitle (balanced) */}
           <motion.p
             className="text-xl md:text-2xl max-w-3xl mb-10 leading-relaxed"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.8 }}
           >
-            Building at the intersection of <span className="font-semibold">Computer Architecture</span> and <span className="font-semibold">GPU Performance</span>.
-            I design pipelines and verification flows, and accelerate ML workloads with CUDA and data-driven tuning.
+            Building at the intersection of <span className="font-semibold">architecture</span>,{' '}
+            <span className="font-semibold">performance</span>, and <span className="font-semibold">learning</span> — 
+            where data and design come together to shape modern computing systems.
           </motion.p>
 
           {/* Track Selector */}
           <div className="flex flex-wrap justify-center gap-3 mb-6">
             {[
-              { key: 'ALL', label: 'All Projects' },
-              { key: 'RTL', label: 'Explore RTL / Architecture' },
-              { key: 'GPU', label: 'Explore GPU / Performance' },
-            ].map(btn => (
+              { key: 'ALL' as const, label: 'All Projects' },
+              { key: 'RTL' as const, label: 'Explore RTL / Architecture' },
+              { key: 'GPU' as const, label: 'Explore GPU / Performance' },
+            ].map((btn) => (
               <button
                 key={btn.key}
-                onClick={() => setTrack(btn.key)}
+                onClick={() => handleTrackSelect(btn.key)}
                 className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors ${
                   track === btn.key
                     ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white border-transparent'
@@ -200,17 +232,27 @@ export default function Portfolio() {
             ))}
           </div>
 
-          {/* Resume Buttons */}
+          {/* Resume Buttons (primary style switches with filter) */}
           <div className="flex flex-wrap justify-center gap-3">
             <a
-              href="/GPU_Resume.pdf"
-              className="px-5 py-2.5 rounded-full bg-gray-900 text-white dark:bg-white dark:text-gray-900 font-medium shadow hover:shadow-lg transition-shadow"
+              href={GPU_RESUME_URL}
+              aria-label="Download GPU-focused resume PDF"
+              className={`px-5 py-2.5 rounded-full font-medium shadow transition-shadow ${
+                primaryResume === 'GPU'
+                  ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900 hover:shadow-lg'
+                  : 'border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800'
+              }`}
             >
               Download GPU Resume
             </a>
             <a
-              href="/RTL_Resume.pdf"
-              className="px-5 py-2.5 rounded-full border border-gray-300 dark:border-gray-700 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              href={RTL_RESUME_URL}
+              aria-label="Download RTL-focused resume PDF"
+              className={`px-5 py-2.5 rounded-full font-medium transition-colors ${
+                primaryResume === 'RTL'
+                  ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900 shadow hover:shadow-lg'
+                  : 'border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800'
+              }`}
             >
               Download RTL Resume
             </a>
@@ -221,25 +263,28 @@ export default function Portfolio() {
         <section id="about" className="max-w-4xl mx-auto px-6">
           <SectionTitle>About Me</SectionTitle>
           <p className="text-lg leading-relaxed">
-            I’m an M.S. ECE student at UW–Madison (Dec 2025). My focus spans <strong>GPU performance optimization</strong>, 
-            <strong> CUDA programming</strong>, and <strong>computer architecture / RTL design</strong>. 
-            Recent work includes an ML-guided CUDA launch optimizer (~30% speedup) and a 5-stage pipelined RISC core with 100% instruction coverage.
-            <br /><br />
-            I enjoy bridging hardware and ML: using models to guide low-level decisions (kernel configs, graph partitioning) while maintaining
-            correctness through principled verification and measurement (CUDA event timers, cycle-accurate sims).
+            I work where <strong>architecture</strong>, <strong>performance</strong>, and <strong>learning</strong> intersect.
+            My interests lie in understanding how data, modeling, and design interact to shape efficient and scalable computing systems.
+            I enjoy exploring how <strong>architectural insight</strong> and <strong>analytical reasoning</strong> can guide
+            better design decisions—whether it’s through modeling processor behavior, optimizing workloads, or refining design methodology.
+            My goal is to contribute to the next generation of computing systems that combine <strong>engineering precision</strong> with
+            <strong> data-driven intuition</strong>, bridging the gap between structured design and adaptive performance.
           </p>
         </section>
 
         {/* PROJECTS */}
         <section id="projects" className="max-w-6xl mx-auto px-6">
-          <SectionTitle>Featured Projects</SectionTitle>
+          <SectionTitle>
+            Featured Projects{' '}
+            <span className="text-base font-normal opacity-60">({filteredProjects.length})</span>
+          </SectionTitle>
           <div className="grid gap-8 md:grid-cols-2">
             {filteredProjects.map((p) => (
               <motion.a
-                key={p.title}
+                key={p.id}
                 href={p.link}
-                target={p.link?.startsWith('http') ? "_blank" : undefined}
-                rel={p.link?.startsWith('http') ? "noopener noreferrer" : undefined}
+                target={p.link?.startsWith('http') ? '_blank' : undefined}
+                rel={p.link?.startsWith('http') ? 'noopener noreferrer' : undefined}
                 className="group block bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-2xl p-6 hover:-translate-y-1 hover:shadow-xl transition transform duration-300"
                 whileHover={{ scale: 1.02 }}
               >
@@ -256,7 +301,10 @@ export default function Portfolio() {
                 {p.stack?.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-3">
                     {p.stack.map((t) => (
-                      <span key={t} className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-xs text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                      <span
+                        key={`${p.id}-${t}`}
+                        className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-xs text-emerald-700 dark:text-emerald-300 border border-emerald-500/20"
+                      >
                         {t}
                       </span>
                     ))}
@@ -265,7 +313,7 @@ export default function Portfolio() {
 
                 <ul className="list-disc pl-5 space-y-1.5 text-sm leading-relaxed">
                   {p.bullets.map((b, i) => (
-                    <li key={i}>{b}</li>
+                    <li key={`${p.id}-b-${i}`}>{b}</li>
                   ))}
                 </ul>
               </motion.a>
@@ -284,7 +332,9 @@ export default function Portfolio() {
                 whileHover={{ scale: 1.02 }}
               >
                 <h3 className="text-lg font-bold">{c.title}</h3>
-                <p className="text-sm opacity-80">{c.subtitle} <span className="opacity-50">({c.year})</span></p>
+                <p className="text-sm opacity-80">
+                  {c.subtitle} <span className="opacity-50">({c.year})</span>
+                </p>
                 {c.link && (
                   <a
                     href={c.link}
@@ -310,7 +360,7 @@ export default function Portfolio() {
                 <ul className="flex flex-wrap gap-2">
                   {bucket.items.map((item) => (
                     <li
-                      key={item}
+                      key={`${bucket.title}-${item}`}
                       className="px-3 py-1 rounded-full bg-emerald-500/10 text-sm text-emerald-700 dark:text-emerald-300 border border-emerald-500/20"
                     >
                       {item}
@@ -326,7 +376,7 @@ export default function Portfolio() {
         <section id="contact" className="max-w-md mx-auto text-center px-6">
           <SectionTitle>Let’s Connect</SectionTitle>
           <p className="mb-6 text-lg">
-            Have an opportunity or want to geek out about GPUs or pipelines? My inbox is always open.
+            Have an opportunity or want to geek out about pipelines, verification, or performance modeling? My inbox is always open.
           </p>
           <a
             href="mailto:kantamneniharshith@gmail.com"
