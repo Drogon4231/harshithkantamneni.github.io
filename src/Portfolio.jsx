@@ -37,9 +37,9 @@ const projects = [
     category: 'GPU',
     stack: ['Python', 'XGBoost', 'pandas'],
     bullets: [
-      '< 5% MAE XGBoost regressor predicts runtime-optimal partition sizes for 2,000+ task graphs.',
+      '< 5% MAE XGBoost regressor predicts runtime-optimal partition sizes for task graphs.',
       'Speeds simulation/design-space exploration by ~25% vs. exhaustive sweeps; enables reliable nightly CI.',
-      'Packaged as Python API + CLI; reproducible runs with fixed seeds and version-pinned dependencies.',
+      'Integrated automated benchmarking and profiling scripts to enable reproducible analysis and fair performance comparison across partitioning strategies.',
     ],
     link: 'https://github.com/Drogon4231/ML-Partition-Predictor',
   },
