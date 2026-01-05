@@ -88,24 +88,59 @@ const certifications = [
 
 const skillBuckets = [
   {
-    title: '🚀 GPU / Performance',
-    items: ['CUDA', 'Kernel Optimization', 'GPU Memory Hierarchy', 'Roofline Modeling'],
+    title: 'GPU Performance Engineering',
+    items: [
+      'CUDA C++ kernel development and optimization',
+      'GPU memory hierarchy analysis (registers, shared, L2, HBM)',
+      'Occupancy, latency hiding, and SIMT execution behavior',
+      'Compute- vs memory-bound workload characterization',
+      'Roofline-based performance reasoning',
+    ],
   },
   {
-    title: '📊 HPC / Systems',
-    items: ['Slurm', 'Linux', 'Benchmarking', 'Profiling'],
+    title: 'Profiling & Performance Measurement',
+    items: [
+      'Nsight Compute and Nsight Systems',
+      'CUDA-level timing and instrumentation',
+      'Microbenchmark design and parameter sweeps',
+      'Throughput, latency, and bandwidth analysis',
+    ],
   },
   {
-    title: '🏗️ Architecture / Modeling',
-    items: ['gem5', 'McPAT', 'Computer Architecture'],
+    title: 'Architecture Modeling & Systems',
+    items: [
+      'Cycle-level architectural simulation (gem5)',
+      'Power and area modeling (McPAT)',
+      'Cache behavior and memory system studies',
+      'Performance modeling and bottleneck attribution',
+    ],
   },
   {
-    title: '🧠 ML for Systems',
-    items: ['PyTorch', 'XGBoost'],
+    title: 'ML-Driven Systems Optimization',
+    items: [
+      'ML-guided kernel and configuration optimization',
+      'Performance prediction from hardware features',
+      'PyTorch-based experimentation and profiling',
+      'Tree-based models for systems decisions',
+    ],
   },
   {
-    title: '💻 Programming',
-    items: ['C', 'C++17', 'Python', 'Bash', 'Git'],
+    title: 'Systems & HPC Environment',
+    items: [
+      'Linux performance analysis',
+      'Slurm-based experiment orchestration',
+      'Reproducible benchmarking pipelines',
+    ],
+  },
+  {
+    title: 'Programming',
+    items: [
+      'CUDA C++',
+      'C / C++17',
+      'Python',
+      'Bash',
+      'Git',
+    ],
   },
 ];
 
