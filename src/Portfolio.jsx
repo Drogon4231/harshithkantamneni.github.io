@@ -17,14 +17,15 @@ const RESUME_URL = `${BASE}Resume_Final.pdf`;
 const projects = [
   {
     id: 'open-gpu-perf',
-    title: 'OpenGPUPerf: CUDA Kernel Performance Workbench',
+    title: 'GPU Kernel Performance Benchmarking (CUDA & Triton) ',
     category: 'GPU',
-    stack: ['C++', 'CUDA', 'Python'],
+    stack: ['C++', 'CUDA', 'Triton', 'Python'],
     bullets: [
-      'Hand-optimized GEMM and reduction kernels using shared-memory tiling, warp shuffle, and WMMA tensor cores.',
-      'Built a reusable benchmarking harness with CUDA event timing for throughput tracking and roofline analysis.',
-      'Profiling kernels using Nsight Compute (CLI) to analyze warp stalls, memory coalescing, and SM occupancy.',
-      'Developing an auto-tuning engine to sweep tile sizes, block sizes, and unroll factors to maximize SM utilization.',
+      'Implemented and optimized GPU kernels for GEMM and parallel reductions using both CUDA and Triton kernels.',
+      'Applied shared-memory tiling, block-level parallelism, and launch configuration tuning to study performance trade-offs across implementations.',
+      'Benchmarked kernel throughput and effective memory bandwidth using CUDA event timing across varied configurations.',
+      'Analyzed sensitivity to tile shape, block size, and memory access patterns to identify occupancy and bandwidth bottlenecks.',
+      'Built a reusable benchmarking harness to enable fair, repeatable performance comparisons between CUDA and Triton kernel variants.'
     ],
     link: '#',
   },
