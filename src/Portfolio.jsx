@@ -85,6 +85,12 @@ const certifications = [
     year: '2025',
     link: 'https://drogon4231.github.io/harshithkantamneni.github.io/public/My%20Learning%20%7C%20NVIDIA.pdf',
   },
+  {
+    title: 'NVIDIA Deep Learning Institute (DLI)',
+    subtitle: 'The Art of Compressing LLMs: Pruning, Distillation, and Quantization Demystified',
+    year: '2026',
+    link: 'https://drogon4231.github.io/harshithkantamneni.github.io/public/The%20Art%20of%20Compressing%20LLMs.pdf',
+  }
 ];
 
 const skillBuckets = [
