@@ -27,7 +27,7 @@ const projects = [
       'Analyzed sensitivity to tile shape, block size, and memory access patterns to identify occupancy and bandwidth bottlenecks.',
       'Built a reusable benchmarking harness to enable fair, repeatable performance comparisons between CUDA and Triton kernel variants.'
     ],
-    link: '#',
+    link: 'https://github.com/Drogon4231/triton-vs-cublas-llm-benchmarks',
   },
   {
     id: 'mi300x-mem',
