@@ -1,99 +1,92 @@
 ---
 import Default from '../layouts/Default.astro';
+import Hero from '../components/Hero.astro';
+import SectionHead from '../components/SectionHead.astro';
 ---
 <Default title="Contact · Harshith Kantamneni" description="How to reach me." current="contact">
 
-  <section class="hero">
-    <div class="hero-parallax-layer hero-parallax-layer-1" aria-hidden="true"></div>
-    <div class="hero-parallax-layer hero-parallax-layer-2" aria-hidden="true"></div>
-    <div class="container">
-      <span class="index-number">Contact</span>
-      <h1 style="max-width: 14ch;">Get in touch.</h1>
-      <p class="lede">
-        Different channels serve different purposes. Email is the primary surface for
-        substantive conversation, GitHub is for technical discussion of the lab work,
-        LinkedIn is for professional inbound, and the RSS feed or monthly newsletter
-        is for an ongoing relationship without a reply expected.
-      </p>
-    </div>
-  </section>
+  <Hero
+    marker="030 / CONTACT"
+    meta={['Email · GitHub · LinkedIn · RSS']}
+  >
+    Get in touch.
+  </Hero>
 
-  <section style="padding-top: 0;">
-    <div class="container-narrow">
+  <div class="page-grid">
+    <p class="extended measure-loose" style="font-size: var(--fs-lede); line-height: var(--lh-lede); margin-top: var(--space-6);">
+      Different channels serve different purposes. Email is the primary surface for substantive conversation, GitHub is for technical discussion of the lab work, LinkedIn is for professional inbound, and the RSS feed or monthly newsletter is for an ongoing relationship without a reply expected.
+    </p>
+  </div>
 
-      <h2>Channels</h2>
+  <SectionHead marker="031 / CHANNELS" title="Channels" />
 
-      <div style="display: grid; gap: var(--space-5); margin-top: var(--space-5);">
+  <div class="page-grid">
+    <div class="extended">
+      <div class="channel-table">
+        <div class="channel-meta">
+          <p>EMAIL</p>
+          <p><a href="mailto:kantamneniharshith@gmail.com">kantamneniharshith@gmail.com</a></p>
+          <p>PRIMARY</p>
+        </div>
+        <div>
+          <p>I read everything. I reply to substantive: critique of methodology, replication attempts, other lab builders sharing patterns, specific technical questions with context.</p>
+        </div>
 
-        <article class="card">
-          <p class="meta">Primary</p>
-          <h3>Email</h3>
-          <p>
-            <a href="mailto:kantamneniharshith@gmail.com" style="font-family: var(--font-mono); font-size: 1.0625rem;">kantamneniharshith@gmail.com</a>
-          </p>
-          <p>
-            I read everything. I reply to substantive: critique of methodology,
-            replication attempts, other lab builders sharing patterns, specific
-            technical questions with context.
-          </p>
-        </article>
+        <div class="channel-meta">
+          <p>GITHUB</p>
+          <p><a href="https://github.com/Drogon4231">@Drogon4231</a></p>
+          <p>PUBLIC TECHNICAL</p>
+        </div>
+        <div>
+          <p>Lab repos, project code, open issues. Technical conversation about specific code is best here. Pull requests welcome on public repos.</p>
+        </div>
 
-        <article class="card">
-          <p class="meta">Public technical discussion</p>
-          <h3>GitHub</h3>
-          <p>
-            <a href="https://github.com/Drogon4231" style="font-family: var(--font-mono);">@Drogon4231</a>
-          </p>
-          <p>
-            Lab repos, project code, open issues. Technical conversation about
-            specific code is best here. Pull requests welcome on public repos.
-          </p>
-        </article>
+        <div class="channel-meta">
+          <p>LINKEDIN</p>
+          <p><a href="https://www.linkedin.com/in/hk4231">in/hk4231</a></p>
+          <p>PROFESSIONAL</p>
+        </div>
+        <div>
+          <p>Career inbound, professional connections. I check it weekly, not daily.</p>
+        </div>
 
-        <article class="card">
-          <p class="meta">Professional</p>
-          <h3>LinkedIn</h3>
-          <p>
-            <a href="https://www.linkedin.com/in/hk4231" style="font-family: var(--font-mono);">in/hk4231</a>
-          </p>
-          <p>
-            Career inbound, professional connections. I check it weekly, not daily.
-          </p>
-        </article>
-
-        <article class="card">
-          <p class="meta">Ongoing</p>
-          <h3>Monthly digest</h3>
-          <p>
-            One email per month. Best reports, notable observations, lessons from
-            running the labs. Around 5 minute read. No upsell. Unsubscribe anytime.
-          </p>
-          <form action="https://buttondown.com/api/emails/embed-subscribe/harshith" method="post" target="popupwindow" class="newsletter-form" style="margin-top: var(--space-3);">
+        <div class="channel-meta">
+          <p>NEWSLETTER</p>
+          <p>Monthly</p>
+          <p>ONGOING</p>
+        </div>
+        <div>
+          <p>One email per month. Best reports, notable observations, lessons from running the labs. Around 5 minute read. No upsell. Unsubscribe anytime.</p>
+          <form action="https://buttondown.com/api/emails/embed-subscribe/harshith" method="post" target="popupwindow" class="newsletter-form">
             <input type="email" name="email" placeholder="you@example.com" required>
             <button type="submit">Subscribe</button>
           </form>
-        </article>
-
+        </div>
       </div>
-
-      <h2>What I respond to</h2>
-      <ul style="padding-left: var(--space-5); line-height: var(--lh-body);">
-        <li>Substantive critique of methodology, including counter-evidence</li>
-        <li>Other autonomous-lab builders sharing patterns or replication attempts</li>
-        <li>Specific technical questions with context</li>
-        <li>Research collaboration proposals</li>
-        <li>Questions about specific reports</li>
-      </ul>
-
-      <h2>What I do not respond to</h2>
-      <ul style="padding-left: var(--space-5); line-height: var(--lh-body);">
-        <li>Generic outreach or cold sales</li>
-        <li>"Can I pick your brain about AI" without a specific topic</li>
-        <li>Recruiter spam unrelated to the work</li>
-        <li>Requests to white-label or rebrand the methodology</li>
-      </ul>
-
     </div>
-  </section>
+  </div>
+
+  <SectionHead marker="032 / RESPOND" title="What I respond to" />
+
+  <div class="page-grid">
+    <ul class="extended measure-tight" style="padding-left: var(--space-4);">
+      <li>Substantive critique of methodology, including counter-evidence</li>
+      <li>Other autonomous-lab builders sharing patterns or replication attempts</li>
+      <li>Specific technical questions with context</li>
+      <li>Research collaboration proposals</li>
+      <li>Questions about specific reports</li>
+    </ul>
+  </div>
+
+  <SectionHead marker="033 / SKIP" title="What I do not respond to" />
+
+  <div class="page-grid">
+    <ul class="extended measure-tight" style="padding-left: var(--space-4);">
+      <li>Generic outreach or cold sales</li>
+      <li>"Can I pick your brain about AI" without a specific topic</li>
+      <li>Recruiter spam unrelated to the work</li>
+      <li>Requests to white-label or rebrand the methodology</li>
+    </ul>
+  </div>
 
 </Default>
