@@ -1,0 +1,46 @@
+---
+import Default from '../../layouts/Default.astro';
+
+const title = "Twelve cycles of byte-identical builds · Harshith Kantamneni";
+const description = "What it takes for an autonomous lab to produce reproducible binaries across cycles, and why it matters for verification.";
+---
+<Default title={title} description={description} current="notes">
+
+  <section style="padding: var(--space-9) 0 var(--space-6);">
+    <div class="container-narrow">
+      <span class="index-number">Note · 2026-05-05</span>
+      <h1 style="font-size: clamp(2rem, 4vw, 3.25rem); max-width: 18ch;">Twelve cycles of byte-identical builds.</h1>
+    </div>
+  </section>
+
+  <section style="padding-top: 0;">
+    <div class="container-narrow">
+
+      <p>
+        HIVE just produced its twelfth consecutive cycle where the cross-platform build (Android arm64, armeabi-v7a, x86, x86_64, plus iOS Mach-O) hashed identically to the cycle before it. Five surfaces, twelve cycles, byte-for-byte the same binary content.
+      </p>
+
+      <p>
+        That sounds like nothing happened. It actually means something specific: across roughly two weeks of cycles, no specialist agent introduced an undeclared change to the build output. Source edits that touched the relevant files either didn't make it into the binary (correctly), got reverted (correctly), or didn't exist (the binary is a stable base case). Every change that should have been visible would have shown up as a hash mismatch.
+      </p>
+
+      <p>
+        It took three things to get here. First, an R11 invariant that names exactly which surfaces must hash-match the previous cycle: per-architecture <code>.so</code> files for Android, the Mach-O for iOS, and the symbol-name set within them. Second, a build-history TSV row appended at every cycle close, which means the chain is grep-recoverable across hundreds of cycles. Third, a golden symbol parity check that requires both <code>hive_core_zeroize</code> and <code>hive_core_hkdf_sha256</code> to appear at the same address as the prior cycle's binary, which catches the case where the symbol set is intact but its layout shifted underneath.
+      </p>
+
+      <p>
+        Why this matters for verification: it gives the external verdict (CI on a public commit) something concrete to bind against. If CI compiles the same source and produces a binary with a different hash, something in the build environment changed. If CI compiles the same source and produces an identical binary, the lab's claim that "nothing meaningful changed in the build surface this cycle" is verifiable from outside.
+      </p>
+
+      <p>
+        The point of byte-identical builds is not the bytes. It is the structural fact that drift in the build is now legible to an outside observer. Without that, the build-pass streak is just another self-reported number.
+      </p>
+
+      <p style="margin-top: var(--space-7); color: var(--text-tertiary); font-size: var(--fs-small);">
+        <a href="/notes">← All notes</a>
+      </p>
+
+    </div>
+  </section>
+
+</Default>

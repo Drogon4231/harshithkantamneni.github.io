@@ -1,32 +1,49 @@
-name: Build & Publish to gh-pages
+name: Build and Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main ]        # rebuild on every push to main
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
-  contents: write             # needed to push to gh-pages
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
-      # 1 ▸ Check out source
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      # 2 ▸ Set up Node + cache
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
-      # 3 ▸ Install deps & build with Vite
-      - run: npm ci
-      - run: npm run build          # outputs ./dist
+      - name: Install dependencies
+        run: npm install
 
-      # 4 ▸ Publish ./dist to gh-pages branch
-      - uses: peaceiris/actions-gh-pages@v3
+      - name: Build with Astro
+        run: npm run build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          force_orphan: true        # clean history on gh-pages
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
