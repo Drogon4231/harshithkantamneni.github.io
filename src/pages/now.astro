@@ -1,59 +1,38 @@
 ---
 import Default from '../layouts/Default.astro';
+import Hero from '../components/Hero.astro';
+import SectionHead from '../components/SectionHead.astro';
+
+const updated = '2026-05-06';
+const entries = [
+  { date: 'May 2026', body: 'Both labs in active operation. HIVE in Phase 2 (architecture port). Autonomous Research Lab on verification-depth methodology series.' },
+  { date: 'Apr 2026', body: 'Diagnosed and prescribed AGI-lab rigidity. Five structural changes to disrupt recursive verification-surface collapse.' },
+  { date: 'Mar 2026', body: 'Published "Recursive Verification-Surface Collapse" report. ~3,200 words. First substantive methodology piece.' },
+  { date: 'Feb 2026', body: 'Both labs cleared their first methodology audit. Cycle cadence stabilized.' },
+];
 ---
-<Default title="Now · Harshith Kantamneni" description="What I'm working on this week." current="now">
+<Default title="Now · Harshith Kantamneni" description="What I'm working on right now." current="now">
 
-  <section class="hero">
-    <div class="hero-parallax-layer hero-parallax-layer-1" aria-hidden="true"></div>
-    <div class="hero-parallax-layer hero-parallax-layer-2" aria-hidden="true"></div>
-    <div class="container">
-      <span class="index-number">Now / week of May 6, 2026</span>
-      <h1 style="max-width: 18ch;">What I am working on this week.</h1>
-      <p class="lede">
-        A weekly snapshot of the labs: what's running, what's shipping, what's blocked,
-        and what's on my mind. Updated weekly. Not a complete log, just a single-page
-        picture of the current state.
-      </p>
+  <Hero
+    marker="020 / NOW"
+    meta={[`Updated ${updated}`]}
+  >
+    What I'm doing<br />right now.
+  </Hero>
+
+  <SectionHead marker="021 / TIMELINE" title="Recent" />
+
+  <div class="page-grid">
+    <div class="extended">
+      <div class="timeline">
+        {entries.map(entry => (
+          <>
+            <p class="timeline-date">{entry.date}</p>
+            <div class="timeline-entry"><p>{entry.body}</p></div>
+          </>
+        ))}
+      </div>
     </div>
-  </section>
-
-  <section style="padding-top: 0;">
-    <div class="container-narrow">
-
-      <h2>This week</h2>
-      <p>
-        HIVE is at Cycle 114. The architecture port from the sister Autonomous
-        Research Lab landed phase one (handoff schemas, telemetry foundation,
-        brief assembler, archival sweep). Build cadence is strong: a twelve-cycle
-        chain of byte-identical cross-platform builds, with the deferred-impl
-        ledger holding clean for thirteen consecutive cycles.
-      </p>
-      <p>
-        Building this site in parallel. First report drafted, three notes
-        published, voice calibration ongoing.
-      </p>
-
-      <h2>What is blocking</h2>
-      <ul style="padding-left: var(--space-5); line-height: var(--lh-body);">
-        <li>Three proposals pending PI ratification (cargo-deny advisories, heuristic-candidate falsifier separation, cross-family adversary spec). Some have aged into HIGH territory.</li>
-        <li>Cross-family verifier mechanism. Testing Qwen2.5-Coder-14B locally before any ratification.</li>
-        <li>iOS Simulator runtime install. Long-deferred environment dependency.</li>
-        <li>Patent counsel scoping consultation. Deferred until the first publishable mechanism.</li>
-      </ul>
-
-      <h2>What I am reading</h2>
-      <ul style="padding-left: var(--space-5); line-height: var(--lh-body);">
-        <li>MAST taxonomy (arxiv 2503.13657). Multi-agent LLM failure modes.</li>
-        <li>Preference Leakage paper (ICLR 2026). Same-family LLM judge bias.</li>
-        <li>LightMem (ICLR 2026). Sleep-time memory consolidation.</li>
-        <li>Behavioral Calibration via RL (arxiv 2512.19920).</li>
-      </ul>
-
-      <p style="margin-top: var(--space-7); color: var(--text-tertiary); font-size: var(--fs-small);">
-        Inspired by Derek Sivers' /now movement. Updated weekly.
-      </p>
-
-    </div>
-  </section>
+  </div>
 
 </Default>
