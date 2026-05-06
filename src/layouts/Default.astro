@@ -1,0 +1,76 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/style.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  current?: string;
+  ogImage?: string;
+}
+
+const {
+  title,
+  description = 'I design and run autonomous AI labs. This site publishes their methodology, system reports, and operating decisions.',
+  current = '',
+  ogImage = '/og-default.png',
+} = Astro.props;
+
+const siteUrl = 'https://harshithkantamneni.github.io';
+const canonicalURL = new URL(Astro.url.pathname, siteUrl).toString();
+---
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+  <meta name="description" content={description}>
+  <link rel="canonical" href={canonicalURL}>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,400..700,30..100,0..1;1,9..144,400..700,30..100,0..1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content={canonicalURL}>
+  <meta property="og:title" content={title}>
+  <meta property="og:description" content={description}>
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content={title}>
+  <meta name="twitter:description" content={description}>
+
+  <!-- JSON-LD: Person schema -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    'name': 'Harshith Kantamneni',
+    'url': siteUrl,
+    'sameAs': [
+      'https://github.com/Drogon4231',
+      'https://www.linkedin.com/in/harshithkantamneni',
+    ],
+    'jobTitle': 'GPU systems engineer; builder of autonomous AI labs',
+    'email': 'mailto:kantamneniharshith@gmail.com',
+  })}></script>
+
+  <!-- Cloudflare Web Analytics -->
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "f1ff5015a395474e96b4c7354362d1c1"}'></script>
+</head>
+<body>
+  <Header current={current} />
+  <main>
+    <slot />
+  </main>
+  <Footer />
+  <script is:inline src="/motion.js"></script>
+</body>
+</html>

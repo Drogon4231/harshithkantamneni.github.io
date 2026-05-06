@@ -1,12 +1,38 @@
-# React + Vite
+# harshithkantamneni.github.io
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Personal site for Harshith Kantamneni. Built with [Astro](https://astro.build).
 
-Currently, two official plugins are available:
+Live at [harshithkantamneni.github.io](https://harshithkantamneni.github.io).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Local development
 
-## Expanding the ESLint configuration
+```bash
+npm install
+npm run dev      # http://localhost:4321
+npm run build    # outputs ./dist
+npm run preview  # preview build locally
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Structure
+
+```
+src/
+├── layouts/Default.astro    shared layout (header + footer + meta)
+├── components/              header, footer
+├── pages/                   one .astro file per route
+│   ├── index.astro          home
+│   ├── about.astro
+│   ├── now.astro
+│   ├── contact.astro
+│   ├── labs/                lab modules (each lab = one file)
+│   ├── reports/             long-form reports
+│   ├── notes/               short observations
+│   └── rss.xml.js           RSS feed
+└── styles/                  CSS tokens + components
+
+public/                      static assets (PDFs, favicon, motion.js)
+```
+
+## Deploy
+
+Pushed to `main` → GitHub Actions builds and deploys to GitHub Pages automatically.
