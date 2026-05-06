@@ -1,92 +1,53 @@
 ---
 import Default from '../../layouts/Default.astro';
+import Hero from '../../components/Hero.astro';
+import SectionHead from '../../components/SectionHead.astro';
+import PullQuote from '../../components/PullQuote.astro';
 ---
-<Default title="Autonomous Research Lab · Harshith Kantamneni" description="Autonomous research operations lab." current="labs">
+<Default title="Autonomous Research Lab · Harshith Kantamneni" description="Multi-agent research lab investigating verification depth in autonomous engineering systems." current="labs">
 
-  <section class="hero">
-    <div class="hero-parallax-layer hero-parallax-layer-1" aria-hidden="true"></div>
-    <div class="hero-parallax-layer hero-parallax-layer-2" aria-hidden="true"></div>
-    <div class="container">
-      <span class="index-number">Lab module · live</span>
-      <h1 style="max-width: 16ch;">Autonomous Research Lab</h1>
-      <p class="lede">
-        An autonomous research operations lab. A Director and specialist agents
-        running on commodity hardware, governed by pre-registration discipline, a
-        tiered persistent memory, reproducibility gates, and honest negative results.
-      </p>
-      <div class="hero-meta">
-        <span><strong>Status</strong> Live</span>
-        <span><strong>Active since</strong> 2026</span>
-        <span><strong>Type</strong> Research operations</span>
-      </div>
+  <Hero
+    marker="120 / AUTONOMOUS RESEARCH"
+    meta={['Active 2026', '~31–73 agents', 'Methodology']}
+  >
+    Autonomous<br />Research Lab.
+  </Hero>
+
+  <div class="page-grid">
+    <p class="extended measure-loose" style="font-size: var(--fs-lede); line-height: var(--lh-lede); margin-top: var(--space-6);">
+      A multi-agent research lab whose work is to investigate why autonomous engineering systems fail at verification — and which structural moves actually disrupt the failure mode versus which are ceremonial.
+    </p>
+  </div>
+
+  <SectionHead marker="121 / THESIS" title="Thesis" />
+
+  <div class="page-grid">
+    <div class="extended measure-tight drop-cap">
+      <p>Most multi-agent labs collapse because they grade themselves. Self-grading creates a flat verification surface — the system's view of its own correctness. Any sufficiently capable optimizer will climb that surface without solving the underlying problem. This is the null-set principal pattern: the lab passes its own tests while the work quietly breaks.</p>
+      <p>The lab investigates three structural principles for disrupting this: external verdicts, pre-registered falsifiers, and adversarial payoffs. Each is tested across cycles; cycles where the principle holds are compared to cycles where it doesn't.</p>
     </div>
-  </section>
+  </div>
 
-  <section style="padding-top: 0;">
-    <div class="grid-editorial">
+  <PullQuote attribution="Lab principle">
+    A verification surface is only as deep as the things it cannot see.
+  </PullQuote>
 
-      <article class="body">
-        <h2>What this lab is</h2>
-        <p>
-          A research operations lab focused on small-model experimentation under
-          constrained local compute. The lab plans experiments, pre-registers
-          hypotheses and falsifiers, runs them on local hardware, evaluates results,
-          archives artifacts, and decides what to do next.
-        </p>
-        <p>
-          It runs in a tmux loop on a single MacBook. One cycle per Claude session.
-          State persists across cycles via a three-tier markdown memory.
-        </p>
+  <SectionHead marker="122 / METHOD" title="Method" />
 
-        <h2>Operating model</h2>
-        <ul style="padding-left: var(--space-5); line-height: var(--lh-body);">
-          <li><strong>Director.</strong> Picks experiments each cycle, dispatches specialists, owns cycle outcome</li>
-          <li><strong>Specialists.</strong> Scientific reasoning, methodology, code review, reproducibility, and adversarial review</li>
-          <li><strong>Knowledge Manager.</strong> Closeout discipline at every cycle close</li>
-          <li><strong>Evaluator.</strong> Independent verdict on cycle PASS, PARTIAL, or FAIL (binding)</li>
-        </ul>
-
-        <h2>Verification discipline</h2>
-        <p>Three structural principles, shared across the lab framework:</p>
-        <ol style="padding-left: var(--space-5); line-height: var(--lh-body);">
-          <li><strong>External verdict.</strong> At least one verdict per cycle from a system the lab cannot edit</li>
-          <li><strong>Pre-registered falsifier.</strong> Every claim declares, at open, a concrete observation that would invalidate it (immutable)</li>
-          <li><strong>Adversarial payoff.</strong> At least one actor whose payoff increases when others' claims are falsified</li>
-        </ol>
-
-        <p style="margin-top: var(--space-7); color: var(--text-secondary);">
-          For the current cycle, recent dispatches, and what is shipping this week,
-          see <a href="/harshithkantamneni.github.io/now">Now</a>. Reports from this lab are forthcoming.
-        </p>
-      </article>
-
-      <aside class="marginalia">
-        <p><strong>Lab type</strong></p>
-        <p>Research operations</p>
-
-        <p style="margin-top: var(--space-5);"><strong>Active since</strong></p>
-        <p>2026</p>
-
-        <p style="margin-top: var(--space-5);"><strong>Hardware</strong></p>
-        <p>Single MacBook (M3 Pro, 18 GB)</p>
-
-        <p style="margin-top: var(--space-5);"><strong>Focus</strong></p>
-        <p>Small-model experimentation under constrained local compute</p>
-
-        <p style="margin-top: var(--space-5);"><strong>Memory</strong></p>
-        <p>Three-tier markdown (hot, wiki, log)</p>
-
-        <p style="margin-top: var(--space-5);"><strong>Discipline</strong></p>
-        <p>Pre-registration, reproducibility gates, honest negative results</p>
-
-        <p style="margin-top: var(--space-5);"><strong>Framework</strong></p>
-        <p><a href="https://github.com/Drogon4231/autonomous-lab-systems">autonomous-lab-systems</a></p>
-
-        <p style="margin-top: var(--space-5);"><strong>Live status</strong></p>
-        <p><a href="/harshithkantamneni.github.io/now">/now</a></p>
-      </aside>
-
+  <div class="page-grid">
+    <div class="extended measure-tight">
+      <p>Cycles run with controlled variation across structural conditions. The lab maintains an agent quartet — four Claude opus instances reviewing each other — and a separate cross-family judge layer (different model family) for control. Same-family judge bias is real; the cross-family layer is the experimental control.</p>
+      <p>Each cycle produces a methodology artifact: ratified principles, archived rejections, and the rationale for both. Methodology is the output, not just the engineering.</p>
     </div>
-  </section>
+  </div>
+
+  <SectionHead marker="123 / OUTPUT" title="Output" />
+
+  <div class="page-grid">
+    <div class="extended measure-tight">
+      <p>The lab publishes long-form methodology reports — roughly one per month. Reports are the public surface; the underlying cycle data and specialist transcripts remain private.</p>
+      <p>Notes on specific findings appear more frequently — short-form observations from a single cycle, paired with the directive that came out of it.</p>
+    </div>
+  </div>
 
 </Default>
