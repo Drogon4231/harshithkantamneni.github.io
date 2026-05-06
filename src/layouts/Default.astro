@@ -17,7 +17,7 @@ const {
   ogImage = '/og-default.png',
 } = Astro.props;
 
-const siteUrl = 'https://harshithkantamneni.github.io';
+const siteUrl = 'https://drogon4231.github.io';
 const canonicalURL = new URL(Astro.url.pathname, siteUrl).toString();
 ---
 <!DOCTYPE html>
@@ -35,7 +35,7 @@ const canonicalURL = new URL(Astro.url.pathname, siteUrl).toString();
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,400..700,30..100,0..1;1,9..144,400..700,30..100,0..1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
 
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="/harshithkantamneni.github.io/favicon.svg">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
@@ -53,7 +53,7 @@ const canonicalURL = new URL(Astro.url.pathname, siteUrl).toString();
     '@context': 'https://schema.org',
     '@type': 'Person',
     'name': 'Harshith Kantamneni',
-    'url': siteUrl,
+    'url': `${siteUrl}/harshithkantamneni.github.io/`,
     'sameAs': [
       'https://github.com/Drogon4231',
       'https://www.linkedin.com/in/harshithkantamneni',
@@ -71,6 +71,6 @@ const canonicalURL = new URL(Astro.url.pathname, siteUrl).toString();
     <slot />
   </main>
   <Footer />
-  <script is:inline src="/motion.js"></script>
+  <script is:inline src="/harshithkantamneni.github.io/motion.js"></script>
 </body>
 </html>
