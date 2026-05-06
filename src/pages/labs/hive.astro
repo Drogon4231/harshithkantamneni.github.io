@@ -1,101 +1,53 @@
 ---
 import Default from '../../layouts/Default.astro';
+import Hero from '../../components/Hero.astro';
+import SectionHead from '../../components/SectionHead.astro';
+import PullQuote from '../../components/PullQuote.astro';
 ---
-<Default title="HIVE Product Lab · Harshith Kantamneni" description="HIVE: an autonomous product engineering lab." current="labs">
+<Default title="HIVE Product Lab · Harshith Kantamneni" description="Autonomous Claude lab building shippable iOS products end-to-end." current="labs">
 
-  <section class="hero">
-    <div class="hero-parallax-layer hero-parallax-layer-1" aria-hidden="true"></div>
-    <div class="hero-parallax-layer hero-parallax-layer-2" aria-hidden="true"></div>
-    <div class="container">
-      <span class="index-number">Lab module · live</span>
-      <h1 style="max-width: 16ch;">HIVE Product Lab</h1>
-      <p class="lede">
-        An autonomous product engineering lab. A Director and specialist agents
-        running on commodity hardware, kept honest by CI-bound external verification,
-        pre-registered streak falsifiers, and a three-tier persistent memory.
-      </p>
-      <div class="hero-meta">
-        <span><strong>Status</strong> Live</span>
-        <span><strong>Active since</strong> 2026</span>
-        <span><strong>Type</strong> Product engineering</span>
-      </div>
+  <Hero
+    marker="110 / HIVE"
+    meta={['Active 2026', '~46 agents', 'Phase 2', 'iOS / Swift']}
+  >
+    HIVE.<br />Product Lab.
+  </Hero>
+
+  <div class="page-grid">
+    <p class="extended measure-loose" style="font-size: var(--fs-lede); line-height: var(--lh-lede); margin-top: var(--space-6);">
+      An autonomous Claude lab whose job is to ship iOS products end-to-end. A Director on Opus orchestrates roughly 46 specialists across architecture, implementation, verification, and post-cycle review. Cycles run continuously; the lab self-corrects through meta-rules updated by post-cycle directives.
+    </p>
+  </div>
+
+  <SectionHead marker="111 / OPERATING" title="Operating model" />
+
+  <div class="page-grid">
+    <div class="extended measure-tight drop-cap">
+      <p>The lab runs in cycles. Each cycle has a specified product target — currently a shippable iOS app — and the Director allocates work across specialists. The Director itself does not execute code; it routes, reviews, and writes post-cycle directives. Specialists handle scope-specific work: ARCH for architecture, IMPL for implementation, VERIFY for testing, REVIEW for adversarial review.</p>
+      <p>Memory is three-tier markdown: long-term (operating model, ratified directives), cycle (current cycle context), and conversation (specialist working memory, evicted between turns). The split prevents context bleed and lets the Director hold whole-lab state without overflowing.</p>
     </div>
-  </section>
+  </div>
 
-  <section style="padding-top: 0;">
-    <div class="grid-editorial">
+  <PullQuote attribution="Operating principle">
+    The Director writes meta-rules, not tactics. Trust the loops; intervene only when loops fail.
+  </PullQuote>
 
-      <article class="body">
-        <h2>What this lab is</h2>
-        <p>
-          An autonomous product engineering lab. A single Claude Opus instance acts
-          as Director, dispatching specialist sub-agents (chief architect, mobile
-          engineer, code reviewer, evaluator, red team, knowledge manager, and more)
-          to plan, execute, and verify engineering work over long horizons.
-        </p>
-        <p>
-          It runs in a tmux loop on a single MacBook. One cycle per Claude session.
-          State persists across cycles via a three-tier markdown memory.
-        </p>
+  <SectionHead marker="112 / VERIFICATION" title="Verification discipline" />
 
-        <h2>Operating model</h2>
-        <ul style="padding-left: var(--space-5); line-height: var(--lh-body);">
-          <li><strong>Director.</strong> Picks PRIMARY and SECONDARY work each cycle, dispatches specialists, owns cycle outcome</li>
-          <li><strong>Quartet.</strong> Chief architect, CPO, red team, and applied researcher reviewing META-altitude proposals (4 of 4 NON-REJECT gate)</li>
-          <li><strong>Specialists.</strong> Mobile engineers, build engineers, code reviewer, evaluator, vm-testing-lead, and others</li>
-          <li><strong>Knowledge Manager.</strong> Closeout discipline at every cycle close</li>
-          <li><strong>Evaluator.</strong> Independent verdict on cycle PASS, PARTIAL, or FAIL (binding)</li>
-        </ul>
-
-        <h2>Verification discipline</h2>
-        <p>Three structural principles, ratified May 2026:</p>
-        <ol style="padding-left: var(--space-5); line-height: var(--lh-body);">
-          <li><strong>External verdict.</strong> At least one verdict per cycle from a system the lab cannot edit (currently GitHub Actions CI on a public commit)</li>
-          <li><strong>Pre-registered falsifier.</strong> Every streak claim declares, at open, a concrete observation that would invalidate it (immutable)</li>
-          <li><strong>Adversarial payoff.</strong> At least one actor whose payoff increases when others' claims are falsified (cross-family verifier mechanism in progress)</li>
-        </ol>
-
-        <h2>Selected case studies</h2>
-        <ul style="padding-left: var(--space-5); line-height: var(--lh-body);">
-          <li>
-            <a href="/harshithkantamneni.github.io/reports/recursive-verification-surface-collapse">Recursive Verification-Surface Collapse</a>.
-            Three iterations of the same failure across 100+ cycles.
-          </li>
-        </ul>
-
-        <p style="margin-top: var(--space-7); color: var(--text-secondary);">
-          For the current cycle, recent dispatches, and what is shipping this week,
-          see <a href="/harshithkantamneni.github.io/now">Now</a>.
-        </p>
-      </article>
-
-      <aside class="marginalia">
-        <p><strong>Lab type</strong></p>
-        <p>Product engineering</p>
-
-        <p style="margin-top: var(--space-5);"><strong>Active since</strong></p>
-        <p>2026</p>
-
-        <p style="margin-top: var(--space-5);"><strong>Hardware</strong></p>
-        <p>Single MacBook (M3 Pro, 18 GB)</p>
-
-        <p style="margin-top: var(--space-5);"><strong>Stack</strong></p>
-        <p>Rust, mobile FFI, cross-platform native</p>
-
-        <p style="margin-top: var(--space-5);"><strong>Memory</strong></p>
-        <p>Three-tier markdown (hot, wiki, log)</p>
-
-        <p style="margin-top: var(--space-5);"><strong>External verification</strong></p>
-        <p>GitHub Actions CI bound to cycle PASS verdict</p>
-
-        <p style="margin-top: var(--space-5);"><strong>Framework</strong></p>
-        <p><a href="https://github.com/Drogon4231/autonomous-lab-systems">autonomous-lab-systems</a></p>
-
-        <p style="margin-top: var(--space-5);"><strong>Live status</strong></p>
-        <p><a href="/harshithkantamneni.github.io/now">/now</a></p>
-      </aside>
-
+  <div class="page-grid">
+    <div class="extended measure-tight">
+      <p>Builds must be byte-identical across cycles. This is not a polish concern — it is the first verification that the lab is doing what the cycle plan says it is doing. If two cycles producing the same input ship different binaries, the lab is non-deterministic in ways that mask real bugs.</p>
+      <p>HIVE has logged twelve consecutive cycles of byte-identical builds at the time of writing. The discipline is what makes downstream verification meaningful.</p>
     </div>
-  </section>
+  </div>
+
+  <SectionHead marker="113 / SELF-CORRECTION" title="Self-correction" />
+
+  <div class="page-grid">
+    <div class="extended measure-tight">
+      <p>Post-cycle directives are the lab's correction mechanism. They are meta-rules — process or constraint changes — never specific tactical decisions. A directive that says "do X this cycle" is the wrong shape; a directive that says "when condition Y holds, the verification gate must include external review before merge" is the right shape.</p>
+      <p>This separation matters. Tactical directives crowd out the lab's own judgment, which defeats the point of autonomy. Meta-rules tighten the structure without prescribing the move.</p>
+    </div>
+  </div>
 
 </Default>
