@@ -17,9 +17,22 @@ indigo-Tailwind first wave. User feedback after the first review:
 2. Visual hierarchy clutter — important points don't catch the eye
 3. Mobile not friendly
 
-This redesign breaks the mold by going brutalist editorial × research-lab — drama
-through type scale, not chrome; one distinctive interaction, not three; mobile-first
-fluid scaling.
+## Positioning thesis
+
+**Brutalist editorial × research lab.** The site is a publication, not a portfolio
+deck. It documents the operating methodology of autonomous AI labs — long-form prose
+is the primary surface, not stat cards. The visual system creates drama through type
+scale and confident hierarchy, not decoration. One distinctive interaction. Stark color.
+Mobile-first.
+
+Three explicit anti-patterns to avoid:
+
+1. **AI-portfolio v1**: Tailwind indigo, Inter, three-icon-grid, gradient hero
+2. **AI-portfolio v2**: warm beige + Fraunces + terracotta + uniform cards (current site)
+3. **Brutalism-cosplay**: Times-New-Roman-and-shouting; harshness without hierarchy
+
+The cure is brutalist editorial in service of legibility — heavy type for emphasis,
+generous reading measure, hairline rules over boxes, marginalia for context.
 
 ## Approved decisions
 
@@ -28,36 +41,69 @@ fluid scaling.
 ```
 --paper:        #E8E5DF   /* cool grey paper, warmer than #FFF, cooler than current beige */
 --ink:          #111111   /* near-black, not pure */
---ink-low:      #555555   /* mono labels, secondary text */
---accent:       #FF5722   /* industrial orange — loud enough to be a real signal */
+--ink-low:      #555555   /* mono labels, secondary text — 6.0:1 on paper */
+--accent:       #FF5722   /* industrial orange — large text, accents, marks ONLY */
+--accent-deep:  #C8401B   /* darker orange for inline body links — 5.4:1 on paper */
 --accent-soft:  rgba(255, 87, 34, 0.12)  /* highlight backgrounds, marks */
 --rule:         #111111   /* hairline rules, full opacity */
 ```
 
-Dark mode flips `--paper` ↔ `--ink`; `--accent` unchanged.
+Dark mode flips `--paper` ↔ `--ink`; `--accent` unchanged (4.7:1 on `#111`).
+
+**Color usage rules (WCAG AA bounds):**
+
+| Where | Color | Contrast |
+|---|---|---|
+| Body text on paper | `--ink` (#111) on `--paper` | 16.0:1 ✓ |
+| Mono labels, secondary | `--ink-low` (#555) on `--paper` | 6.0:1 ✓ |
+| Inline body link | `--accent-deep` (#C8401B) on `--paper` | 5.4:1 ✓ |
+| Hero, h2, section markers | `--ink` on `--paper` | 16.0:1 ✓ |
+| Accent at scale (>18pt or >14pt bold) | `--accent` on `--paper` | 3.4:1 ✓ for large |
+| Accent rules, borders, marks (non-text) | `--accent` | n/a |
+| Newsletter button text on accent | `--ink` (#111) on `--accent` | 4.7:1 ✓ |
+
+`--accent` (#FF5722) is **never used for body-sized text on light paper** — fails AA
+at small sizes. For inline body links on light paper use `--accent-deep` (#C8401B),
+which passes AA at 5.4:1.
+
+In **dark mode**, `--accent` (#FF5722) on `--ink` (#111) measures 4.7:1 — passes AA
+for body text. Use a `--link` token that flips: `--accent-deep` in light mode,
+`--accent` in dark mode. CSS:
+
+```css
+:root[data-theme="light"] { --link: var(--accent-deep); }
+:root[data-theme="dark"]  { --link: var(--accent); }
+```
 
 ### Typography
 
-| Role | Font | Source |
-|---|---|---|
-| Display | Bricolage Grotesque (variable, 200–800, optical-size axis) | self-hosted woff2 |
-| Body | Newsreader (variable, 200–800, optical-size axis) | self-hosted woff2 |
-| Mono | JetBrains Mono (kept) | self-hosted woff2 |
+| Role | Font | Source | Approx size |
+|---|---|---|---|
+| Display | Bricolage Grotesque (variable, 200–800, opsz axis) | Google Fonts variable woff2, self-hosted | ~80KB |
+| Body | Newsreader (variable, 200–800, opsz axis) | Google Fonts variable woff2, self-hosted | ~100KB |
+| Mono | JetBrains Mono (variable, 100–800) | Google Fonts variable woff2, self-hosted | ~50KB |
 
-Total font payload target: ≤180KB woff2. Drop the three Google Fonts CSS imports
-in `Default.astro` in favor of a single self-hosted `@font-face` set with
-`font-display: swap`.
+**Sourcing:** download variable woff2 directly from Google Fonts (`fonts.google.com`
+→ "Get font" → variable woff2). Place under `public/fonts/`. Reference via
+`@font-face` in `tokens.css`.
+
+**Subsetting strategy:** apply `unicode-range: U+0000-00FF;` (Latin-1) to all three
+families. Drops Cyrillic/Greek/Vietnamese subsets, brings combined payload to
+~150KB target. Use `font-display: swap` on all faces.
+
+Drop the three Google Fonts CSS imports (Fraunces, JetBrains Mono, General Sans)
+in `Default.astro` in favor of self-hosted `@font-face` declarations in `tokens.css`.
 
 ### Type scale
 
 ```
-hero          clamp(3rem, 14vw, 14rem)    Bricolage 700, leading 0.9, tracking tight
-h2            clamp(2rem, 6vw, 5rem)      Bricolage 700, leading 1
+hero          clamp(3rem, 14vw, 14rem)    Bricolage 700, leading 0.9, tracking -0.02em
+h2            clamp(2rem, 6vw, 5rem)      Bricolage 700, leading 1, tracking -0.01em
 h3            clamp(1.25rem, 2vw, 1.75rem)  Bricolage 600
-lede          clamp(1.25rem, 2vw, 1.75rem)  Newsreader 400, leading 1.4
-body          1.0625rem                    Newsreader 400, leading 1.55, max 65ch
+lede          clamp(1.25rem, 2vw, 1.75rem)  Newsreader 400, leading 1.4, max 42ch
+body          1.0625rem                    Newsreader 400, leading 1.55, max 58ch
 mono-label    11–12px                      JetBrains Mono uppercase, tracking +0.2em
-pull-quote    clamp(1.5rem, 3vw, 2.5rem)  Bricolage 600
+pull-quote    clamp(1.5rem, 3vw, 2.5rem)  Bricolage 600, leading 1.15
 ```
 
 ### Hierarchy moves
@@ -67,8 +113,23 @@ pull-quote    clamp(1.5rem, 3vw, 2.5rem)  Bricolage 600
 2. **Section markers** replace the current `<span class="index-number">` + `<h2>`
    pattern. Format: `001 / THESIS` in JetBrains Mono uppercase, 12px, tracking
    +0.2em, with a hairline rule extending to right edge of viewport.
+
+   **Semantic structure:** the marker is decoration. The `<h2>` carries the heading
+   semantic. Use:
+   ```html
+   <header class="section-head">
+     <p class="section-marker" aria-hidden="true">001 / THESIS</p>
+     <h2>Thesis</h2>
+   </header>
+   ```
+   Screen readers skip the marker, follow `<h2>`. Visual readers see both.
 3. **Drop cap** on first paragraph of long-form posts (reports, multi-paragraph
    notes). 4 lines tall, Bricolage 600.
+
+   **Implementation:** primary path uses CSS `initial-letter: 4` (modern Safari).
+   Fallback for browsers without support uses `::first-letter` with `float: left`
+   plus computed `font-size` and `line-height` to match. Both paths in `style.css`,
+   selected via `@supports`.
 4. **Pull quotes hang in the margin** (cols 9–12 on desktop). On mobile, full-width
    with 4px orange left rule.
 5. **All-caps mono labels** — "ACTIVE 2026", "MADISON, WI", "REPORTS" — used as
@@ -77,15 +138,28 @@ pull-quote    clamp(1.5rem, 3vw, 2.5rem)  Bricolage 600
 ### Layout: asymmetric 12-column grid
 
 ```
-| 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 |
-  marginalia    main measure (3–9)             pull-quotes
+col:  1   2   3   4   5   6   7   8   9   10  11  12
+      ├───┤                                            ← marginalia (1–2)
+              ├───────────────────────┤                ← body without quote (3–8)
+              ├───────────────────────┤                ← body with quote (3–8)
+                                          ├───────────┤ ← pull-quote (9–12)
+              ├───────────────────────────────┤         ← body extends (3–10) when no quote
+      ├───────────────────────────────────────────────┤ ← full-bleed: section markers, hero, rules (1–12)
 ```
 
-- Body prose: cols 3–9, ~65ch
-- Pull quotes: cols 9–12, breaking right
+**Allocations:**
+
 - Marginalia (mono dates, footnotes, metadata): cols 1–2
-- Mobile: collapses to single column. Marginalia becomes inline mono metadata
-  above prose blocks. Pull quotes go full-width with thick left rule.
+- Body prose default: cols 3–8, ~58ch (tight, brutalist measure)
+- Body prose extended (no marginalia, no quote on this row): cols 3–10
+- Pull quotes: cols 9–12 (sits beside body; never overlaps)
+- Hero, h2 + section marker, hairline rules: cols 1–12 (full bleed)
+
+**Tablet (60em–80em):** marginalia merges into body (becomes inline above prose).
+Pull quote stays in cols 9–12. Body cols 1–8.
+
+**Mobile (<60em):** single column. Marginalia inlined. Pull quotes full-width with
+4px orange left rule.
 
 ### Hero pattern (replaces current `.hero`)
 
@@ -112,6 +186,25 @@ Drop parallax layers (`.hero-parallax-layer-1/2`). Drop `.lede` paragraph from h
 | `.card` for "what I respond to" lists | Plain numbered list, large type. |
 
 The `.card` class can be deleted from `style.css`.
+
+### Component extraction
+
+Repeating patterns get extracted as Astro components. Without this, 13 pages each
+hand-roll the hero pattern and section markers — guaranteed drift over time.
+
+New components in `src/components/`:
+
+| Component | Purpose | Props |
+|---|---|---|
+| `Hero.astro` | Mono marker + display headline + mono meta strip | `marker`, `meta` (array); slot for headline |
+| `SectionHead.astro` | Mono marker + h2 + hairline rule | `marker`, `title`, `level` (default 2) |
+| `MetaStrip.astro` | Mono dot-separated metadata row | `items` (array) |
+| `NumberedList.astro` | Numbered list with hairline rules between entries | slots for entries |
+| `PullQuote.astro` | Pull quote with margin behavior | slot |
+
+Existing components stay (`Header.astro`, `Footer.astro`) but get restyled to match
+the new system. New components avoid the temptation to over-engineer — each is
+under 30 lines, slot-driven, no internal state.
 
 ### Page-by-page deltas
 
@@ -160,11 +253,20 @@ The `.card` class can be deleted from `style.css`.
 ### Interaction (one distinctive move)
 
 1. **Hero variable-font tween**: cursor proximity drives Bricolage `wght` axis
-   from 500 → 700 on hero text. Subtle, alive, type-anchored. Disabled under
-   `prefers-reduced-motion`.
-2. **Section markers**: `position: sticky` + scroll-driven animation. Markers fix
-   at viewport top while their section is in view, release on next section. Pure
-   CSS, no JS.
+   from 500 → 700 on hero text. Subtle, alive, type-anchored.
+   - Distance threshold: tween only kicks in when cursor within 240px of hero
+     bounding box; outside that range, weight stays at 500
+   - Throttled via `requestAnimationFrame`, single listener on `pointermove`
+   - Disabled entirely under `prefers-reduced-motion: reduce`
+   - Disabled on touch devices (`pointer: coarse`) — no hover, no tween
+2. **Section markers**: `position: sticky; top: 0;` so each marker fixes at viewport
+   top while its section is in view, releases on next section.
+   - **Primary path**: scroll-driven CSS animation using `animation-timeline: view()`
+     adjusts marker opacity / underline emphasis as section enters/exits
+   - **Fallback path** (Firefox, older browsers): plain `position: sticky` without
+     scroll-driven enhancement. Markers still anchor at viewport top, just without
+     the animated transition. Wrap enhancement in `@supports (animation-timeline: view())`.
+   - Pure CSS, no JS
 
 **Dropped**:
 - Lab card tilt (no cards)
@@ -186,10 +288,58 @@ Fluid type via `clamp()` between them — no fixed media-query type jumps.
 - Asymmetric grid → single column
 - Pull quotes → full-width, 4px orange left rule, flush left
 - Marginalia → inline mono metadata above prose
-- Touch targets ≥48px (exceeds 44px floor) on nav, buttons, form fields
+- Touch targets ≥48px on nav, buttons, form fields, mobile menu items, theme
+  toggle (see Accessibility section for full rules; body prose links not bound)
 - Mobile menu: full-bleed overlay (current `<details>` element kept, restyled).
   Links at `clamp(2rem, 8vw, 3.5rem)` Bricolage 700.
 - Section markers stay sticky at top on mobile — they orient you as you scroll
+
+### Accessibility
+
+**Focus states (keyboard nav).**
+
+```css
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 0;  /* no rounded focus rings */
+}
+```
+
+Applied via single `:focus-visible` rule — no per-element overrides. Outline always
+visible on keyboard focus, hidden on mouse click.
+
+**Touch targets (interactive elements).**
+
+≥48px applies to: nav links, buttons, form inputs, mobile menu items, theme toggle.
+Body prose links keep their natural inline size — long-form text doesn't enforce
+48px line-height. Non-prose lists (lab list, contact channel rows) get `padding`
+to reach 48px clickable area without forcing visual height.
+
+**Screen readers.**
+
+- Section markers: `aria-hidden="true"` (decorative)
+- Numbered list prefixes (`01 — `, `02 — `): `aria-hidden="true"` on the prefix span,
+  the lab name itself is the readable content
+- Mono metadata strip: regular `<p>` content, screen-reader accessible
+- Mobile menu `<details>`: native disclosure semantics, no ARIA additions
+- Theme toggle: `<button>` with `aria-label="Toggle dark mode"` (text content alone
+  — `LIGHT` / `DARK` — is ambiguous without context)
+
+**Motion preferences.**
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+Plus the `motion.js` cursor tween checks `matchMedia('(prefers-reduced-motion: reduce)').matches`
+before attaching listeners.
 
 ### Theme toggle
 
@@ -197,12 +347,38 @@ Fluid type via `clamp()` between them — no fixed media-query type jumps.
 - Dark mode: flips paper ↔ ink, accent unchanged
 - Toggle button: mono uppercase `LIGHT` / `DARK` text — no sun/moon icon
 
+### Spacing + layout tokens
+
+```
+--space-1:   0.25rem    /*  4px */
+--space-2:   0.5rem     /*  8px */
+--space-3:   1rem       /* 16px */
+--space-4:   1.5rem     /* 24px */
+--space-5:   2.5rem     /* 40px */
+--space-6:   4rem       /* 64px */
+--space-7:   6rem       /* 96px */
+--space-8:   10rem      /* 160px — between major page sections */
+
+--rule-thin:    1px
+--rule-medium:  2px
+--rule-thick:   4px
+
+--measure-tight:    58ch  /* default body */
+--measure-loose:    72ch  /* extended body */
+--measure-narrow:   42ch  /* lede, hero subheads */
+```
+
+Drop the existing token names that don't match (e.g. `--content-width`,
+`--container-narrow`) — replace with the measure tokens above.
+
 ### Performance budget
 
-- Variable fonts, self-hosted woff2, total ≤180KB
+- Variable fonts, self-hosted woff2, subset to Latin-1, total ≤180KB
 - No client-side framework
 - `motion.js` ≤2KB minified
 - Astro static output unchanged
+- Lighthouse mobile score targets: Performance ≥90, Accessibility ≥95, Best
+  Practices ≥95, SEO ≥95
 
 ## Out of scope
 
@@ -215,14 +391,27 @@ Fluid type via `clamp()` between them — no fixed media-query type jumps.
 
 ## Files to touch
 
-- `src/styles/tokens.css` — full rewrite (color, type, scale tokens)
-- `src/styles/style.css` — full rewrite (component styles)
-- `src/layouts/Default.astro` — font loading change (drop Google Fonts, add self-hosted)
+**New:**
+
+- `src/components/Hero.astro`
+- `src/components/SectionHead.astro`
+- `src/components/MetaStrip.astro`
+- `src/components/NumberedList.astro`
+- `src/components/PullQuote.astro`
+- `public/fonts/` — Bricolage Grotesque, Newsreader, JetBrains Mono variable woff2
+
+**Rewrite:**
+
+- `src/styles/tokens.css` — color, type, scale, spacing tokens; `@font-face` block
+- `src/styles/style.css` — component styles, grid, section markers, drop cap
+
+**Modify:**
+
+- `src/layouts/Default.astro` — drop Google Fonts CSS imports
 - `src/components/Header.astro` — restyle, mobile menu treatment
 - `src/components/Footer.astro` — restyle (mono labels, hairline rule)
-- `public/motion.js` — shrink to single interaction
-- All 13 `src/pages/**/*.astro` — apply new hero pattern, section markers, no cards
-- `public/fonts/` — new directory, add Bricolage Grotesque + Newsreader woff2
+- `public/motion.js` — shrink to single interaction (cursor weight tween)
+- All 13 `src/pages/**/*.astro` — apply new components, drop hand-rolled markup
 
 ## Out-of-scope files (untouched)
 
@@ -233,24 +422,45 @@ Fluid type via `clamp()` between them — no fixed media-query type jumps.
 
 ## Risk / open questions
 
-- **Self-hosted variable fonts**: need to source Bricolage Grotesque variable woff2
-  (Google Fonts download or fontsource). Newsreader available on fontsource.
-- **Section marker scroll-driven CSS animation**: needs `@supports` fallback for
-  browsers without scroll-driven animation support — falls back to non-sticky markers.
-- **Pull quotes in margin**: relies on `position` + grid. On viewport widths between
-  60em and 80em, may need to clamp quote to within main column rather than break
-  out, to avoid overflow.
-- **Drop cap**: CSS `initial-letter` has limited support. Use a manual fallback with
-  `::first-letter` styling.
+- **Variable font subsetting**: hitting ≤180KB with Latin-1 subset is feasible but
+  tight. If actual payload exceeds budget, drop one variable axis (e.g. opsz on
+  Newsreader) before dropping the variable file altogether.
+- **Section marker scroll-driven animation**: `animation-timeline: view()` needs
+  `@supports` fallback. Spec covers this — fallback is plain `position: sticky`
+  without animation. Verify in Firefox build.
+- **Pull quotes in margin**: relies on grid + line-up with paragraph rows. On
+  viewport widths between 60em and 80em, quote stays in cols 9–12 alongside body
+  in cols 1–8 (marginalia merged). Verify visual rhythm doesn't break.
+- **Drop cap**: `initial-letter` has limited support outside Safari. Spec covers
+  `::first-letter` fallback. Test both paths.
+- **Hero variable-font tween perf**: every `pointermove` event recalculating
+  `font-variation-settings` could thrash on weak devices. rAF throttling + 240px
+  distance threshold should keep it bounded; verify with throttled CPU in DevTools.
+- **Lab list maintainability**: labs index is still a hand-coded list. Adding a
+  new lab requires editing the page. Out of scope for this redesign — flag for
+  future content-collection migration if the list grows past 4–5 entries.
 
 ## Acceptance
 
-The redesign is acceptable when:
+The redesign is acceptable when all of:
 
 1. Three open-incognito visits to the live site read as: brutalist editorial,
    research-lab serious, not generic AI portfolio
-2. Hero on phone fills viewport without horizontal scroll
-3. All touch targets pass 48px audit
-4. Visual hierarchy is legible at a glance — what's important is obviously important
-5. No cards, no parallax, no fade-ins
-6. Lighthouse mobile score ≥90 across performance/accessibility
+2. Hero on phone fills viewport without horizontal scroll, type renders before
+   FCP (no flash of unstyled text from font swap)
+3. WCAG AA contrast verified across all colored text combinations (orange never
+   used for body-sized text)
+4. Touch targets pass 48px audit on nav, buttons, forms, mobile menu
+5. Keyboard nav: every interactive element shows `:focus-visible` orange outline
+6. Screen reader pass: section markers skipped, headings flow correctly, mobile
+   menu announced as disclosure
+7. Visual hierarchy is legible at a glance — what's important is obviously important
+8. No cards, no parallax, no fade-ins, no italic headings
+9. Drop cap renders correctly in both Safari (initial-letter path) and
+   Chrome/Firefox (first-letter fallback)
+10. Section markers fix-on-scroll in Chrome (scroll-driven path) and remain
+    static-but-functional in Firefox (fallback path)
+11. Lighthouse mobile: Performance ≥90, Accessibility ≥95
+12. `prefers-reduced-motion` honored — no cursor tween, no scroll-driven animation
+13. All 13 pages use extracted components (Hero, SectionHead, MetaStrip, etc.) —
+    no hand-rolled hero patterns remaining in `.astro` files
