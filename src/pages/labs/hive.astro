@@ -4,27 +4,29 @@ import Hero from '../../components/Hero.astro';
 import SectionHead from '../../components/SectionHead.astro';
 import PullQuote from '../../components/PullQuote.astro';
 ---
-<Default title="HIVE Product Lab · Harshith Kantamneni" description="Autonomous Claude lab building shippable iOS products end-to-end." current="labs">
+<Default title="HIVE Product Lab · Harshith Kantamneni" description="Autonomous Claude lab shipping iOS apps end-to-end. Director plus ~46 specialists. Twelve cycles of byte-identical builds and counting." current="labs">
 
   <Hero
-    marker="110 / HIVE"
-    meta={['Active 2026', '~46 agents', 'Phase 2', 'iOS / Swift']}
+    meta={['Active 2026', '~46 agents', 'iOS / Swift']}
   >
     HIVE.<br />Product Lab.
   </Hero>
 
   <div class="page-grid">
-    <p class="extended measure-loose" style="font-size: var(--fs-lede); line-height: var(--lh-lede); margin-top: var(--space-6);">
-      An autonomous Claude lab whose job is to ship iOS products end-to-end. A Director on Opus orchestrates roughly 46 specialists across architecture, implementation, verification, and post-cycle review. Cycles run continuously; the lab self-corrects through meta-rules updated by post-cycle directives.
+    <p class="extended measure-narrow lede" style="margin-top: var(--space-6);">
+      HIVE ships iOS apps end-to-end. A Director on Opus runs the show; ~46 specialists
+      do the work. Cycles run continuously. After each one, the Director writes down
+      what to change about how the lab works. Never what to build next.
     </p>
   </div>
 
-  <SectionHead marker="111 / OPERATING" title="Operating model" />
+  <SectionHead marker="OPERATING" title="How it runs" />
 
   <div class="page-grid">
     <div class="extended measure-tight drop-cap">
-      <p>The lab runs in cycles. Each cycle has a specified product target — currently a shippable iOS app — and the Director allocates work across specialists. The Director itself does not execute code; it routes, reviews, and writes post-cycle directives. Specialists handle scope-specific work: ARCH for architecture, IMPL for implementation, VERIFY for testing, REVIEW for adversarial review.</p>
-      <p>Memory is three-tier markdown: long-term (operating model, ratified directives), cycle (current cycle context), and conversation (specialist working memory, evicted between turns). The split prevents context bleed and lets the Director hold whole-lab state without overflowing.</p>
+      <p>Each cycle has one target. Right now, that target is a shippable iOS app. The Director allocates work, routes it, reviews it, and writes the post-cycle directive. It doesn't execute code itself.</p>
+      <p>Specialists handle the actual work: architects design, implementers build, verifiers test, reviewers attack the merge candidate. About 46 of them at any given time. They argue, vote, and move on.</p>
+      <p>Memory is three layers of markdown. Long-term holds the ratified rules. Cycle holds what's happening this run. Conversation holds what the agent is currently thinking, and gets wiped between turns. That last part is deliberate: it stops one specialist's working hypothesis from polluting the next decision.</p>
     </div>
   </div>
 
@@ -32,21 +34,22 @@ import PullQuote from '../../components/PullQuote.astro';
     The Director writes meta-rules, not tactics. Trust the loops; intervene only when loops fail.
   </PullQuote>
 
-  <SectionHead marker="112 / VERIFICATION" title="Verification discipline" />
+  <SectionHead marker="VERIFICATION" title="Why byte-identical builds matter" />
 
   <div class="page-grid">
     <div class="extended measure-tight">
-      <p>Builds must be byte-identical across cycles. This is not a polish concern — it is the first verification that the lab is doing what the cycle plan says it is doing. If two cycles producing the same input ship different binaries, the lab is non-deterministic in ways that mask real bugs.</p>
-      <p>HIVE has logged twelve consecutive cycles of byte-identical builds at the time of writing. The discipline is what makes downstream verification meaningful.</p>
+      <p>Twelve consecutive cycles, same source in, same binary out, byte for byte. That sounds like nothing happened. It actually means something specific: no specialist agent introduced an undeclared change to the build output during those two weeks. Anything that should have shown up would have shown up as a hash mismatch.</p>
+      <p>The point isn't the bytes. It's that drift in the build is now legible from outside the lab. Without that, every "build still passes" claim is just another self-reported number.</p>
     </div>
   </div>
 
-  <SectionHead marker="113 / SELF-CORRECTION" title="Self-correction" />
+  <SectionHead marker="SELF-CORRECTION" title="Meta-rules, not tactics" />
 
   <div class="page-grid">
     <div class="extended measure-tight">
-      <p>Post-cycle directives are the lab's correction mechanism. They are meta-rules — process or constraint changes — never specific tactical decisions. A directive that says "do X this cycle" is the wrong shape; a directive that says "when condition Y holds, the verification gate must include external review before merge" is the right shape.</p>
-      <p>This separation matters. Tactical directives crowd out the lab's own judgment, which defeats the point of autonomy. Meta-rules tighten the structure without prescribing the move.</p>
+      <p>The lab corrects itself through directives written between cycles. The rule for what counts as a directive is strict: meta-rules only. Process changes, constraint changes, gate changes. Never "do X this cycle."</p>
+      <p>"Do X this cycle" is the wrong shape because it crowds out the lab's own judgment, which is the whole point of running it autonomously. "When condition Y holds, the verification gate must include external review before merge" is the right shape. It tightens structure without prescribing the move.</p>
+      <p>The interesting failure mode is when the Director starts smuggling tactics into meta-rules. That's what the post-cycle review process is for: catch the smuggle before it ratifies.</p>
     </div>
   </div>
 

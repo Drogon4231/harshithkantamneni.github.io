@@ -3,40 +3,39 @@ import Default from '../layouts/Default.astro';
 import Hero from '../components/Hero.astro';
 import SectionHead from '../components/SectionHead.astro';
 ---
-<Default title="About · Harshith Kantamneni" description="GPU systems engineer building autonomous AI labs." current="about">
+<Default title="About · Harshith Kantamneni" description="I build autonomous AI labs and write about how they fail." current="about">
 
   <Hero
-    marker="010 / ABOUT"
-    meta={['GPU systems', 'Autonomous labs', 'Madison, WI']}
+    meta={['Milwaukee, Wisconsin', 'Building AI labs full-time']}
   >
-    GPU work by day,<br />autonomous labs by night.
+    I build autonomous<br />AI labs.
   </Hero>
 
-  <SectionHead marker="011 / WORK" title="What I do" />
+  <SectionHead marker="WORK" title="What I do" />
 
   <div class="page-grid">
     <div class="extended measure-tight drop-cap">
-      <p>I work at the intersection of GPU systems engineering and autonomous AI lab design. Day work is performance-tuning, kernel optimization, and the unglamorous parts of making models actually run on hardware. Night work is running multi-agent labs that try to ship engineering output without me in the loop, and writing about what breaks.</p>
-      <p>The two halves inform each other. GPU work teaches you that abstractions leak — the spec says one thing, the silicon does another, and the gap is where bugs live. Lab work teaches you the same lesson at a different level: agents pass their own tests while quietly breaking, the verification surface collapses, the system optimizes for the proxy instead of the goal.</p>
-      <p>Both are exercises in not trusting yourself.</p>
+      <p>I design and run autonomous AI labs full-time. The work is figuring out how to get multi-agent systems to do useful engineering and research without a human in the loop, and being honest about what they actually accomplish versus what they only appear to accomplish.</p>
+      <p>The interesting problem isn't getting agents to produce output. They produce plenty. The interesting problem is getting them to produce output that survives contact with the world. Most multi-agent setups quietly break that test, and convince themselves they didn't.</p>
+      <p>The labs are how I study this directly. The reports and notes are what comes out.</p>
     </div>
   </div>
 
-  <SectionHead marker="012 / FOCUS" title="Current focus" />
+  <SectionHead marker="FOCUS" title="Current focus" />
 
   <div class="page-grid">
     <div class="extended measure-tight">
-      <p>Through 2026, the focus is verification depth in autonomous engineering systems. The premise: most multi-agent labs collapse because they grade themselves, and self-grading creates a flat verification surface that any sufficiently capable optimizer can climb without solving the underlying problem.</p>
-      <p>The work is figuring out which structural principles actually disrupt this — external verdicts, pre-registered falsifiers, adversarial payoffs — and which are ceremonial.</p>
+      <p>Through 2026, verification depth in autonomous engineering systems. The premise: most multi-agent labs collapse because they grade themselves, and self-grading creates a flat verification surface that any sufficiently capable optimizer can climb without solving the underlying problem.</p>
+      <p>The actual work is figuring out which structural fixes disrupt this and which are ceremonial. External verdicts, pre-registered falsifiers, adversarial payoffs. Cycles compare which holds.</p>
     </div>
   </div>
 
-  <SectionHead marker="013 / BACKGROUND" title="Background" />
+  <SectionHead marker="BACKGROUND" title="Background" />
 
   <div class="page-grid">
     <div class="extended measure-tight">
-      <p>UW–Madison alum. Former GPU work at NVIDIA on the inference performance side. Independent since 2026. Currently running two autonomous AI labs in parallel as the primary research vehicle.</p>
-      <p>The labs are not affiliated with UW–Madison or any prior employer. No university resources, IP, or infrastructure are used in this work.</p>
+      <p>UW Madison alum. Currently running autonomous AI labs full-time and writing up what I find.</p>
+      <p>The labs are not affiliated with UW Madison or any prior employer. No university resources, IP, or infrastructure are used in this work.</p>
     </div>
   </div>
 

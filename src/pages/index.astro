@@ -11,35 +11,35 @@ const labs = [
     num: '01',
     href: `${base}/labs/hive`,
     name: 'HIVE / Product Lab',
-    desc: 'Autonomous Claude lab building shippable iOS products end-to-end. Director + ~46 specialists, three-tier markdown memory, byte-identical builds.',
+    desc: 'Ships iOS apps end-to-end. A Director on Opus and ~46 specialists argue, vote, and merge. Twelve consecutive cycles of byte-identical builds at last count.',
     meta: ['Active 2026', '~46 agents', 'Phase 2'],
   },
   {
     num: '02',
     href: `${base}/labs/autonomous-research`,
     name: 'Autonomous Research Lab',
-    desc: 'Multi-agent research lab investigating verification-depth principles, same-family judge bias, and recursive verification-surface collapse.',
+    desc: 'Studies why labs like HIVE pass their own tests while the work quietly breaks. Three structural fixes on the table; cycles compare which actually hold.',
     meta: ['Active 2026', '~31–73 agents', 'Methodology'],
   },
 ];
 ---
-<Default title="Harshith Kantamneni" description="I design and run autonomous AI labs. Reports, notes, and operating decisions." current="">
+<Default title="Harshith Kantamneni" description="Autonomous AI labs running in cycles. Reports, notes, and observations from inside the systems." current="">
 
   <Hero
-    marker="000 / INDEX"
-    meta={['Active 2026', 'Madison, WI', '2 labs']}
+    meta={['Active 2026', 'Milwaukee, Wisconsin']}
   >
-    I design and run<br />autonomous AI labs.
+    Autonomous<br />AI labs.
   </Hero>
 
   <div class="page-grid">
-    <p class="extended measure-loose" style="font-size: var(--fs-lede); line-height: var(--lh-lede); margin-top: var(--space-6);">
-      The site is a publication, not a portfolio. Methodology pieces, system reports,
-      and operating decisions from two parallel autonomous labs.
+    <p class="extended measure-narrow lede" style="margin-top: var(--space-6);">
+      Multi-agent systems running in cycles. They ship things, they break things,
+      they try to grade themselves. This site collects what they produce and what
+      I'm learning about how they actually fail.
     </p>
   </div>
 
-  <SectionHead marker="001 / LABS" title="Labs" />
+  <SectionHead marker="LABS" title="Labs" />
 
   <div class="page-grid">
     <div class="extended">
@@ -54,13 +54,14 @@ const labs = [
                 {lab.meta.map(m => <span>{m}</span>)}
               </p>
             </div>
+            <span class="arrow" aria-hidden="true">→</span>
           </li>
         ))}
       </NumberedList>
     </div>
   </div>
 
-  <SectionHead marker="002 / WRITING" title="Recent" />
+  <SectionHead marker="WRITING" title="Recent" />
 
   <div class="page-grid">
     <ul class="writing-list extended">
@@ -87,15 +88,18 @@ const labs = [
     </ul>
   </div>
 
-  <SectionHead marker="003 / SUBSCRIBE" title="Monthly digest" id="subscribe" />
+  <SectionHead marker="SUBSCRIBE" title="Monthly digest" id="subscribe" />
 
   <div class="page-grid">
-    <div class="extended measure-loose">
-      <p>One email per month. Best reports, notable observations, lessons from running the labs. Around 5 minute read. No upsell. Unsubscribe anytime.</p>
-      <form action="https://buttondown.com/api/emails/embed-subscribe/harshith" method="post" target="popupwindow" class="newsletter-form">
-        <input type="email" name="email" placeholder="you@example.com" required>
-        <button type="submit">Subscribe</button>
-      </form>
+    <div class="extended">
+      <div class="subscribe-block">
+        <p class="meta-tag">One email per month · ~5 min read · Unsubscribe anytime</p>
+        <p>The best report, a couple of notes, and what broke this cycle. Sent the first week of each month.</p>
+        <form action="https://buttondown.com/api/emails/embed-subscribe/harshith" method="post" target="popupwindow" class="newsletter-form">
+          <input type="email" name="email" placeholder="you@example.com" required>
+          <button type="submit">Subscribe</button>
+        </form>
+      </div>
     </div>
   </div>
 

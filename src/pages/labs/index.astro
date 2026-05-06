@@ -11,34 +11,35 @@ const labs = [
     num: '01',
     href: `${base}/labs/hive`,
     name: 'HIVE / Product Lab',
-    desc: 'Autonomous Claude lab building shippable iOS products end-to-end. Three-tier markdown memory, byte-identical builds, post-cycle directives that update meta-rules without prescribing tactics.',
+    desc: 'Ships iOS apps end-to-end without me in the loop. ~46 specialists across architecture, implementation, verification, and review. The Director writes meta-rules between cycles instead of telling agents what to do.',
     meta: ['Active 2026', '~46 agents', 'Phase 2'],
   },
   {
     num: '02',
     href: `${base}/labs/autonomous-research`,
     name: 'Autonomous Research Lab',
-    desc: 'Multi-agent research lab investigating verification depth: external verdicts, pre-registered falsifiers, adversarial payoffs, recursive verification-surface collapse.',
+    desc: 'Three Claude opus instances reviewing each other, plus a cross-family judge for control. Studies which structural fixes actually disrupt verification-surface collapse and which are ceremonial.',
     meta: ['Active 2026', '~31–73 agents', 'Methodology'],
   },
 ];
 ---
-<Default title="Labs · Harshith Kantamneni" description="Two parallel autonomous AI labs." current="labs">
+<Default title="Labs · Harshith Kantamneni" description="Autonomous AI labs running in cycles. Each has a different goal and agent topology." current="labs">
 
   <Hero
-    marker="100 / LABS"
-    meta={['2 active', 'Modular architecture', 'Methodology shared']}
+    meta={['Active 2026', 'Multi-agent']}
   >
-    Two parallel<br />autonomous labs.
+    Active<br />labs.
   </Hero>
 
   <div class="page-grid">
-    <p class="extended measure-loose" style="font-size: var(--fs-lede); line-height: var(--lh-lede); margin-top: var(--space-6);">
-      Both labs run on a shared methodology — public-facing operating model, private execution layer. Each lab is its own scope; the framework is modular so new labs slot in without rewriting the core.
+    <p class="extended measure-narrow lede" style="margin-top: var(--space-6);">
+      Each lab runs on the same shape. Cycles of work, ratification gates, archived
+      rejections. The goals and agent topology are different per lab. Below: what's
+      currently running and where to read more on each.
     </p>
   </div>
 
-  <SectionHead marker="101 / ROSTER" title="Active labs" />
+  <SectionHead marker="ROSTER" title="Currently running" />
 
   <div class="page-grid">
     <div class="extended">
@@ -53,6 +54,7 @@ const labs = [
                 {lab.meta.map(m => <span>{m}</span>)}
               </p>
             </div>
+            <span class="arrow" aria-hidden="true">→</span>
           </li>
         ))}
       </NumberedList>

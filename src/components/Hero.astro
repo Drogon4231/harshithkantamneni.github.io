@@ -1,13 +1,13 @@
 ---
 interface Props {
-  marker: string;
+  marker?: string;
   meta?: string[];
 }
 
 const { marker, meta = [] } = Astro.props;
 ---
 <section class="hero full-bleed" data-hero>
-  <p class="section-marker">{marker}</p>
+  {marker && <p class="section-marker">{marker}</p>}
   <h1 class="hero-headline"><slot /></h1>
   {meta.length > 0 && (
     <div class="meta-strip">
