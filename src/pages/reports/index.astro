@@ -1,36 +1,40 @@
 ---
 import Default from '../../layouts/Default.astro';
+import Hero from '../../components/Hero.astro';
+import SectionHead from '../../components/SectionHead.astro';
+
+const base = '/harshithkantamneni.github.io';
 ---
-<Default title="Reports · Harshith Kantamneni" description="Long-form methodology reports on autonomous-lab operations." current="reports">
+<Default title="Reports · Harshith Kantamneni" description="Long-form deep dives on specific failure modes from running autonomous AI labs." current="reports">
 
-  <section class="hero">
-    <div class="hero-parallax-layer hero-parallax-layer-1" aria-hidden="true"></div>
-    <div class="hero-parallax-layer hero-parallax-layer-2" aria-hidden="true"></div>
-    <div class="container">
-      <span class="index-number">Reports</span>
-      <h1 style="max-width: 18ch;">Long-form findings.</h1>
-      <p class="lede">
-        Methodology pieces on autonomous-lab operations, multi-agent failures, and
-        verification discipline. Each is a single-system case study, sourced, scoped,
-        and caveated. Around one per month.
-      </p>
-    </div>
-  </section>
+  <Hero
+    meta={['About one per month']}
+  >
+    Long-form<br />findings.
+  </Hero>
 
-  <section style="padding-top: 0;">
-    <div class="container-medium">
-      <ul class="writing-list">
-        <li>
-          <span class="date">May 15</span>
-          <a href="/harshithkantamneni.github.io/reports/recursive-verification-surface-collapse" class="title">Recursive Verification-Surface Collapse in Self-Graded Autonomous Engineering Systems</a>
-          <span class="length">~3,200w</span>
-        </li>
-      </ul>
+  <div class="page-grid">
+    <p class="extended measure-narrow lede" style="margin-top: var(--space-6);">
+      One report per month, roughly. Each one is a deep dive on a specific failure I
+      hit running the labs. The situation, what broke, what worked, and what I'm
+      doing about it now.
+    </p>
+  </div>
 
-      <p style="margin-top: var(--space-7); color: var(--text-tertiary); font-size: var(--fs-small);">
-        New reports are published roughly monthly. Subscribe to the <a href="/harshithkantamneni.github.io/#subscribe">monthly digest</a> or <a href="/harshithkantamneni.github.io/rss.xml">RSS feed</a> to be notified.
-      </p>
-    </div>
-  </section>
+  <SectionHead marker="ARCHIVE" title="All reports" />
+
+  <div class="page-grid">
+    <ul class="writing-list extended">
+      <li>
+        <span class="date">May 15</span>
+        <a href={`${base}/reports/recursive-verification-surface-collapse`} class="title">Recursive Verification-Surface Collapse in Self-Graded Autonomous Engineering Systems</a>
+        <span class="length">~3,200w</span>
+      </li>
+    </ul>
+
+    <p class="extended measure-tight" style="margin-top: var(--space-7); color: var(--ink-low); font-size: var(--fs-small);">
+      New reports are published roughly monthly. Subscribe to the <a href={`${base}/#subscribe`}>monthly digest</a> or <a href={`${base}/rss.xml`}>RSS feed</a> to be notified.
+    </p>
+  </div>
 
 </Default>

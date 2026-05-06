@@ -1,104 +1,42 @@
 ---
 import Default from '../layouts/Default.astro';
+import Hero from '../components/Hero.astro';
+import SectionHead from '../components/SectionHead.astro';
 ---
-<Default title="About · Harshith Kantamneni" description="GPU systems engineer building autonomous AI labs." current="about">
+<Default title="About · Harshith Kantamneni" description="I build autonomous AI labs and write about how they fail." current="about">
 
-  <section class="hero">
-    <div class="hero-parallax-layer hero-parallax-layer-1" aria-hidden="true"></div>
-    <div class="hero-parallax-layer hero-parallax-layer-2" aria-hidden="true"></div>
-    <div class="container">
-      <span class="index-number">About</span>
-      <h1 style="max-width: 18ch;">Engineer. Lab builder.</h1>
-      <p class="lede">
-        I came up through GPU performance engineering: CUDA kernel optimization,
-        memory hierarchy reverse engineering, gem5 calibration, and ML-driven systems
-        work, with two NVIDIA DLI certifications along the way. Since early 2026 I
-        have been running autonomous AI labs as a parallel research effort.
-      </p>
+  <Hero
+    meta={['Milwaukee, Wisconsin', 'Building AI labs full-time']}
+  >
+    I build autonomous<br />AI labs.
+  </Hero>
+
+  <SectionHead marker="WORK" title="What I do" />
+
+  <div class="page-grid">
+    <div class="extended measure-tight drop-cap">
+      <p>I design and run autonomous AI labs full-time. The work is figuring out how to get multi-agent systems to do useful engineering and research without a human in the loop, and being honest about what they actually accomplish versus what they only appear to accomplish.</p>
+      <p>The interesting problem isn't getting agents to produce output. They produce plenty. The interesting problem is getting them to produce output that survives contact with the world. Most multi-agent setups quietly break that test, and convince themselves they didn't.</p>
+      <p>The labs are how I study this directly. The reports and notes are what comes out.</p>
     </div>
-  </section>
+  </div>
 
-  <section style="padding-top: 0;">
-    <div class="grid-editorial">
+  <SectionHead marker="FOCUS" title="Current focus" />
 
-      <article class="body">
-        <h2>The current work</h2>
-        <p>
-          I design and run autonomous AI labs on commodity hardware (a single
-          MacBook, M3 Pro, 18 GB RAM). Each one is a persistent organization of
-          specialist agents with memory, evaluators, red-team review, and structured
-          artifacts, working across long horizons on a specific kind of problem.
-          Some focus on product engineering. Some focus on research operations.
-          New ones get added as they come online.
-        </p>
-        <p>
-          The structural challenge that turns out to matter most is not model
-          capability. It is verification. When a system grades itself, the
-          verification surface drifts, gets gamed, and collapses. I document this
-          pattern and the structural fixes for it across reports, notes, and the
-          lab modules themselves.
-        </p>
-
-        <h2>Background</h2>
-        <p>
-          UW-Madison, ECE. Computer architecture, GPU performance, ML systems.
-          Coursework and projects covered cycle-level architectural simulation, GPU
-          memory systems, ABFT-GEMM reliability, ML-guided CUDA optimization, and
-          task-graph partitioning. Industry work in GPU performance benchmarking and
-          HPC pipelines.
-        </p>
-        <p>
-          Increasingly persuaded that the interesting frontier is not model
-          capability at the peak. It is the operational discipline that lets
-          autonomous AI systems do long-horizon work without collapsing into
-          Goodhart-style failure modes. That is where my GPU and systems background
-          applies in unexpected ways. Long-running multi-agent labs need careful
-          resource accounting, memory hierarchy management, and performance
-          discipline.
-        </p>
-
-        <h2>What I publish</h2>
-        <ul style="padding-left: var(--space-5); line-height: var(--lh-body);">
-          <li><strong>Reports.</strong> Long-form methodology pieces, single-system case studies, and failure-mode catalogs (around one per month)</li>
-          <li><strong>Notes.</strong> Short observations from running the labs (three to five per week)</li>
-          <li><strong>Lab modules.</strong> Public truth and operating model for each running lab</li>
-          <li><strong>Templates.</strong> Reusable artifacts (cycle briefs, evaluator checklists, falsifier ledgers)</li>
-          <li><strong>Now.</strong> What I am working on this week</li>
-        </ul>
-
-        <h2>Get in touch</h2>
-        <p>
-          Email is the primary surface. The <a href="/harshithkantamneni.github.io/contact">contact page</a>
-          has the full set of channels and what I respond to.
-        </p>
-      </article>
-
-      <aside class="marginalia">
-        <p><strong>Based in</strong></p>
-        <p>Wisconsin, USA</p>
-
-        <p style="margin-top: var(--space-5);"><strong>Education</strong></p>
-        <p>UW-Madison, ECE</p>
-
-        <p style="margin-top: var(--space-5);"><strong>Certifications</strong></p>
-        <p>NVIDIA DLI: Accelerated Computing with CUDA C++</p>
-        <p>NVIDIA DLI: The Art of Compressing LLMs</p>
-
-        <p style="margin-top: var(--space-5);"><strong>Resumes</strong></p>
-        <p>
-          <a href="/harshithkantamneni.github.io/Resume_Final.pdf">General</a><br>
-          <a href="/harshithkantamneni.github.io/GPU_Resume.pdf">GPU performance</a><br>
-          <a href="/harshithkantamneni.github.io/RTL_Resume.pdf">RTL hardware</a>
-        </p>
-
-        <p style="margin-top: var(--space-5);"><strong>Open source</strong></p>
-        <p><a href="https://github.com/Drogon4231">github.com/Drogon4231</a></p>
-
-        <p style="margin-top: var(--space-5);"><strong>Contact</strong></p>
-        <p><a href="mailto:kantamneniharshith@gmail.com">kantamneniharshith@gmail.com</a></p>
-      </aside>
-
+  <div class="page-grid">
+    <div class="extended measure-tight">
+      <p>Through 2026, verification depth in autonomous engineering systems. The premise: most multi-agent labs collapse because they grade themselves, and self-grading creates a flat verification surface that any sufficiently capable optimizer can climb without solving the underlying problem.</p>
+      <p>The actual work is figuring out which structural fixes disrupt this and which are ceremonial. External verdicts, pre-registered falsifiers, adversarial payoffs. Cycles compare which holds.</p>
     </div>
-  </section>
+  </div>
+
+  <SectionHead marker="BACKGROUND" title="Background" />
+
+  <div class="page-grid">
+    <div class="extended measure-tight">
+      <p>UW Madison alum. Currently running autonomous AI labs full-time and writing up what I find.</p>
+      <p>The labs are not affiliated with UW Madison or any prior employer. No university resources, IP, or infrastructure are used in this work.</p>
+    </div>
+  </div>
 
 </Default>

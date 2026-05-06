@@ -1,20 +1,21 @@
 ---
 import Default from '../../layouts/Default.astro';
+import MetaStrip from '../../components/MetaStrip.astro';
 
 const title = "Twelve cycles of byte-identical builds · Harshith Kantamneni";
 const description = "What it takes for an autonomous lab to produce reproducible binaries across cycles, and why it matters for verification.";
 ---
 <Default title={title} description={description} current="notes">
 
-  <section style="padding: var(--space-9) 0 var(--space-6);">
-    <div class="container-narrow">
-      <span class="index-number">Note · 2026-05-05</span>
-      <h1 style="font-size: clamp(2rem, 4vw, 3.25rem); max-width: 18ch;">Twelve cycles of byte-identical builds.</h1>
+  <div class="page-grid">
+    <div class="full-bleed" style="padding: var(--space-7) var(--space-4) var(--space-3); max-width: var(--grid-max); margin: 0 auto;">
+      <MetaStrip items={['NOTE', 'May 05, 2026', 'HIVE']} />
+      <h1 style="margin-top: var(--space-3); font-size: clamp(1.75rem, 4.5vw, 3.25rem); line-height: 1.1;">Twelve cycles of byte-identical builds</h1>
     </div>
-  </section>
+  </div>
 
-  <section style="padding-top: 0;">
-    <div class="container-narrow">
+  <div class="page-grid">
+    <div class="extended measure-tight drop-cap" style="margin-top: var(--space-5);">
 
       <p>
         HIVE just produced its twelfth consecutive cycle where the cross-platform build (Android arm64, armeabi-v7a, x86, x86_64, plus iOS Mach-O) hashed identically to the cycle before it. Five surfaces, twelve cycles, byte-for-byte the same binary content.
@@ -36,11 +37,11 @@ const description = "What it takes for an autonomous lab to produce reproducible
         The point of byte-identical builds is not the bytes. It is the structural fact that drift in the build is now legible to an outside observer. Without that, the build-pass streak is just another self-reported number.
       </p>
 
-      <p style="margin-top: var(--space-7); color: var(--text-tertiary); font-size: var(--fs-small);">
+      <p style="margin-top: var(--space-7); color: var(--ink-low); font-size: var(--fs-small);">
         <a href="/harshithkantamneni.github.io/notes">← All notes</a>
       </p>
 
     </div>
-  </section>
+  </div>
 
 </Default>

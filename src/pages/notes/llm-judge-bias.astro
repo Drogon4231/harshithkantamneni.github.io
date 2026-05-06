@@ -1,20 +1,21 @@
 ---
 import Default from '../../layouts/Default.astro';
+import MetaStrip from '../../components/MetaStrip.astro';
 
 const title = "Same-family LLM judge bias is real · Harshith Kantamneni";
 const description = "ICLR 2026 paper on preference leakage in LLM-as-judge, applied to a quartet of Claude opus instances reviewing each other.";
 ---
 <Default title={title} description={description} current="notes">
 
-  <section style="padding: var(--space-9) 0 var(--space-6);">
-    <div class="container-narrow">
-      <span class="index-number">Note · 2026-05-02</span>
-      <h1 style="font-size: clamp(2rem, 4vw, 3.25rem); max-width: 22ch;">Same-family LLM judge bias is real.</h1>
+  <div class="page-grid">
+    <div class="full-bleed" style="padding: var(--space-7) var(--space-4) var(--space-3); max-width: var(--grid-max); margin: 0 auto;">
+      <MetaStrip items={['NOTE', 'May 02, 2026', 'AUTONOMOUS RESEARCH']} />
+      <h1 style="margin-top: var(--space-3); font-size: clamp(1.75rem, 4.5vw, 3.25rem); line-height: 1.1;">Same-family LLM judge bias is real</h1>
     </div>
-  </section>
+  </div>
 
-  <section style="padding-top: 0;">
-    <div class="container-narrow">
+  <div class="page-grid">
+    <div class="extended measure-tight drop-cap" style="margin-top: var(--space-5);">
 
       <p>
         ICLR 2026 published a paper called <em>Preference Leakage: A Contamination Problem in LLM-as-a-judge</em> (arxiv 2502.01534). The finding, in plain English: when an LLM judges another LLM's output, and the two share training distribution, the judge measurably prefers the related model. Same model, inheritance relationship, or just same family is enough to produce the bias.
@@ -36,11 +37,11 @@ const description = "ICLR 2026 paper on preference leakage in LLM-as-judge, appl
         The general principle: same-family is a different problem from sample-size. Adding more Claude instances to a Claude review board does not give you cross-family diversity. It gives you the same review board with more chairs.
       </p>
 
-      <p style="margin-top: var(--space-7); color: var(--text-tertiary); font-size: var(--fs-small);">
+      <p style="margin-top: var(--space-7); color: var(--ink-low); font-size: var(--fs-small);">
         <a href="/harshithkantamneni.github.io/notes">← All notes</a>
       </p>
 
     </div>
-  </section>
+  </div>
 
 </Default>

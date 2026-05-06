@@ -1,20 +1,21 @@
 ---
 import Default from '../../layouts/Default.astro';
+import MetaStrip from '../../components/MetaStrip.astro';
 
 const title = "Tier dispatchers per task, not per role · Harshith Kantamneni";
 const description = "Why role-level model tiering misses the point, and what task-level tiering buys you instead.";
 ---
 <Default title={title} description={description} current="notes">
 
-  <section style="padding: var(--space-9) 0 var(--space-6);">
-    <div class="container-narrow">
-      <span class="index-number">Note · 2026-05-03</span>
-      <h1 style="font-size: clamp(2rem, 4vw, 3.25rem); max-width: 22ch;">Tier dispatchers per task, not per role.</h1>
+  <div class="page-grid">
+    <div class="full-bleed" style="padding: var(--space-7) var(--space-4) var(--space-3); max-width: var(--grid-max); margin: 0 auto;">
+      <MetaStrip items={['NOTE', 'May 03, 2026']} />
+      <h1 style="margin-top: var(--space-3); font-size: clamp(1.75rem, 4.5vw, 3.25rem); line-height: 1.1;">Tier dispatchers per task, not per role</h1>
     </div>
-  </section>
+  </div>
 
-  <section style="padding-top: 0;">
-    <div class="container-narrow">
+  <div class="page-grid">
+    <div class="extended measure-tight drop-cap" style="margin-top: var(--space-5);">
 
       <p>
         Common pattern in multi-agent setups: assign each role a fixed model tier. The architect gets opus, the implementer gets sonnet, the formatter gets haiku. Cleaner config, simpler routing, easier to reason about.
@@ -40,11 +41,11 @@ const description = "Why role-level model tiering misses the point, and what tas
         The sister AGI lab landed this pattern recently. HIVE is porting it. The interesting non-obvious detail: the orchestrator becomes <em>more</em> load-bearing under task-tiering, not less. Bad decomposition silently corrupts everything downstream. Workers can't catch a wrongly-scoped task. So the dispatcher and the orchestrator both stay opus. The savings live in the bounded interior of the work, not at its edges.
       </p>
 
-      <p style="margin-top: var(--space-7); color: var(--text-tertiary); font-size: var(--fs-small);">
+      <p style="margin-top: var(--space-7); color: var(--ink-low); font-size: var(--fs-small);">
         <a href="/harshithkantamneni.github.io/notes">← All notes</a>
       </p>
 
     </div>
-  </section>
+  </div>
 
 </Default>

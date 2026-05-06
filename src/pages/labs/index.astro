@@ -1,73 +1,64 @@
 ---
 import Default from '../../layouts/Default.astro';
+import Hero from '../../components/Hero.astro';
+import SectionHead from '../../components/SectionHead.astro';
+import NumberedList from '../../components/NumberedList.astro';
+
+const base = '/harshithkantamneni.github.io';
+
+const labs = [
+  {
+    num: '01',
+    href: `${base}/labs/hive`,
+    name: 'HIVE / Product Lab',
+    desc: 'Ships iOS apps end-to-end without me in the loop. ~46 specialists across architecture, implementation, verification, and review. The Director writes meta-rules between cycles instead of telling agents what to do.',
+    meta: ['Active 2026', '~46 agents', 'Phase 2'],
+  },
+  {
+    num: '02',
+    href: `${base}/labs/autonomous-research`,
+    name: 'Autonomous Research Lab',
+    desc: 'Three Claude opus instances reviewing each other, plus a cross-family judge for control. Studies which structural fixes actually disrupt verification-surface collapse and which are ceremonial.',
+    meta: ['Active 2026', '~31–73 agents', 'Methodology'],
+  },
+];
 ---
-<Default title="Labs · Harshith Kantamneni" description="Autonomous AI labs running on commodity hardware." current="labs">
+<Default title="Labs · Harshith Kantamneni" description="Autonomous AI labs running in cycles. Each has a different goal and agent topology." current="labs">
 
-  <section class="hero">
-    <div class="hero-parallax-layer hero-parallax-layer-1" aria-hidden="true"></div>
-    <div class="hero-parallax-layer hero-parallax-layer-2" aria-hidden="true"></div>
-    <div class="container">
-      <span class="index-number">Labs</span>
-      <h1 style="max-width: 18ch;">Lab modules.</h1>
-      <p class="lede">
-        Each lab is a persistent organization: a Director coordinating specialist
-        sub-agents, with memory, evaluators, red-team review, and structured artifacts.
-        The methodology is published openly, and new labs plug into the same modular
-        framework as they come online.
-      </p>
-    </div>
-  </section>
+  <Hero
+    meta={['Active 2026', 'Multi-agent']}
+  >
+    Active<br />labs.
+  </Hero>
 
-  <section style="padding-top: 0;">
-    <div class="container">
+  <div class="page-grid">
+    <p class="extended measure-narrow lede" style="margin-top: var(--space-6);">
+      Each lab runs on the same shape. Cycles of work, ratification gates, archived
+      rejections. The goals and agent topology are different per lab. Below: what's
+      currently running and where to read more on each.
+    </p>
+  </div>
 
-      <div class="card-grid">
+  <SectionHead marker="ROSTER" title="Currently running" />
 
-        <a href="/harshithkantamneni.github.io/labs/hive" class="tilt-card">
-          <div class="card-inner">
-            <span class="status-pill live">Live</span>
-            <h3>HIVE Product Lab</h3>
-            <p class="meta">Product engineering · active since 2026</p>
-            <p>
-              Specialist agents for architecture, mobile engineering, code review,
-              red team, evaluator, and knowledge management. CI-bound external verdict
-              and pre-registered streak falsifiers.
-            </p>
-            <div class="stack">
-              <span>Rust</span><span>Mobile FFI</span><span>Cross-platform</span>
+  <div class="page-grid">
+    <div class="extended">
+      <NumberedList>
+        {labs.map(lab => (
+          <li>
+            <span class="num">{lab.num}</span>
+            <div>
+              <h3><a href={lab.href}>{lab.name}</a></h3>
+              <p>{lab.desc}</p>
+              <p class="meta-strip">
+                {lab.meta.map(m => <span>{m}</span>)}
+              </p>
             </div>
-          </div>
-        </a>
-
-        <a href="/harshithkantamneni.github.io/labs/autonomous-research" class="tilt-card">
-          <div class="card-inner">
-            <span class="status-pill live">Live</span>
-            <h3>Autonomous Research Lab</h3>
-            <p class="meta">Research operations · active since 2026</p>
-            <p>
-              Tiered persistent memory, pre-registration discipline, governance ledgers,
-              reproducibility gates, honest negative results. Small-model
-              experimentation under constrained local compute.
-            </p>
-            <div class="stack">
-              <span>Small models</span><span>Pre-registration</span><span>Tiered memory</span>
-            </div>
-          </div>
-        </a>
-
-        <article class="card" style="opacity: 0.65;">
-          <span class="status-pill dormant">In design</span>
-          <h3>New module incoming</h3>
-          <p class="meta">Pre-launch</p>
-          <p>
-            A new lab module is currently being designed. More once it has a name
-            and a shipped first cycle.
-          </p>
-        </article>
-
-      </div>
-
+            <span class="arrow" aria-hidden="true">→</span>
+          </li>
+        ))}
+      </NumberedList>
     </div>
-  </section>
+  </div>
 
 </Default>

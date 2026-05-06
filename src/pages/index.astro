@@ -1,185 +1,106 @@
 ---
 import Default from '../layouts/Default.astro';
+import Hero from '../components/Hero.astro';
+import SectionHead from '../components/SectionHead.astro';
+import NumberedList from '../components/NumberedList.astro';
+
+const base = '/harshithkantamneni.github.io';
+
+const labs = [
+  {
+    num: '01',
+    href: `${base}/labs/hive`,
+    name: 'HIVE / Product Lab',
+    desc: 'Ships iOS apps end-to-end. A Director on Opus and ~46 specialists argue, vote, and merge. Twelve consecutive cycles of byte-identical builds at last count.',
+    meta: ['Active 2026', '~46 agents', 'Phase 2'],
+  },
+  {
+    num: '02',
+    href: `${base}/labs/autonomous-research`,
+    name: 'Autonomous Research Lab',
+    desc: 'Studies why labs like HIVE pass their own tests while the work quietly breaks. Three structural fixes on the table; cycles compare which actually hold.',
+    meta: ['Active 2026', '~31–73 agents', 'Methodology'],
+  },
+];
 ---
-<Default title="Harshith Kantamneni">
+<Default title="Harshith Kantamneni" description="Autonomous AI labs running in cycles. Reports, notes, and observations from inside the systems." current="">
 
-  <section class="hero">
-    <div class="hero-parallax-layer hero-parallax-layer-1" aria-hidden="true"></div>
-    <div class="hero-parallax-layer hero-parallax-layer-2" aria-hidden="true"></div>
-    <div class="container">
-      <span class="index-number">001 / Thesis</span>
-      <h1>I design and run autonomous AI labs.</h1>
-      <p class="lede">
-        Each one is a persistent organization of specialist agents that ships
-        engineering and research work over long horizons. This site is the public
-        surface for their methodology, system reports, and operating decisions.
-      </p>
-      <div class="hero-meta">
-        <span>Active development</span>
-        <span>Methodology published</span>
-      </div>
-    </div>
-  </section>
+  <Hero
+    meta={['Active 2026', 'Milwaukee, Wisconsin']}
+  >
+    Autonomous<br />AI labs.
+  </Hero>
 
-  <section class="reveal">
-    <div class="container">
-      <div style="display: grid; grid-template-columns: 1fr 2fr; gap: var(--space-8); align-items: start; max-width: 80rem; margin: 0 auto;">
-        <div><span class="section-marker">002 / Background</span></div>
-        <div>
-          <p style="font-size: var(--fs-body-lg); line-height: 1.5; max-width: 48rem;">
-            GPU systems engineer with a background in CUDA kernel optimization,
-            memory hierarchy reverse engineering, and ML-driven systems work. I build
-            autonomous AI labs as a parallel research effort, applying performance
-            engineering discipline to the operations of multi-agent systems.
-          </p>
-          <p style="color: var(--text-secondary);"><a href="/harshithkantamneni.github.io/about">Read more →</a></p>
-        </div>
-      </div>
-    </div>
-  </section>
+  <div class="page-grid">
+    <p class="extended measure-narrow lede" style="margin-top: var(--space-6);">
+      Multi-agent systems running in cycles. They ship things, they break things,
+      they try to grade themselves. This site collects what they produce and what
+      I'm learning about how they actually fail.
+    </p>
+  </div>
 
-  <section style="border-top: 1px solid var(--border-hairline);" class="reveal">
-    <div class="container">
-      <span class="section-marker">003 / Labs</span>
-      <h2 style="max-width: 24ch;">Each lab is a persistent organization that plans, executes, evaluates, and self-corrects over long horizons.</h2>
+  <SectionHead marker="LABS" title="Labs" />
 
-      <div class="card-grid">
-        <a href="/harshithkantamneni.github.io/labs/hive" class="tilt-card">
-          <div class="card-inner">
-            <span class="status-pill live">Live</span>
-            <h3>HIVE Product Lab</h3>
-            <p class="meta">Product engineering · active since 2026</p>
-            <p>
-              Specialist agents for architecture, mobile engineering, code review,
-              red team, evaluator, and knowledge management. CI-bound external verdict
-              and pre-registered streak falsifiers.
-            </p>
-            <div class="stack">
-              <span>Rust</span><span>Mobile FFI</span><span>Cross-platform</span>
+  <div class="page-grid">
+    <div class="extended">
+      <NumberedList>
+        {labs.map(lab => (
+          <li>
+            <span class="num">{lab.num}</span>
+            <div>
+              <h3><a href={lab.href}>{lab.name}</a></h3>
+              <p>{lab.desc}</p>
+              <p class="meta-strip">
+                {lab.meta.map(m => <span>{m}</span>)}
+              </p>
             </div>
-          </div>
-        </a>
-
-        <a href="/harshithkantamneni.github.io/labs/autonomous-research" class="tilt-card">
-          <div class="card-inner">
-            <span class="status-pill live">Live</span>
-            <h3>Autonomous Research Lab</h3>
-            <p class="meta">Research operations · long-horizon experimentation</p>
-            <p>
-              Tiered persistent memory, pre-registration discipline, governance ledgers,
-              reproducibility gates, honest negative results. Small-model experimentation
-              under constrained local compute.
-            </p>
-            <div class="stack">
-              <span>Small models</span><span>Pre-registration</span><span>Tiered memory</span>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <p style="margin-top: var(--space-6);"><a href="/harshithkantamneni.github.io/labs">All labs →</a></p>
+            <span class="arrow" aria-hidden="true">→</span>
+          </li>
+        ))}
+      </NumberedList>
     </div>
-  </section>
+  </div>
 
-  <section style="border-top: 1px solid var(--border-hairline);" class="reveal">
-    <div class="container">
-      <span class="section-marker">004 / Latest report</span>
-      <div style="max-width: 60rem;">
-        <a href="/harshithkantamneni.github.io/reports/recursive-verification-surface-collapse" class="tilt-card" style="display: block;">
-          <div class="card-inner">
-            <p class="meta" style="margin: 0 0 var(--space-3);">May 15, 2026 · 3,200 words · 14 min read</p>
-            <h3 style="font-size: 2rem; margin-bottom: var(--space-4);">
-              Recursive Verification-Surface Collapse in Self-Graded Autonomous Engineering Systems
-            </h3>
-            <p style="font-size: var(--fs-body-lg); color: var(--text-secondary); max-width: 50rem; margin: 0;">
-              Three times in 100 cycles, my autonomous lab passed its own tests while quietly
-              breaking. Each break was at a deeper layer than the last. Notes on the null-set
-              principal problem and three structural principles for disrupting it.
-            </p>
-            <p style="margin-top: var(--space-5); margin-bottom: 0;">
-              <span style="font-family: var(--font-mono); font-size: var(--fs-small); color: var(--accent);">Read report →</span>
-            </p>
-          </div>
-        </a>
-      </div>
-      <p style="margin-top: var(--space-7);"><a href="/harshithkantamneni.github.io/reports">All reports →</a></p>
-    </div>
-  </section>
+  <SectionHead marker="WRITING" title="Recent" />
 
-  <section style="border-top: 1px solid var(--border-hairline);" class="reveal">
-    <div class="container-medium">
-      <span class="section-marker">005 / Recent notes</span>
-      <h2 style="font-size: var(--fs-h3);">Lab observations and quick takes.</h2>
-      <ul class="writing-list">
-        <li>
-          <span class="date">May 5</span>
-          <a href="/harshithkantamneni.github.io/notes/byte-identical-builds" class="title">Twelve cycles of byte-identical builds</a>
-          <span class="length">~330w</span>
-        </li>
-        <li>
-          <span class="date">May 3</span>
-          <a href="/harshithkantamneni.github.io/notes/tier-per-task" class="title">Tier dispatchers per task, not per role</a>
-          <span class="length">~310w</span>
-        </li>
-        <li>
-          <span class="date">May 2</span>
-          <a href="/harshithkantamneni.github.io/notes/llm-judge-bias" class="title">Same-family LLM judge bias is real</a>
-          <span class="length">~290w</span>
-        </li>
-      </ul>
-      <p style="margin-top: var(--space-5);"><a href="/harshithkantamneni.github.io/notes">All notes →</a></p>
-    </div>
-  </section>
+  <div class="page-grid">
+    <ul class="writing-list extended">
+      <li>
+        <span class="date">May 15</span>
+        <a href={`${base}/reports/recursive-verification-surface-collapse`} class="title">Recursive Verification-Surface Collapse</a>
+        <span class="length">~3,200w</span>
+      </li>
+      <li>
+        <span class="date">May 05</span>
+        <a href={`${base}/notes/byte-identical-builds`} class="title">Twelve cycles of byte-identical builds</a>
+        <span class="length">~600w</span>
+      </li>
+      <li>
+        <span class="date">May 03</span>
+        <a href={`${base}/notes/tier-per-task`} class="title">Tier dispatchers per task, not per role</a>
+        <span class="length">~500w</span>
+      </li>
+      <li>
+        <span class="date">May 02</span>
+        <a href={`${base}/notes/llm-judge-bias`} class="title">Same-family LLM judge bias is real</a>
+        <span class="length">~700w</span>
+      </li>
+    </ul>
+  </div>
 
-  <section style="border-top: 1px solid var(--border-hairline);" class="reveal">
-    <div class="container">
-      <span class="section-marker">006 / Work</span>
-      <h2 style="max-width: 24ch;">Selected projects from years of GPU performance and systems work.</h2>
-      <div class="card-grid">
-        <article class="card">
-          <p class="meta">2026 · Public</p>
-          <h3 style="font-size: 1.5rem;">Triton vs cuBLAS Benchmarks</h3>
-          <p>
-            CUDA and Triton kernels for LLM-shaped GEMM and fused linear ops. Measured
-            p50 latency, throughput, bandwidth, and jitter on NVIDIA GPUs.
-          </p>
-          <div class="stack"><span>C++</span><span>CUDA</span><span>Triton</span></div>
-        </article>
-        <article class="card">
-          <p class="meta">In progress</p>
-          <h3 style="font-size: 1.5rem;">MI300X Memory Reverse Engineering</h3>
-          <p>
-            CUDA microbenchmarks measuring L2, L3, and HBM latency and bandwidth.
-            Calibrating a gem5 MI300X memory subsystem to reduce HW vs sim mismatch.
-          </p>
-          <div class="stack"><span>CUDA</span><span>gem5</span></div>
-        </article>
-        <article class="card">
-          <p class="meta">2025 · Public</p>
-          <h3 style="font-size: 1.5rem;">Edge LLM GPU Profiling</h3>
-          <p>
-            Performance profiling on NVIDIA Jetson Orin Nano. Analyzed LLM attention
-            and KV-cache decode workloads with Nsight Systems and FlashAttention.
-          </p>
-          <div class="stack"><span>Jetson</span><span>Nsight</span></div>
-        </article>
+  <SectionHead marker="SUBSCRIBE" title="Monthly digest" id="subscribe" />
+
+  <div class="page-grid">
+    <div class="extended">
+      <div class="subscribe-block">
+        <p class="meta-tag">One email per month · ~5 min read · Unsubscribe anytime</p>
+        <p>The best report, a couple of notes, and what broke this cycle. Sent the first week of each month.</p>
+        <form action="https://buttondown.com/api/emails/embed-subscribe/harshith" method="post" target="popupwindow" class="newsletter-form">
+          <input type="email" name="email" placeholder="you@example.com" required>
+          <button type="submit">Subscribe</button>
+        </form>
       </div>
     </div>
-  </section>
-
-  <section id="subscribe" style="border-top: 1px solid var(--border-hairline); background: var(--bg-surface);" class="reveal">
-    <div class="container-medium">
-      <span class="section-marker">007 / Subscribe</span>
-      <h2 style="font-size: var(--fs-h3); max-width: 22ch; margin-top: 0;">One email per month, around 5 minute read.</h2>
-      <p style="font-size: var(--fs-body-lg); color: var(--text-secondary); max-width: 38rem;">
-        Curated digest of the month's reports, notable observations from running the labs,
-        and anything I think you would find useful. No spam, unsubscribe anytime.
-      </p>
-      <form action="https://buttondown.com/api/emails/embed-subscribe/harshith" method="post" target="popupwindow" class="newsletter-form">
-        <input type="email" name="email" placeholder="you@example.com" required>
-        <button type="submit">Subscribe</button>
-      </form>
-    </div>
-  </section>
+  </div>
 
 </Default>
