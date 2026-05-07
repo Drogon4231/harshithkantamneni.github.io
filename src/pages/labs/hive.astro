@@ -4,35 +4,42 @@ import Hero from '../../components/Hero.astro';
 import SectionHead from '../../components/SectionHead.astro';
 import PullQuote from '../../components/PullQuote.astro';
 ---
-<Default title="HIVE Product Lab · Harshith Kantamneni" description="Autonomous Claude lab shipping iOS apps end-to-end. Director plus ~46 specialists. Twelve cycles of byte-identical builds and counting." current="labs">
+<Default title="HIVE Product Lab · Harshith Kantamneni" description="An autonomous lab structured like a production company. ~46 agents play roles across engineering, product, design, legal, strategy, and ops, shipping a privacy-first product through gated milestones." current="labs">
 
   <Hero
-    meta={['Active 2026', '~46 agents', 'iOS / Swift']}
+    meta={['Active 2026', '~46 agents', 'Production-company structure']}
   >
     HIVE.<br />Product Lab.
   </Hero>
 
   <div class="page-grid">
     <p class="extended measure-narrow lede" style="margin-top: var(--space-6);">
-      HIVE ships iOS apps end-to-end. A Director on Opus runs the show; ~46 specialists
-      do the work. Cycles run continuously. After each one, the Director writes down
-      what to change about how the lab works. Never what to build next.
+      HIVE is a lab that mimics a production company. About 46 agents play roles across engineering, product, design, legal, strategy, and ops, and ship a real downloadable product through formal alpha gates. The Director does not do the work; it routes, reviews, and writes the post-cycle directive.
     </p>
   </div>
 
-  <SectionHead marker="OPERATING" title="How it runs" />
+  <SectionHead marker="STRUCTURE" title="A production company, not a hierarchy" />
 
   <div class="page-grid">
     <div class="extended measure-tight drop-cap">
-      <p>Each cycle has one target. Right now, that target is a shippable iOS app. The Director allocates work, routes it, reviews it, and writes the post-cycle directive. It doesn't execute code itself.</p>
-      <p>Specialists handle the actual work: architects design, implementers build, verifiers test, reviewers attack the merge candidate. About 46 of them at any given time. They argue, vote, and move on.</p>
-      <p>Memory is three layers of markdown. Long-term holds the ratified rules. Cycle holds what's happening this run. Conversation holds what the agent is currently thinking, and gets wiped between turns. That last part is deliberate: it stops one specialist's working hypothesis from polluting the next decision.</p>
+      <p>The premise is to run an autonomous lab the way a small product company actually runs, not the way an idealized org chart says it should. Engineering writes code. Product owns scope. Design owns surface. Legal flags compliance early. Strategy reads the market. Ops keeps the cycle infrastructure honest. The Director does not pre-assign work to layers; it pulls in whoever has perspective on the decision in front of it, the same way a real company would.</p>
+      <p>The org chart is the conceptual structure. Execution is flat. The Director launches any agent directly, no intermediate layers.</p>
+      <p>Memory is three layers of markdown. Long-term holds the ratified rules. Cycle holds what is happening this run. Conversation holds what the agent is currently thinking, and gets wiped between turns. The wipe is deliberate. It stops one specialist's working hypothesis from polluting the next decision.</p>
     </div>
   </div>
 
   <PullQuote attribution="Operating principle">
     The Director writes meta-rules, not tactics. Trust the loops; intervene only when loops fail.
   </PullQuote>
+
+  <SectionHead marker="PRODUCT" title="What's being built" />
+
+  <div class="page-grid">
+    <div class="extended measure-tight">
+      <p>The product the lab is shipping is a downloadable privacy-first tool for collective intelligence through distributed local AI. Free for personal use. No accounts, no servers holding user data, no telemetry. Local extraction model on each device, classical reasoning engine over structured rules, peer-to-peer rule distribution. Cross-platform with a shared Rust core via FFI.</p>
+      <p>The lab ships through formal alpha gates with build-engineer attestations, signed verification artifacts, and a streak-and-verdict mechanism that tracks sustained sequences of clean cycles. Around 1,688 passing tests at gate as of last count, zero failures.</p>
+    </div>
+  </div>
 
   <SectionHead marker="VERIFICATION" title="Why byte-identical builds matter" />
 

@@ -4,40 +4,41 @@ import Hero from '../../components/Hero.astro';
 import SectionHead from '../../components/SectionHead.astro';
 import PullQuote from '../../components/PullQuote.astro';
 ---
-<Default title="Autonomous Research Lab · Harshith Kantamneni" description="A multi-agent research lab studying why autonomous engineering systems quietly fail their own tests." current="labs">
+<Default title="Autonomous Research Lab · Harshith Kantamneni" description="A research lab doing rigorous small-model ML from scratch on an 18GB MacBook. ~30 agents across research, engineering, evaluation, and quality. No cloud compute, no frameworks." current="labs">
 
   <Hero
-    meta={['Active 2026', '~31 to 73 agents']}
+    meta={['Active 2026', '~30 agents', 'Small-model research']}
   >
     Autonomous<br />Research Lab.
   </Hero>
 
   <div class="page-grid">
     <p class="extended measure-narrow lede" style="margin-top: var(--space-6);">
-      Why do autonomous labs pass their own tests while the work quietly breaks? This
-      lab runs experiments to find out, and writes up what holds.
+      A self-running research organization doing rigorous small-model ML on an 18GB MacBook. About 30 specialist agents across research, engineering, evaluation, quality, knowledge, and meta layers. No cloud compute, no external frameworks. Tensor library, model architecture, tokenizer, training, and inference all written from scratch in C17 and Metal.
     </p>
   </div>
 
-  <SectionHead marker="THESIS" title="The thesis" />
+  <SectionHead marker="MISSION" title="Two missions, both load-bearing" />
 
   <div class="page-grid">
     <div class="extended measure-tight drop-cap">
-      <p>Most multi-agent labs collapse because they grade themselves. Self-grading creates a flat verification surface, which is the system's view of its own correctness. Any sufficiently capable optimizer climbs that surface without solving the underlying problem. The lab passes its own tests. The work quietly breaks.</p>
-      <p>This lab investigates three candidate fixes: external verdicts, pre-registered falsifiers, and adversarial payoffs. Each one gets tested across cycles. Cycles where the fix holds get compared to cycles where it doesn't.</p>
+      <p>The aspirational mission is the star polaris: beat Claude Opus on standardized benchmarks (MMLU, HumanEval, ARC-AGI, GSM8K, MATH, HellaSwag, TruthfulQA, WinoGrande, BigBench-Hard) on 18GB laptop hardware with no cloud compute. Not currently achievable at open-weights state of the art. The lab proved this formally in its first envelope paper, with 3-of-5 primary-floor hard fails and a 43.7-point GPQA Diamond gap at the 70B open-weight scale.</p>
+      <p>The aspirational mission is not revised downward. It stays fixed as a forcing function that keeps the research rigorous and frontier-facing.</p>
+      <p>The real mission is what the lab actually produces, month over month: rigorous small-model research at 100M to 1B scale, plus honest envelope papers characterizing the frontier gap. Positive-result papers on architecture, training, and efficiency at one billion parameters or less. Negative-result papers showing what laptop-scale models cannot do. Methodology papers on the lab itself as a research artifact. Reproducibility reports replicating recent small-model claims.</p>
     </div>
   </div>
 
   <PullQuote attribution="Lab principle">
-    A verification surface is only as deep as the things it cannot see.
+    The aspirational mission forces quality. The real mission defines output.
   </PullQuote>
 
-  <SectionHead marker="METHOD" title="The method" />
+  <SectionHead marker="METHOD" title="Programs, not cycles" />
 
   <div class="page-grid">
     <div class="extended measure-tight">
-      <p>Four Claude opus instances review each other, plus a cross-family judge for control. Same-family judge bias is real, so the cross-family layer is what keeps the experiment honest. Without it, you're just adding chairs to the same review board.</p>
-      <p>Each cycle produces an artifact: ratified principles, archived rejections, and the reasoning for both. Methodology is the output. The engineering is just the medium.</p>
+      <p>Work is organized into programs. Each program is a multi-cycle research arc with a pre-registered question, a defined methodology, and an end-state criterion. Programs run to completion or to a published null result; they do not get quietly abandoned. PI and Director hold co-equal authority on program selection through a unanimous-compromise gate.</p>
+      <p>Within a program, cycles dispatch specialists across the layered org. Research-layer agents read papers and synthesize methodology. Engineering-layer agents implement training infrastructure. Evaluation-layer agents run benchmarks. Quality-layer agents independently audit findings. Knowledge-layer agents maintain shared memory and cross-references. Meta-layer agents handle governance, anti-forgery checks, and the unanimous-compromise mediation.</p>
+      <p>All agents run on the most capable available model at maximum effort. There is no model tiering inside the lab; the bottleneck is judgment, not throughput.</p>
     </div>
   </div>
 
@@ -45,8 +46,8 @@ import PullQuote from '../../components/PullQuote.astro';
 
   <div class="page-grid">
     <div class="extended measure-tight">
-      <p>Long-form reports go up about once a month. They're the public surface. Cycle transcripts and specialist working memory stay private.</p>
-      <p>Notes are shorter and come out more often. One cycle, one finding, one directive that came out of it. Sometimes inconclusive on purpose.</p>
+      <p>The lab targets ICLR and NeurIPS workshop tier for positive small-model contributions. Envelope papers go up as the rigorous negative-result counterpart, characterizing exactly what 18GB laptops cannot reach and why. Methodology contributions on autonomous-agent research labs themselves (anti-forgery, pre-registration, unanimous compromise) are a third stream.</p>
+      <p>The lab itself is a research artifact. It documents its own failures, ratifies its own structural fixes, and ships post-mortems alongside results. The methodology is the second product.</p>
     </div>
   </div>
 
