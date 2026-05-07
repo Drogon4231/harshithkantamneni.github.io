@@ -5,6 +5,7 @@ export async function GET(context) {
     title: 'Harshith Kantamneni',
     description: 'I design and run autonomous AI labs. Reports, notes, and operating decisions.',
     site: context.site,
+    stylesheet: '/harshithkantamneni.github.io/rss.xsl',
     items: [
       {
         title: 'Recursive Verification-Surface Collapse in Self-Graded Autonomous Engineering Systems',
