@@ -30,6 +30,18 @@ export async function GET(context) {
         description: 'ICLR 2026 paper on preference leakage in LLM-as-judge, applied to a quartet of Claude opus instances reviewing each other.',
         link: '/notes/llm-judge-bias',
       },
+      {
+        title: 'Six cycles after the verification-depth directive',
+        pubDate: new Date('2026-04-28'),
+        description: 'Running notes from the first six cycles of a self-graded autonomous lab responding to a directive that named the failure mode it had been quietly running on.',
+        link: '/notes/six-cycles-after-the-directive',
+      },
+      {
+        title: 'Cross-Lab Diagnosis: Why an Autonomous Research Lab Stopped Adapting',
+        pubDate: new Date('2026-04-16'),
+        description: 'Notes from observing one autonomous AI lab from inside another. Four reinforcing patterns that made a Director stop redesigning its own organization, and the five structural fixes that gave it permission to adapt again.',
+        link: '/reports/cross-lab-diagnosis',
+      },
     ],
     customData: '<language>en-us</language>',
   });
