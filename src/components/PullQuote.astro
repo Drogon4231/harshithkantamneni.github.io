@@ -17,16 +17,21 @@ const { attribution } = Astro.props;
     font-size: var(--fs-pull);
     line-height: var(--lh-pull);
     letter-spacing: var(--tracking-snug);
-    margin: var(--space-5) 0;
-    padding: 0 0 0 var(--space-3);
+    margin: var(--space-6) auto;
+    padding: 0 var(--space-4) 0 calc(var(--space-4) + var(--space-3));
     border-left: var(--rule-thick) solid var(--accent);
+    max-width: 56rem;
+    box-sizing: border-box;
   }
 
-  .pull-quote p { margin: 0; }
+  .pull-quote p {
+    margin: 0;
+    max-width: 36ch;
+  }
 
   .pull-quote cite {
     display: block;
-    margin-top: var(--space-2);
+    margin-top: var(--space-3);
     font-family: var(--font-mono);
     font-size: var(--fs-mono);
     font-style: normal;
@@ -35,10 +40,10 @@ const { attribution } = Astro.props;
     color: var(--ink-low);
   }
 
-  @media (min-width: 80em) {
+  @media (max-width: 60em) {
     .pull-quote {
-      border-left: 0;
-      padding: 0;
+      padding: 0 var(--space-3) 0 var(--space-4);
+      margin: var(--space-5) var(--space-3);
     }
   }
 </style>
