@@ -3,8 +3,11 @@
 # Source this file: . tools/curator/lib/log.sh
 # Sets CURATOR_LOG to today's log file path.
 
-# Caller may set CURATOR_DIR; default is the dir containing this script's parent.
-: "${CURATOR_DIR:=$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )}"
+# Always resolve CURATOR_DIR from this script's own location, overriding any
+# stale env value. This is robust against shells where a parent script set
+# CURATOR_DIR to something unrelated.
+CURATOR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+export CURATOR_DIR
 
 CURATOR_LOG_DIR="${CURATOR_DIR}/log"
 mkdir -p "$CURATOR_LOG_DIR"
@@ -22,12 +25,16 @@ _log() {
     local msg="$*"
     local ts
     ts="$(date +%Y-%m-%dT%H:%M:%S%z)"
-    echo "${ts} [${CURATOR_RUN_ID}] [${level}] ${msg}" | tee -a "$CURATOR_LOG"
+    local line="${ts} [${CURATOR_RUN_ID}] [${level}] ${msg}"
+    # Write to log file always; write to stderr so callers using
+    # $(...) capture don't get log lines mixed into their returns.
+    echo "$line" >> "$CURATOR_LOG"
+    echo "$line" >&2
 }
 
 log_info() { _log "INFO" "$@"; }
 log_warn() { _log "WARN" "$@"; }
-log_error() { _log "ERROR" "$@" 1>&2; }
+log_error() { _log "ERROR" "$@"; }
 log_debug() {
     # Debug logs only emit when CURATOR_DEBUG=1
     [ "${CURATOR_DEBUG:-0}" = "1" ] && _log "DEBUG" "$@"
