@@ -82,7 +82,7 @@ Each lab gets `publish_candidates/<id>.json` with this schema:
   "ratified_at": "C108",
   "ratified_date": "2026-05-04",
   "tags": ["verification", "build-discipline"],
-  "voice_fit_target": 7.5,
+  "voice_fit_target": 6.5,
   "novelty_target": 6.0,
   "risk_tier": null,
   "curator_state": "pending"
@@ -113,7 +113,7 @@ The append happens inside the lab's existing closeout protocol:
 | 1. Read source | `cat` + git | load source artifacts named in manifest | fail if any missing |
 | 2. Classify risk | MLX Qwen 2.5 3B | assign Tier 1/2/3 | unclassifiable → Tier 1 (default to safest) |
 | 3. Draft | `claude --print --model opus` | adapt source to public Astro page | fail if claude exits nonzero |
-| 4. Voice judge | MLX Qwen 2.5 Coder 14B | score voice_fit 0-10 vs voice.md anchor | <7 → held |
+| 4. Voice judge | MLX Qwen 2.5 Coder 14B | score voice_fit 0-10 vs voice.md anchor | <6.5 → held |
 | 5. Factcheck judge | MLX Qwen 2.5 7B | verify all numbers/names/quotes appear in source | any hallucination → held |
 | 6. Novelty judge | MLX Qwen 2.5 7B (same model, different prompt) | check vs already-published pieces | duplicate → superseded |
 | 7. Validate | bash + grep + npm | em-dash, forbidden terms, base path, [VERIFY] markers, `npm run build` | any fail → held |
@@ -149,7 +149,7 @@ Three independent MLX-served judges, each different prompt + temperature:
 
 | Judge | Model | Score | Threshold |
 |---|---|---|---|
-| Voice fit | Qwen 2.5 Coder 14B Q4 | 0-10 | ≥7.5 |
+| Voice fit | Qwen 2.5 Coder 14B Q4 | 0-10 | ≥6.5 (calibrated against real prose; Task 1) |
 | Factcheck | Qwen 2.5 7B Q4 | pass/fail per claim | 0 hallucinations |
 | Novelty | Qwen 2.5 7B Q4 (same load, different prompt) | 0-10 | ≥6.0 |
 
