@@ -34,9 +34,16 @@ for f in os.listdir('.'):
 
 All 6 files validate as of 2026-05-07.
 
-## Known awkwardness
+## Cross-lab source convention
 
-`cross-lab-diagnosis.json` uses `../../AGI/AGI_LAB_ORG_DIAGNOSIS.md` as a source artifact path — the source was authored from HIVE's perspective but the source file lives in the AGI lab tree. The `..` traversal works but is ugly. If labs grow more cross-pollinating cases, switch the schema's source_artifacts to objects: `{"lab": "agi", "path": "..."}`. For now, deferred.
+`cross-lab-diagnosis.json` is authored from HIVE's perspective but its source file lives in the AGI lab tree. The schema supports two shapes for `source_artifacts`:
+
+- **Plain string** (`"path/to/file"`): resolves against the entry's own `lab:` root
+- **Typed object** (`{"lab": "agi", "path": "..."}`): cross-lab; resolves against the named lab's root
+
+`cross-lab-diagnosis.json` uses the typed-object form. All other backfill entries use plain strings.
+
+This was refactored from the original `../../AGI/...` relative-path notation on 2026-05-08 (deferral item 2 closed).
 
 ## All HIVE, no AGI
 

@@ -22,12 +22,14 @@ scalable solution
 synergy
 best-in-class
 industry-leading
-world-class
 leverage AI
 leverage the power
 leveraging
 unlock the power
 unlock value
+# Note: "world-class" was here but removed — the user's pun "Hello-World-class
+# scaffolding" (in published prose) false-positives, and the marketing concern
+# is caught by "best-in-class" and others.
 
 # === Generic resume-ese / LinkedIn-ese ===
 specializing in

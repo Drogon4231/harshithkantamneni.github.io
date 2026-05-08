@@ -54,11 +54,26 @@
     "source_artifacts": {
       "type": "array",
       "items": {
-        "type": "string",
-        "minLength": 1
+        "oneOf": [
+          {
+            "type": "string",
+            "minLength": 1,
+            "description": "Lab-relative path. Resolves against the entry's own lab root."
+          },
+          {
+            "type": "object",
+            "required": ["lab", "path"],
+            "additionalProperties": false,
+            "properties": {
+              "lab": {"type": "string", "enum": ["hive", "agi"]},
+              "path": {"type": "string", "minLength": 1}
+            },
+            "description": "Cross-lab source: lab-prefixed path. Resolves against that named lab's root."
+          }
+        ]
       },
       "minItems": 1,
-      "description": "Lab-relative paths to source files the curator should read when adapting. Paths are relative to the lab root (~/Desktop/Fun/lab/ for HIVE, ~/Desktop/AGI/ for AGI)."
+      "description": "Source files the curator reads when adapting. Plain strings resolve against the entry's own lab root (~/Desktop/Fun/lab/ for hive, ~/Desktop/AGI/ for agi). Object form {lab, path} is for cross-lab sources (e.g. a HIVE-authored piece that observes AGI source material)."
     },
     "ratified_at": {
       "type": "string",

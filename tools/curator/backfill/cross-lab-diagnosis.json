@@ -6,7 +6,7 @@
   "title": "Cross-Lab Diagnosis: Why an Autonomous Research Lab Stopped Adapting",
   "summary": "Notes from observing one autonomous AI lab from inside another. Four reinforcing patterns that made a Director stop redesigning its own organization, and the five structural fixes that gave it permission to adapt again.",
   "source_artifacts": [
-    "../../AGI/AGI_LAB_ORG_DIAGNOSIS.md"
+    {"lab": "agi", "path": "AGI_LAB_ORG_DIAGNOSIS.md"}
   ],
   "ratified_at": "diagnosis_2026-04-16",
   "ratified_date": "2026-04-16",
