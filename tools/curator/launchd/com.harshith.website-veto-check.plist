@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.harshith.website-veto-check</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-l</string>
+        <string>-c</string>
+        <string>cd /Users/harshithkantamneni/Desktop/website &amp;&amp; bash tools/curator/veto_check.sh &gt;&gt; tools/curator/log/veto.log 2&gt;&amp;1</string>
+    </array>
+
+    <key>StartInterval</key>
+    <integer>3600</integer>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/harshithkantamneni/Desktop/website/tools/curator/log/veto.stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/harshithkantamneni/Desktop/website/tools/curator/log/veto.stderr.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>HOME</key>
+        <string>/Users/harshithkantamneni</string>
+    </dict>
+</dict>
+</plist>
