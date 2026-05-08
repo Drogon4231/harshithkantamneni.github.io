@@ -105,17 +105,41 @@ validate_build() {
     local target_path="${WEBSITE_ROOT}/${target_dir}/${id}.astro"
     local backup=""
 
-    # Backup if file exists; otherwise mark "new" so we delete on cleanup
+    # Backup if file exists; otherwise mark "new" so we delete on cleanup.
+    # Each step has explicit error handling — a silent backup failure here
+    # would mean the live page gets clobbered by the draft and never
+    # restored if build fails.
     local was_new=0
     if [ -f "$target_path" ]; then
-        backup="$(mktemp /tmp/validate_build_backup.XXXXXX.astro)"
-        cp "$target_path" "$backup"
+        backup=$(mktemp /tmp/validate_build_backup.XXXXXX.astro)
+        if [ -z "$backup" ] || [ ! -f "$backup" ]; then
+            log_error "validate_build: could not create backup tempfile; REFUSING to proceed (would risk clobbering live page)"
+            return 1
+        fi
+        if ! cp "$target_path" "$backup"; then
+            log_error "validate_build: backup cp failed for $target_path; REFUSING to proceed"
+            rm -f "$backup"
+            return 1
+        fi
+        # Verify the backup is non-empty and matches source size
+        if [ ! -s "$backup" ]; then
+            log_error "validate_build: backup is empty; REFUSING to proceed"
+            rm -f "$backup"
+            return 1
+        fi
     else
         was_new=1
     fi
 
-    # Place draft as the target
-    cp "$draft" "$target_path"
+    # Place draft as the target. Explicit error: if cp fails, restore + bail.
+    if ! cp "$draft" "$target_path"; then
+        log_error "validate_build: could not copy draft to $target_path"
+        if [ "$was_new" -eq 0 ] && [ -n "$backup" ]; then
+            cp "$backup" "$target_path"
+            rm -f "$backup"
+        fi
+        return 1
+    fi
 
     # Run build
     local build_log

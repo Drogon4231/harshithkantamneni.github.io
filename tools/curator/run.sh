@@ -10,7 +10,11 @@
 #   bash tools/curator/run.sh --skip-ram-check  # bypass RAM precondition
 #   DRY_RUN=1 bash tools/curator/run.sh         # log what would happen, don't push
 
-set -uo pipefail
+# Strict mode. -e halts on any unhandled command failure; -u catches
+# unset variables; pipefail catches errors anywhere in a pipe.
+# This is critical: without -e, a failed python3 inside the manifest-update
+# steps below would silently let the candidate proceed to the next stage.
+set -euo pipefail
 
 CURATOR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 WEBSITE_ROOT="$( cd "$CURATOR_DIR/../.." && pwd )"
@@ -98,9 +102,32 @@ open('$candidate','w').write(json.dumps(d, indent=2))
 
     # Stage 2: classify risk
     log_section "stage 2: classify risk"
+    TIER=""
+    CLASSIFY_RC=0
+    # Run classifier; capture both its stdout (the tier number) and its
+    # exit code so we can distinguish infra-failure (rc=3) from
+    # successful classification.
+    set +e
     TIER=$(classify_candidate "$candidate" 2>&1 | tail -1)
+    CLASSIFY_RC=$?
+    set -e
+    if [ "$CLASSIFY_RC" -eq 3 ]; then
+        # Infrastructure failure: MLX itself broken (model load, OOM, etc).
+        # Do NOT silently default to Tier 1 — that's the failure mode.
+        # Hold the candidate so the operator notices the broken infra.
+        log_error "stage 2: classifier reported INFRASTRUCTURE failure. NOT defaulting to Tier 1."
+        log_error "stage 2: holding candidate so the operator notices the broken infra."
+        python3 -c "
+import json
+d = json.load(open('$candidate'))
+d['curator_state'] = 'held'
+d['held_reason'] = 'classifier infrastructure failure (MLX call rc=3); fix MLX before re-running'
+open('$candidate','w').write(json.dumps(d, indent=2))
+"
+        continue
+    fi
     if [ -z "$TIER" ] || ! [[ "$TIER" =~ ^[123]$ ]]; then
-        log_warn "classify returned non-numeric ('$TIER'), defaulting to Tier 1"
+        log_warn "stage 2: classifier returned non-numeric ('$TIER'); model output ambiguous; safe-defaulting to Tier 1"
         TIER=1
     fi
     # Update manifest with tier

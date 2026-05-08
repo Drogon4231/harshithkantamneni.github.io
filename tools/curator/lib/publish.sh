@@ -24,6 +24,15 @@ export CURATOR_DIR
 
 DRY_RUN="${DRY_RUN:-0}"
 
+# Loud announcement if DRY_RUN is on. This is critical — a curator run with
+# DRY_RUN=1 set in the environment would silently never publish, and the
+# manifest entries would still get marked "published" (because the pipeline
+# logically completed). That's the worst kind of silent bug.
+if [ "$DRY_RUN" = "1" ]; then
+    log_warn "publish.sh: DRY_RUN=1 ACTIVE — git/gh operations will be PRINTED, NOT EXECUTED."
+    log_warn "publish.sh: if this is a production cron run, something is misconfigured."
+fi
+
 _run() {
     if [ "$DRY_RUN" = "1" ]; then
         echo "DRY: $*"
