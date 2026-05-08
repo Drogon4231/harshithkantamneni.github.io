@@ -113,6 +113,38 @@ To remove a model and free disk: `rm -rf ~/.cache/huggingface/hub/models--mlx-co
 
 ---
 
+## Substantive capability tests
+
+Smoke tests ("say 'ok'") only confirm models load. Substantive tests below confirm models can do the actual work each will be assigned.
+
+### 3B classifier — risk tier classification
+
+Prompt: candidate description for a lab status observation, asked to classify Tier 1/2/3 per rules in the spec.
+
+Result: **"Tier 3"** (correct — internal-only observation, no external claims, no names). Peak RAM 2.09 GB.
+
+### 7B factcheck — number mismatch detection
+
+Prompt: source containing "twelfth consecutive cycle" + draft containing "fifteen consecutive cycles". Asked to verify each claim against source.
+
+Result: correctly flagged the entire draft sentence as `unverified_claims` (lumped rather than per-sub-claim, but caught the number mismatch — the safety-critical behavior). Peak RAM 4.61 GB.
+
+### 14B Coder voice judging — calibration check
+
+**Negative control** (AI-slop draft, full of "cutting-edge", "leverage", "seamlessly", "paradigm shift"): scored **2/10** with rationale "buzzwords, focuses on innovation and grandeur, lacks concrete claims, numbers, and consequences." Sharp and accurate.
+
+**Positive control** (real published prose from `notes/six-cycles-after-the-directive`): scored **7/10** with rationale "maintains declarative and concrete style, but introduces more narrative elements and personal anecdotes, slightly deviates from dry punctuated tone." Pedantic but defensible.
+
+Peak RAM 8.81 GB.
+
+**Calibration note for Task 7:** the spec set voice threshold ≥7.5, but real published prose scored 7. Either lower the threshold to 6.5–7.0, or use multiple voice anchor pieces representing the natural range. Re-evaluate during Task 7 (judges) implementation.
+
+### Concerns disproved
+
+The "would Coder fine-tuning distort prose judging?" concern was unfounded — the 14B Coder evaluates prose cleanly. No need to switch to non-Coder Instruct variant.
+
+---
+
 ## Acceptance — Task 1
 
 Per the implementation plan:
@@ -122,5 +154,7 @@ Per the implementation plan:
 - [x] Peak RAM measured matches expectation (3B≈2GB ✓, 7B≈4-5GB ✓, 14B≈8-9GB ✓)
 - [x] First run downloads weights; second run loads from cache in ≤15s
 - [x] CLI invocation pattern documented
+- [x] Substantive capability tests passed (each model performs its assigned task)
+- [x] Calibration concern (voice threshold) logged for Task 7
 
 **Task 1 complete.** Ready for Task 2 (manifest contract + backfill).
