@@ -29,6 +29,8 @@ export CURATOR_DIR
 . "$CURATOR_DIR/lib/validate.sh"
 . "$CURATOR_DIR/lib/provenance.sh"
 . "$CURATOR_DIR/lib/publish.sh"
+. "$CURATOR_DIR/lib/channel_hackernews.sh"
+. "$CURATOR_DIR/lib/channel_linkedin.sh"
 
 SKIP_RAM_CHECK=0
 for arg in "$@"; do
@@ -220,6 +222,28 @@ d['published_at'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
 open('$candidate','w').write(json.dumps(d, indent=2))
 "
     log_info "candidate $(basename "$candidate") → published (tier $TIER, ${COST_SECONDS}s)"
+
+    # Stage 8: channel adapters (non-blocking — website is source of truth)
+    log_section "stage 8: channel adapters"
+    CHANNELS=$(python3 -c "import json; print(' '.join(json.load(open('$candidate')).get('channels', ['website'])))" 2>/dev/null || echo "website")
+    for ch in $CHANNELS; do
+        case "$ch" in
+            website) ;; # already done in Stage 7
+            hackernews)
+                if ! channel_hackernews "$candidate"; then
+                    log_warn "HN adapter failed (non-blocking; website already published)"
+                fi
+                ;;
+            linkedin)
+                if ! channel_linkedin "$candidate"; then
+                    log_warn "LinkedIn adapter failed (non-blocking; website already published)"
+                fi
+                ;;
+            *)
+                log_warn "unknown channel: $ch (skipping)"
+                ;;
+        esac
+    done
 
     rm -f "$DRAFT_PATH" "$JUDGES_OUT"
 done
