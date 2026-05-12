@@ -163,7 +163,7 @@ This pushes errors to the lab side rather than letting them accumulate in held c
 ## Implementation status
 
 - [x] Spec written
-- [ ] HIVE knowledge-manager agent implements (lab-side work; not blocking curator pipeline)
-- [ ] AGI program-close hook implements (lab-side work; not blocking curator pipeline)
+- [x] HIVE append tool: `~/Desktop/Fun/lab/bin/append_publish_candidate.py` + `~/Desktop/Fun/lab/PUBLISHING.md` (committed in HIVE repo, 2026-05-12). Agent-prompt wiring (knowledge-manager loop invokes the tool on the four trigger conditions) is left to the operator — the tool exists; making the loop call it automatically is a separate decision.
+- [x] AGI append tool: `~/Desktop/AGI/tools/append_publish_candidate.py` + `~/Desktop/AGI/PUBLISHING.md` (committed in AGI repo, 2026-05-12). Parses YAML frontmatter from closure memos; opt-in via `publish_to_portfolio: true`. Program-close flow wiring (manual invocation vs. session-close sweep with `--all`) is left to the operator.
 
-The curator pipeline tests against backfilled manifest entries (see `tools/curator/backfill/`) until the labs implement append. This is the right sequencing: prove the curator works, then have the labs feed it.
+The curator pipeline tests against backfilled manifest entries (see `tools/curator/backfill/`) until the labs adopt the append discipline. Both tools are safe to invoke immediately on any artifact that's already ratified.
