@@ -26,11 +26,23 @@ channel_hackernews() {
         return 1
     fi
 
+    # Read all fields in a single python call via env var (avoids
+    # bash-into-python-string-literal injection on titles with apostrophes).
     local id type title summary
-    id=$(python3 -c "import json; print(json.load(open('$candidate'))['id'])")
-    type=$(python3 -c "import json; print(json.load(open('$candidate'))['type'])")
-    title=$(python3 -c "import json; print(json.load(open('$candidate'))['title'])")
-    summary=$(python3 -c "import json; print(json.load(open('$candidate'))['summary'])")
+    {
+        read -r id
+        read -r type
+        read -r title
+        read -r summary
+    } < <(CANDIDATE="$candidate" python3 <<'PYEOF'
+import os, json
+d = json.load(open(os.environ['CANDIDATE']))
+print(d['id'])
+print(d['type'])
+print(d['title'])
+print(d.get('summary', ''))
+PYEOF
+)
 
     # HN URL: report or note in the right path
     local subpath
@@ -46,9 +58,11 @@ channel_hackernews() {
     # - Drop colons followed by long sub-titles (HN truncates titles)
     # - Hooky-but-honest works best ("Show HN" prefix optional)
     # Deterministic transforms only — no LLM rewrite.
+    # Title transform (env var, not bash interpolation — safe against apostrophes).
     local hn_title
-    hn_title=$(python3 -c "
-title = '$title'.strip()
+    hn_title=$(TITLE="$title" python3 <<'PYEOF'
+import os
+title = os.environ['TITLE'].strip()
 # If title is much over 80 chars, suggest a shorter form
 # (HN UI truncates around 80, search/email crops to 80)
 if len(title) > 80:
@@ -58,7 +72,8 @@ if len(title) > 80:
         if len(head) >= 30 and len(head) <= 80:
             title = head
 print(title)
-")
+PYEOF
+)
 
     local out_file="${CURATOR_DIR}/channel_drafts/hackernews/${id}.txt"
     mkdir -p "$(dirname "$out_file")"

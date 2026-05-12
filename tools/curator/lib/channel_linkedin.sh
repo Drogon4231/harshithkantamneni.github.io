@@ -23,9 +23,9 @@ SITE_BASE_URL="${SITE_BASE_URL:-https://drogon4231.github.io/harshithkantamneni.
 # expressions, and astro-cid attributes.
 _extract_prose() {
     local astro_file="$1"
-    python3 <<PYEOF
-import re
-text = open("$astro_file").read()
+    ASTRO_FILE="$astro_file" python3 <<'PYEOF'
+import os, re
+text = open(os.environ['ASTRO_FILE']).read()
 # Strip frontmatter (first --- block)
 text = re.sub(r'^---\n[\s\S]*?\n---\n?', '', text, count=1)
 # Strip JSX comment blocks {/* ... */}
@@ -50,11 +50,23 @@ channel_linkedin() {
         return 1
     fi
 
+    # Read all fields in a single python call via env var (safe against
+    # apostrophes or other quote chars in field values).
     local id type title summary
-    id=$(python3 -c "import json; print(json.load(open('$candidate'))['id'])")
-    type=$(python3 -c "import json; print(json.load(open('$candidate'))['type'])")
-    title=$(python3 -c "import json; print(json.load(open('$candidate'))['title'])")
-    summary=$(python3 -c "import json; print(json.load(open('$candidate'))['summary'])")
+    {
+        read -r id
+        read -r type
+        read -r title
+        read -r summary
+    } < <(CANDIDATE="$candidate" python3 <<'PYEOF'
+import os, json
+d = json.load(open(os.environ['CANDIDATE']))
+print(d['id'])
+print(d['type'])
+print(d['title'])
+print(d.get('summary', ''))
+PYEOF
+)
 
     # Resolve the published Astro file to extract prose from
     local subpath astro_path target_url

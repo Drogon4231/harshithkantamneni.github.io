@@ -225,7 +225,12 @@ open('$candidate','w').write(json.dumps(d, indent=2))
 
     # Stage 8: channel adapters (non-blocking — website is source of truth)
     log_section "stage 8: channel adapters"
-    CHANNELS=$(python3 -c "import json; print(' '.join(json.load(open('$candidate')).get('channels', ['website'])))" 2>/dev/null || echo "website")
+    CHANNELS=$(CANDIDATE="$candidate" python3 -c "import os, json; print(' '.join(json.load(open(os.environ['CANDIDATE'])).get('channels', ['website'])))" 2>/dev/null || echo "website")
+    if [ "${DRY_RUN:-0}" = "1" ]; then
+        log_info "DRY_RUN active; would dispatch channels: $CHANNELS (skipping adapter calls)"
+        rm -f "$DRAFT_PATH" "$JUDGES_OUT"
+        continue
+    fi
     for ch in $CHANNELS; do
         case "$ch" in
             website) ;; # already done in Stage 7
