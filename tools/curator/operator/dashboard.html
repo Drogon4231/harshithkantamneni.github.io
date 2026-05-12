@@ -110,7 +110,11 @@
   .modal .info-strip { display: flex; gap: 16px; font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 12px; flex-wrap: wrap; }
   .modal .info-strip span { white-space: nowrap; }
   .modal textarea { background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--mono); font-size: 12px; padding: 10px; resize: vertical; border-radius: 3px; width: 100%; }
-  .modal textarea.source { flex: 1; min-height: 320px; }
+  .modal textarea.source { flex: 1; min-height: 420px; }
+  .modal .tabs { display: flex; gap: 0; margin-bottom: 8px; }
+  .modal .tabs button.tab { background: transparent; color: var(--muted); border: 1px solid var(--border); border-bottom: none; padding: 5px 14px; font-family: var(--mono); font-size: 11px; cursor: pointer; border-radius: 3px 3px 0 0; }
+  .modal .tabs button.tab.active { background: var(--bg); color: var(--text); border-color: var(--accent); }
+  .modal .preview-frame { width: 100%; flex: 1; min-height: 420px; background: white; border: 1px solid var(--border); border-radius: 0 3px 3px 3px; }
   .modal textarea.notes { min-height: 80px; margin-top: 8px; }
   .modal textarea.reason { min-height: 60px; margin-top: 8px; }
   .modal .actions { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; flex-wrap: wrap; }
@@ -210,14 +214,22 @@
 
     <div class="review-grid">
       <div class="col">
-        <label>Astro source (editable)</label>
-        <textarea class="source" id="review-source"></textarea>
+        <div class="tabs">
+          <button class="tab active" id="tab-preview" onclick="showTab('preview')">visual preview</button>
+          <button class="tab" id="tab-source" onclick="showTab('source')">astro source</button>
+        </div>
+        <iframe id="review-preview" class="preview-frame" sandbox="allow-same-origin"></iframe>
+        <textarea class="source" id="review-source" style="display:none"></textarea>
       </div>
       <div class="col right-col">
         <h3>Judge scores</h3>
         <div class="meta-block" id="review-scores"></div>
-        <label>Operator notes (your comments, persisted to manifest)</label>
-        <textarea class="notes" id="review-notes" placeholder="leave a note for yourself or future-Claude…"></textarea>
+        <label>Comments — used as revision instructions for Claude</label>
+        <textarea class="notes" id="review-notes" placeholder="e.g. 'tighten the opening; drop the third paragraph; make title more specific'"></textarea>
+        <div class="actions" style="margin-top:8px; justify-content:flex-start;">
+          <button class="act" onclick="saveNotes()">save comment</button>
+          <button class="act primary" onclick="applyNotes()">apply (Claude revises) →</button>
+        </div>
         <div class="reject-block" id="review-reject-block">
           <label>Rejection reason</label>
           <textarea class="reason" id="review-reason" placeholder="why are you rejecting this draft?"></textarea>
@@ -228,8 +240,7 @@
 
     <div class="actions">
       <div class="left">
-        <button class="act" onclick="saveSource()">save edits</button>
-        <button class="act" onclick="saveNotes()">save notes</button>
+        <button class="act" onclick="saveSource()" id="btn-save-source" style="display:none">save source edits</button>
       </div>
       <button class="act" onclick="closeReview()">close</button>
       <button class="act danger" id="review-reject-btn" onclick="toggleReject()">reject…</button>
@@ -321,7 +332,9 @@ function render(data) {
   const rb = el('review-body');
   rb.replaceChildren();
   if (review.length === 0) {
-    el('review-section').style.display = 'none';
+    el('review-section').style.display = '';
+    rb.appendChild(tag('div', { class: 'empty' },
+      'No drafts awaiting your review right now. When the curator finishes processing a candidate, it lands here for you to read, edit, and approve before publishing.'));
   } else {
     el('review-section').style.display = '';
     review.forEach(c => {
@@ -439,6 +452,9 @@ async function openReview(id) {
   el('review-reject-block').classList.remove('open');
   el('review-toast').replaceChildren();
   el('review-modal').classList.add('open');
+  // Default to preview tab
+  showTab('preview');
+  el('review-preview').src = '/api/preview?id=' + encodeURIComponent(id) + '&_=' + Date.now();
 
   try {
     const r = await fetch('/api/review?id=' + encodeURIComponent(id));
@@ -517,7 +533,39 @@ async function saveNotes() {
     body: JSON.stringify({ id: currentReview.id, notes })
   });
   const d = await r.json();
-  toast(d.ok ? 'notes saved' : ('save failed: ' + (d.error || 'unknown')), !d.ok);
+  toast(d.ok ? 'comment saved (not yet sent to Claude — click "apply" for that)' : ('save failed: ' + (d.error || 'unknown')), !d.ok);
+}
+
+async function applyNotes() {
+  if (!currentReview) return;
+  const notes = el('review-notes').value.trim();
+  if (!notes) { toast('write a comment first', true); return; }
+  if (!confirm('Send your comment to Claude to revise the draft? Takes ~30-90 seconds.')) return;
+  toast('Claude is revising the draft… (do not close)');
+  const r = await fetch('/api/review/revise', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ id: currentReview.id, notes })
+  });
+  const d = await r.json();
+  if (d.ok) {
+    toast('revision applied — refreshing preview');
+    // Reload preview iframe + source textarea
+    el('review-preview').src = '/api/preview?id=' + encodeURIComponent(currentReview.id) + '&_=' + Date.now();
+    const r2 = await fetch('/api/review?id=' + encodeURIComponent(currentReview.id));
+    const d2 = await r2.json();
+    if (d2.ok) el('review-source').value = d2.source;
+  } else {
+    toast('revise failed: ' + (d.error || ('rc=' + d.returncode)) + (d.stderr ? '\n' + d.stderr.slice(0, 300) : ''), true);
+  }
+}
+
+function showTab(which) {
+  const isPreview = which === 'preview';
+  el('tab-preview').classList.toggle('active', isPreview);
+  el('tab-source').classList.toggle('active', !isPreview);
+  el('review-preview').style.display = isPreview ? '' : 'none';
+  el('review-source').style.display = isPreview ? 'none' : '';
+  el('btn-save-source').style.display = isPreview ? 'none' : '';
 }
 
 function toggleReject() {

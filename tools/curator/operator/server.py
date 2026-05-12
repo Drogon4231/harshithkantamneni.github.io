@@ -22,6 +22,7 @@ import datetime
 import http.server
 import json
 import os
+import re
 import socketserver
 import subprocess
 import sys
@@ -243,6 +244,154 @@ def reject_candidate(target_id: str, reason: str) -> dict:
     return result
 
 
+def revise_candidate(target_id: str, notes: str) -> dict:
+    """Treat operator notes as a revision prompt; run claude --print to
+    regenerate the pending draft. Persist notes to manifest too."""
+    c, f = find_candidate_by_id(target_id)
+    if not c:
+        return {"ok": False, "error": "candidate not found"}
+    if c.get("curator_state") != "awaiting_review":
+        return {"ok": False,
+                "error": f"state is '{c.get('curator_state')}', not awaiting_review"}
+    if not notes.strip():
+        return {"ok": False, "error": "notes are empty — nothing to revise on"}
+
+    save_operator_notes(target_id, notes)
+
+    import tempfile
+    fd, tmp_path = tempfile.mkstemp(suffix=".txt", text=True)
+    try:
+        with os.fdopen(fd, "w") as t:
+            t.write(notes)
+        result = run_shell(
+            ["bash", "tools/curator/revise.sh", target_id, tmp_path],
+            timeout=240,
+        )
+    finally:
+        try: os.unlink(tmp_path)
+        except FileNotFoundError: pass
+    return result
+
+
+# ── Preview rendering ─────────────────────────────────────────────────────
+
+_ASTRO_TAG_RE = re.compile(r"<([A-Z][A-Za-z0-9]*)\b([^>]*)/?>", re.DOTALL)
+
+
+def _strip_astro_attrs(s: str) -> str:
+    """Strip Astro-component-specific attributes from an HTML-ish string."""
+    s = re.sub(r"\s+data-astro-cid-[a-z0-9-]+", "", s)
+    s = re.sub(r"\s+set:html=\"[^\"]*\"", "", s)
+    return s
+
+
+def render_preview(astro_source: str) -> str:
+    """Cheap, approximate render of Astro source for visual preview.
+
+    Not a real Astro build — strips frontmatter + JSX expressions +
+    Astro-specific tags, then wraps in basic styled HTML. Operator sees
+    structure + prose; final production styling applies on publish.
+    """
+    text = astro_source
+
+    text = re.sub(r"^---\n[\s\S]*?\n---\n?", "", text, count=1)
+
+    # MetaStrip: <MetaStrip items={['REPORT', 'May 12, 2026']} />
+    def _metastrip(m):
+        inner = m.group(1)
+        items = [
+            x.strip().strip("'\"").strip()
+            for x in re.split(r",", inner) if x.strip()
+        ]
+        return '<div class="meta">' + " · ".join(items) + "</div>"
+    text = re.sub(r"<MetaStrip[^/>]*items=\{\[([^\]]*)\]\}[^/>]*/?>",
+                  _metastrip, text)
+
+    # SectionHead with title
+    text = re.sub(
+        r"<SectionHead[^>]*title=\"([^\"]+)\"[^>]*/?>",
+        r'<h2 class="section-head">\1</h2>',
+        text,
+    )
+
+    # PullQuote → blockquote
+    text = re.sub(r"<PullQuote[^>]*>", "<blockquote>", text)
+    text = re.sub(r"</PullQuote>", "</blockquote>", text)
+
+    # Default wrapper → strip outer tags (keep contents)
+    text = re.sub(r"<Default\b[^>]*>", "", text)
+    text = re.sub(r"</Default>", "", text)
+
+    # ProvenanceFooter and other capitalised components → strip outer, keep body
+    text = re.sub(r"<([A-Z][A-Za-z0-9]*)\b[^>]*/>", "", text)
+    text = re.sub(r"<([A-Z][A-Za-z0-9]*)\b[^>]*>", "", text)
+    text = re.sub(r"</[A-Z][A-Za-z0-9]*>", "", text)
+
+    # Strip JSX expressions: `{...}`. Handle nested template strings naively.
+    text = re.sub(r"\{`[^`]*`\}", "", text)
+    text = re.sub(r"\{[^{}\n]*?\}", "", text)
+
+    # Strip Astro import statements that may have leaked.
+    text = re.sub(r"^import\s+.+$", "", text, flags=re.MULTILINE)
+
+    # Strip leftover ${...} interpolations inside attribute strings.
+    text = re.sub(r"\$\{[^}]*\}", "", text)
+
+    text = _strip_astro_attrs(text)
+
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
+
+
+PREVIEW_CSS = """
+  body { font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+         max-width: 720px; margin: 32px auto 80px; padding: 0 24px;
+         color: #1a1a1a; background: #fafafa; line-height: 1.7; font-size: 18px; }
+  h1 { font-size: 2.2em; font-weight: 700; line-height: 1.1; margin: 1.2em 0 0.3em; letter-spacing: -0.02em; }
+  h2 { font-size: 1.3em; font-weight: 600; color: #444; margin: 2em 0 0.6em; text-transform: uppercase; letter-spacing: 0.05em; }
+  h2.section-head { border-top: 1px solid #d0d0d0; padding-top: 1em; font-size: 0.85em; color: #666; }
+  h3 { font-size: 1.1em; font-weight: 600; margin: 1.5em 0 0.4em; }
+  p { margin: 1em 0; }
+  .meta { font-family: ui-monospace, "SF Mono", Menlo, monospace;
+          font-size: 0.78em; color: #888; margin: 0.5em 0 1.5em;
+          text-transform: uppercase; letter-spacing: 0.08em; }
+  blockquote { border-left: 3px solid #888; padding: 0.3em 1em;
+               color: #333; font-style: italic; margin: 1.4em 0;
+               background: #f3f3f3; }
+  code { background: #ececec; padding: 0.1em 0.35em; border-radius: 3px;
+         font-family: ui-monospace, Menlo, monospace; font-size: 0.85em; }
+  pre { background: #f0f0f0; padding: 1em; overflow-x: auto;
+        border-radius: 4px; font-size: 0.85em; }
+  pre code { background: none; padding: 0; }
+  a { color: #2c5fa8; text-decoration: underline; }
+  ul, ol { padding-left: 1.4em; }
+  li { margin: 0.4em 0; }
+  hr { border: none; border-top: 1px solid #ddd; margin: 2.5em 0; }
+  .preview-banner { background: #fffbe6; border: 1px solid #ffd166;
+                    padding: 8px 14px; font-family: ui-monospace, Menlo, monospace;
+                    font-size: 12px; margin-bottom: 28px; border-radius: 3px;
+                    color: #8a6d00; }
+"""
+
+
+def preview_html(target_id: str) -> str:
+    draft_path = PENDING_DRAFTS_DIR / f"{target_id}.astro"
+    if not draft_path.is_file():
+        return ("<html><body style='font-family:sans-serif;padding:40px;color:#900'>"
+                "<h2>No pending draft found</h2></body></html>")
+    source = draft_path.read_text()
+    body = render_preview(source)
+    return (
+        "<!doctype html><html><head><meta charset='utf-8'>"
+        f"<title>Preview: {target_id}</title>"
+        f"<style>{PREVIEW_CSS}</style></head><body>"
+        "<div class='preview-banner'>PREVIEW MODE — Astro components stripped; "
+        "real styling applies on publish. Edit source via 'source' tab.</div>"
+        f"{body}"
+        "</body></html>"
+    )
+
+
 def recent_runs(limit=10):
     if not LOG_DIR.is_dir():
         return []
@@ -314,9 +463,6 @@ def delete_channel_draft(channel: str, draft_id: str) -> bool:
 
 # ── HTTP handler ──────────────────────────────────────────────────────────
 
-import re  # used in recent_runs; imported here so it's available at runtime
-
-
 class Handler(http.server.BaseHTTPRequestHandler):
     def log_message(self, format, *args):  # quieter logs
         pass
@@ -364,6 +510,17 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self._send_json({"ok": False, "error": "id required"}, 400)
             else:
                 self._send_json(get_review(cid))
+        elif path == "/api/preview":
+            cid = qs.get("id", [""])[0]
+            if not cid:
+                self.send_response(400); self.end_headers(); return
+            html = preview_html(cid).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(html)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(html)
         else:
             self.send_response(404); self.end_headers()
 
@@ -413,6 +570,15 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self._send_json({"ok": False, "error": "id required"}, 400)
                 return
             result = reject_candidate(target, reason)
+            self._send_json(result, 200 if result.get("ok") else 400)
+        elif path == "/api/review/revise":
+            target = (data.get("id") or "").strip()
+            notes = data.get("notes") or ""
+            if not target:
+                self._send_json({"ok": False, "error": "id required"}, 400)
+                return
+            result = revise_candidate(target, notes)
+            # Long-running; bump default status to 200 even with non-ok subset
             self._send_json(result, 200 if result.get("ok") else 400)
         else:
             self.send_response(404); self.end_headers()
