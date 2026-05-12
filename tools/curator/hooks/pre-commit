@@ -1,0 +1,36 @@
+#!/bin/bash
+# Pre-commit hook: block commits that introduce future dates, [VERIFY] markers,
+# or TODO/FIXME tokens into src/pages/.
+#
+# Audits ONLY staged content under src/pages/*.{astro,md,js}. Pre-existing
+# issues in other files won't block your commit.
+#
+# Install once:
+#   bash tools/curator/hooks/install.sh
+# Bypass (when needed):
+#   git commit --no-verify
+
+set -euo pipefail
+
+# Locate the website root via git itself — bulletproof against symlinks
+# (the hook is symlinked from tools/curator/hooks/ into .git/hooks/).
+WEBSITE_ROOT="$( git rev-parse --show-toplevel )"
+cd "$WEBSITE_ROOT"
+
+# List staged files added/copied/modified under src/pages/ matching audit globs.
+STAGED=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null \
+    | grep -E '^src/pages/.*\.(astro|md|js)$' || true)
+
+if [ -z "$STAGED" ]; then
+    exit 0
+fi
+
+# Run the auditor on just those files. Default exit code (1 on issues) blocks.
+# shellcheck disable=SC2086
+if ! python3 tools/curator/audit_site.py $STAGED; then
+    echo ""
+    echo "pre-commit: site audit found issues in your staged changes."
+    echo "  - Fix them, then re-stage and re-commit."
+    echo "  - Or bypass with: git commit --no-verify  (use sparingly)"
+    exit 1
+fi

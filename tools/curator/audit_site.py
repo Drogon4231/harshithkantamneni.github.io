@@ -156,16 +156,29 @@ def main() -> None:
                         "(off by default — the existing site uses some of them "
                         "intentionally in the operator's voice; the curator's "
                         "own validator already gates new content)")
+    p.add_argument("files", nargs="*",
+                   help="optional list of files to audit (default: all "
+                        "*.astro / *.md / *.js under src/pages/). Used by the "
+                        "pre-commit hook to audit only staged files.")
     args = p.parse_args()
 
     forbidden = load_forbidden() if args.check_style else []
     all_results: dict[str, list[dict]] = {}
 
-    file_iter = sorted(
-        list(PAGES_DIR.rglob("*.astro"))
-        + list(PAGES_DIR.rglob("*.md"))
-        + list(PAGES_DIR.rglob("*.js"))
-    )
+    if args.files:
+        file_iter = []
+        for raw in args.files:
+            fp = Path(raw)
+            if not fp.is_absolute():
+                fp = (WEBSITE_ROOT / fp).resolve()
+            if fp.is_file():
+                file_iter.append(fp)
+    else:
+        file_iter = sorted(
+            list(PAGES_DIR.rglob("*.astro"))
+            + list(PAGES_DIR.rglob("*.md"))
+            + list(PAGES_DIR.rglob("*.js"))
+        )
 
     for f in file_iter:
         if not f.is_file():
@@ -175,7 +188,11 @@ def main() -> None:
         except Exception as e:
             issues = [{"line": 0, "type": "audit_error", "found": str(e)}]
         if issues:
-            all_results[str(f.relative_to(WEBSITE_ROOT))] = issues
+            try:
+                key = str(f.relative_to(WEBSITE_ROOT))
+            except ValueError:
+                key = str(f)  # file outside website root (e.g. /tmp/ during tests)
+            all_results[key] = issues
 
     if args.json:
         print(json.dumps({"today": str(TODAY), "files": all_results}, indent=2))

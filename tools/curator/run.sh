@@ -68,6 +68,58 @@ log_section "stage 1: scan manifests"
 HIVE_MANIFEST_DIR="$HOME/Desktop/Fun/lab/publish_candidates"
 AGI_MANIFEST_DIR="$HOME/Desktop/AGI/data/publish_candidates"
 
+# Stuck-state recovery: a previous run that crashed mid-pipeline leaves
+# the candidate in 'processing' with no follow-up. Reset any candidate
+# stuck in 'processing' for > STUCK_THRESHOLD_HOURS to 'held' so the
+# operator notices and decides whether to retry.
+STUCK_THRESHOLD_HOURS="${STUCK_THRESHOLD_HOURS:-2}"
+STUCK_RESET_COUNT=0
+for dir in "$HIVE_MANIFEST_DIR" "$AGI_MANIFEST_DIR"; do
+    [ -d "$dir" ] || continue
+    for f in "$dir"/*.json; do
+        [ -f "$f" ] || continue
+        RESET_LINE=$(CANDIDATE="$f" THRESHOLD_H="$STUCK_THRESHOLD_HOURS" python3 <<'PYEOF' 2>/dev/null
+import os, json, datetime
+p = os.environ['CANDIDATE']
+threshold_h = float(os.environ['THRESHOLD_H'])
+try:
+    d = json.load(open(p))
+except Exception:
+    print(''); raise SystemExit(0)
+if d.get('curator_state') != 'processing':
+    print(''); raise SystemExit(0)
+started = d.get('processing_started_at')
+age_h = None
+if started:
+    try:
+        t = datetime.datetime.fromisoformat(started)
+        age_h = (datetime.datetime.now(datetime.timezone.utc) - t).total_seconds() / 3600
+    except Exception:
+        age_h = None
+# No timestamp OR older than threshold → reset.
+if age_h is None or age_h >= threshold_h:
+    d['curator_state'] = 'held'
+    d['held_reason'] = (f"previous run interrupted (was 'processing' for "
+                        f"{age_h:.1f}h)" if age_h is not None else
+                        "previous run interrupted (no processing_started_at; "
+                        "pre-2026-05-12 manifest)")
+    d.pop('processing_started_at', None)
+    open(p, 'w').write(json.dumps(d, indent=2))
+    print(f"reset {os.path.basename(p)} (age={age_h if age_h is not None else 'unknown'})")
+else:
+    print('')
+PYEOF
+)
+        if [ -n "$RESET_LINE" ]; then
+            log_warn "stuck-state recovery: $RESET_LINE"
+            STUCK_RESET_COUNT=$((STUCK_RESET_COUNT + 1))
+        fi
+    done
+done
+if [ "$STUCK_RESET_COUNT" -gt 0 ]; then
+    log_warn "stuck-state recovery: reset $STUCK_RESET_COUNT candidate(s) → 'held'; review with cli.sh held"
+fi
+
 # Find all candidates with curator_state == "pending"
 CANDIDATES=()
 for dir in "$HIVE_MANIFEST_DIR" "$AGI_MANIFEST_DIR"; do
@@ -94,13 +146,17 @@ for candidate in "${CANDIDATES[@]}"; do
     log_section "candidate: $(basename "$candidate")"
     START_EPOCH=$(date +%s)
 
-    # Mark as processing (in-place edit; reverts on hold/fail)
-    python3 -c "
-import json
-d = json.load(open('$candidate'))
+    # Mark as processing (in-place edit; reverts on hold/fail).
+    # processing_started_at lets the next run's stuck-state recovery
+    # detect candidates abandoned by a crashed previous run.
+    CANDIDATE="$candidate" python3 <<'PYEOF'
+import os, json, datetime
+p = os.environ['CANDIDATE']
+d = json.load(open(p))
 d['curator_state'] = 'processing'
-open('$candidate','w').write(json.dumps(d, indent=2))
-"
+d['processing_started_at'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+open(p, 'w').write(json.dumps(d, indent=2))
+PYEOF
 
     # Stage 2: classify risk
     log_section "stage 2: classify risk"
