@@ -23,6 +23,7 @@ Other verbs:
 | `cli.sh veto <id>` | Kill a Tier 3 publish in its 24h window |
 | `cli.sh tail` | Tail today's log |
 | `cli.sh runs [N]` | Summary of last N runs (default 10) |
+| `cli.sh audit` | Scan all pages for future dates, [VERIFY] markers, TODO/FIXME (add `--check-style` for forbidden-phrase scan) |
 | `cli.sh help` | Print help |
 
 Convenient alias (one-time):

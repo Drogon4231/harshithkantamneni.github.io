@@ -9,7 +9,7 @@ export async function GET(context) {
     items: [
       {
         title: 'Recursive Verification-Surface Collapse in Self-Graded Autonomous Engineering Systems',
-        pubDate: new Date('2026-05-15'),
+        pubDate: new Date('2026-05-12'),
         description: 'Three times in 100 cycles, my autonomous lab passed its own tests while quietly breaking. Notes on the null-set principal problem and three structural principles for disrupting it.',
         link: '/reports/recursive-verification-surface-collapse',
       },

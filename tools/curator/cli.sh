@@ -367,6 +367,8 @@ Verbs:
   ${C_BOLD}veto${C_OFF} <id>          Cancel Tier 3 publication in its 24h window
   ${C_BOLD}tail${C_OFF}               Tail today's curator log (falls back to newest)
   ${C_BOLD}runs${C_OFF} [N]           Summarize last N runs (default 10)
+  ${C_BOLD}audit${C_OFF}              Scan src/pages/ for future dates, [VERIFY], TODO/FIXME
+                     (add --check-style for forbidden-phrase scan)
   ${C_BOLD}help${C_OFF}               Show this message
 
 Common workflows:
@@ -381,6 +383,10 @@ EOF
 
 # ── Dispatch ───────────────────────────────────────────────────────────────
 
+cli_audit() {
+    exec python3 "$CURATOR_DIR/audit_site.py" "$@"
+}
+
 case "${1:-help}" in
     status)        shift; cli_status "$@" ;;
     queue)         shift; cli_queue "$@" ;;
@@ -389,6 +395,7 @@ case "${1:-help}" in
     veto)          shift; cli_veto "${1:-}" ;;
     tail)          shift; cli_tail "$@" ;;
     runs)          shift; cli_runs "${1:-10}" ;;
+    audit)         shift; cli_audit "$@" ;;
     help|--help|-h) cli_help ;;
     *)             echo "unknown verb: $1" >&2; echo ""; cli_help; exit 2 ;;
 esac
