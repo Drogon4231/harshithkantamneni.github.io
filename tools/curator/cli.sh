@@ -369,6 +369,8 @@ Verbs:
   ${C_BOLD}runs${C_OFF} [N]           Summarize last N runs (default 10)
   ${C_BOLD}audit${C_OFF}              Scan src/pages/ for future dates, [VERIFY], TODO/FIXME
                      (add --check-style for forbidden-phrase scan)
+  ${C_BOLD}ui${C_OFF}                 Launch the local browser dashboard
+                     (http://127.0.0.1:8088/; ctrl-c to stop)
   ${C_BOLD}help${C_OFF}               Show this message
 
 Common workflows:
@@ -387,6 +389,10 @@ cli_audit() {
     exec python3 "$CURATOR_DIR/audit_site.py" "$@"
 }
 
+cli_ui() {
+    exec python3 "$CURATOR_DIR/operator/server.py" "$@"
+}
+
 case "${1:-help}" in
     status)        shift; cli_status "$@" ;;
     queue)         shift; cli_queue "$@" ;;
@@ -396,6 +402,7 @@ case "${1:-help}" in
     tail)          shift; cli_tail "$@" ;;
     runs)          shift; cli_runs "${1:-10}" ;;
     audit)         shift; cli_audit "$@" ;;
+    ui)            shift; cli_ui "$@" ;;
     help|--help|-h) cli_help ;;
     *)             echo "unknown verb: $1" >&2; echo ""; cli_help; exit 2 ;;
 esac

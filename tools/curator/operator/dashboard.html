@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Curator Operator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --bg: #0f1011;
+    --panel: #16181a;
+    --border: #24272b;
+    --text: #e9e9e9;
+    --muted: #8b8e92;
+    --accent: #ffd166;
+    --ok: #6ad174;
+    --warn: #ffb454;
+    --err: #ff6b6b;
+    --dim: #5a5d61;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; }
+  body { padding: 20px 28px 40px; max-width: 1400px; margin: 0 auto; }
+  h1 { font-size: 16px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+  h2 { font-size: 12px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+  .top { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 24px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+  .top h1 { color: var(--text); font-size: 18px; }
+  .top .meta { color: var(--muted); font-family: var(--mono); font-size: 12px; }
+  .top .meta button { background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 3px; padding: 3px 9px; cursor: pointer; font-family: var(--mono); font-size: 11px; margin-left: 8px; }
+  .top .meta button:hover { color: var(--text); border-color: var(--text); }
+
+  .stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 24px; }
+  .stat { background: var(--panel); border: 1px solid var(--border); padding: 12px 14px; border-radius: 4px; }
+  .stat .n { font-family: var(--mono); font-size: 24px; font-weight: 600; color: var(--text); line-height: 1; }
+  .stat .n.warn { color: var(--warn); }
+  .stat .n.err { color: var(--err); }
+  .stat .n.ok { color: var(--ok); }
+  .stat .label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; margin-top: 5px; }
+
+  .grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; }
+  .section { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; margin-bottom: 18px; }
+
+  table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 500; font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; }
+  tr:last-child td { border-bottom: none; }
+  .state { padding: 2px 6px; border-radius: 3px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .state.pending    { background: rgba(255,209,102,0.15); color: var(--accent); }
+  .state.processing { background: rgba(255,180, 84,0.15); color: var(--warn); }
+  .state.held       { background: rgba(255,107,107,0.15); color: var(--err); }
+  .state.published  { background: rgba(106,209,116,0.15); color: var(--ok); }
+
+  .held-item { border: 1px solid var(--border); border-left: 3px solid var(--err); padding: 10px 14px; margin-bottom: 8px; border-radius: 3px; }
+  .held-item .id { font-family: var(--mono); font-weight: 600; }
+  .held-item .reason { color: var(--err); font-size: 12px; margin: 4px 0; }
+  .held-item .actions { margin-top: 6px; }
+
+  .draft-item { border: 1px solid var(--border); padding: 8px 12px; margin-bottom: 6px; border-radius: 3px; display: flex; justify-content: space-between; align-items: center; }
+  .draft-item .id { font-family: var(--mono); font-size: 12px; }
+  .draft-item .actions { display: flex; gap: 6px; }
+
+  button.act, .top .meta button {
+    background: transparent; color: var(--text); border: 1px solid var(--border);
+    border-radius: 3px; padding: 4px 10px; cursor: pointer; font-family: var(--mono);
+    font-size: 11px;
+  }
+  button.act:hover { border-color: var(--accent); color: var(--accent); }
+  button.act.danger:hover { border-color: var(--err); color: var(--err); }
+  button.act.ok:hover { border-color: var(--ok); color: var(--ok); }
+
+  pre.log { background: #0a0b0c; color: var(--muted); padding: 12px; font-family: var(--mono); font-size: 11px; line-height: 1.5; overflow-x: auto; border-radius: 3px; max-height: 320px; overflow-y: auto; margin: 0; }
+  .launchd-row { display: flex; gap: 16px; font-family: var(--mono); font-size: 12px; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+  .dot.ok { background: var(--ok); }
+  .dot.err { background: var(--err); }
+
+  .empty { color: var(--dim); font-style: italic; padding: 8px 0; }
+  .runs-table td.outcome.ok { color: var(--ok); }
+  .runs-table td.outcome.fail { color: var(--err); }
+  .runs-table td.outcome.partial { color: var(--warn); }
+
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; z-index: 100; align-items: center; justify-content: center; padding: 24px; }
+  .modal-bg.open { display: flex; }
+  .modal { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 20px; width: 100%; max-width: 720px; max-height: 90vh; display: flex; flex-direction: column; }
+  .modal h2 { color: var(--text); margin-bottom: 12px; }
+  .modal textarea { background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--mono); font-size: 12px; padding: 12px; flex: 1; min-height: 320px; resize: vertical; border-radius: 3px; }
+  .modal .actions { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+
+  @media (max-width: 900px) {
+    .stats { grid-template-columns: repeat(3, 1fr); }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>Curator Operator</h1>
+  <div class="meta">
+    <span id="today">—</span> · auto-refresh <span id="countdown">5</span>s
+    <button onclick="refresh()">refresh now</button>
+    <button onclick="toggleAuto()" id="auto-btn">pause</button>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="n" id="stat-pending">—</div><div class="label">Pending</div></div>
+  <div class="stat"><div class="n" id="stat-processing">—</div><div class="label">Processing</div></div>
+  <div class="stat"><div class="n" id="stat-held">—</div><div class="label">Held</div></div>
+  <div class="stat"><div class="n" id="stat-hn">—</div><div class="label">HN drafts</div></div>
+  <div class="stat"><div class="n" id="stat-li">—</div><div class="label">LinkedIn drafts</div></div>
+  <div class="stat"><div class="n" id="stat-runs-ok">—</div><div class="label">Recent runs OK</div></div>
+</div>
+
+<div class="section">
+  <h2>Launchd jobs</h2>
+  <div class="launchd-row">
+    <div><span class="dot" id="d-curator"></span>curator <span id="t-curator">—</span></div>
+    <div><span class="dot" id="d-veto"></span>veto-check <span id="t-veto">—</span></div>
+  </div>
+</div>
+
+<div class="grid">
+  <div>
+    <div class="section">
+      <h2>Queue (non-published)</h2>
+      <div id="queue-body"></div>
+    </div>
+
+    <div class="section">
+      <h2>Held — needs attention</h2>
+      <div id="held-body"></div>
+    </div>
+
+    <div class="section">
+      <h2>Recent runs</h2>
+      <table class="runs-table"><thead><tr><th>Run</th><th>Outcome</th><th>Candidates</th><th>Source</th></tr></thead><tbody id="runs-body"></tbody></table>
+    </div>
+  </div>
+
+  <div>
+    <div class="section">
+      <h2>Channel drafts pending paste</h2>
+      <h3 style="font-family: var(--mono); font-size: 11px; color: var(--muted); margin: 8px 0 4px;">Hacker News</h3>
+      <div id="hn-body"></div>
+      <h3 style="font-family: var(--mono); font-size: 11px; color: var(--muted); margin: 12px 0 4px;">LinkedIn</h3>
+      <div id="li-body"></div>
+    </div>
+
+    <div class="section">
+      <h2>Today's log (tail)</h2>
+      <pre class="log" id="log-body">loading…</pre>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h2 id="modal-title">Draft</h2>
+    <textarea id="modal-text" readonly></textarea>
+    <div class="actions">
+      <button class="act" onclick="copyDraft()">copy to clipboard</button>
+      <button class="act danger" onclick="markPasted()">mark pasted (delete file)</button>
+      <button class="act" onclick="closeModal()">close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let auto = true;
+let countdown = 5;
+const REFRESH_S = 5;
+let currentDraft = null;
+
+function fmtBytes(n) {
+  if (n < 1024) return n + 'B';
+  return (n/1024).toFixed(1) + 'K';
+}
+function el(id) { return document.getElementById(id); }
+
+// Safe DOM builder — all string children become text nodes (no XSS).
+function tag(name, props, ...children) {
+  const e = document.createElement(name);
+  if (props) {
+    for (const k in props) {
+      if (k === 'class') e.className = props[k];
+      else if (k.startsWith('on') && typeof props[k] === 'function') e[k] = props[k];
+      else e.setAttribute(k, props[k]);
+    }
+  }
+  for (const c of children) {
+    if (c == null) continue;
+    if (typeof c === 'string' || typeof c === 'number') {
+      e.appendChild(document.createTextNode(String(c)));
+    } else {
+      e.appendChild(c);
+    }
+  }
+  return e;
+}
+
+async function refresh() {
+  try {
+    const r = await fetch('/api/status', { cache: 'no-store' });
+    const data = await r.json();
+    render(data);
+    countdown = REFRESH_S;
+  } catch (e) {
+    el('log-body').textContent = 'FETCH FAILED: ' + e.message;
+  }
+}
+
+function render(data) {
+  el('today').textContent = data.today;
+
+  const q = data.queue || [];
+  const pending = q.filter(c => c.state === 'pending').length;
+  const processing = q.filter(c => c.state === 'processing').length;
+  const held = q.filter(c => c.state === 'held').length;
+  const hnDrafts = (data.channel_drafts.hackernews || []).length;
+  const liDrafts = (data.channel_drafts.linkedin || []).length;
+  const runs = data.runs || [];
+  const runsOk = runs.filter(r => r.outcome === 'ok').length;
+
+  el('stat-pending').textContent = pending;
+  el('stat-processing').textContent = processing;
+  el('stat-processing').className = 'n' + (processing > 0 ? ' warn' : '');
+  el('stat-held').textContent = held;
+  el('stat-held').className = 'n' + (held > 0 ? ' err' : '');
+  el('stat-hn').textContent = hnDrafts;
+  el('stat-hn').className = 'n' + (hnDrafts > 0 ? ' warn' : '');
+  el('stat-li').textContent = liDrafts;
+  el('stat-li').className = 'n' + (liDrafts > 0 ? ' warn' : '');
+  el('stat-runs-ok').textContent = runsOk + '/' + runs.length;
+  el('stat-runs-ok').className = 'n ok';
+
+  el('d-curator').className = 'dot ' + (data.launchd.curator ? 'ok' : 'err');
+  el('t-curator').textContent = data.launchd.curator ? 'loaded · daily 04:00' : 'NOT LOADED';
+  el('d-veto').className = 'dot ' + (data.launchd.veto_check ? 'ok' : 'err');
+  el('t-veto').textContent = data.launchd.veto_check ? 'loaded · hourly' : 'NOT LOADED';
+
+  const qb = el('queue-body');
+  qb.replaceChildren();
+  if (q.length === 0) {
+    qb.appendChild(tag('div', { class: 'empty' }, '(no candidates in queue)'));
+  } else {
+    const table = tag('table');
+    const thead = tag('thead');
+    thead.appendChild(tag('tr', null,
+      tag('th', null, 'Lab'), tag('th', null, 'ID'), tag('th', null, 'Type'),
+      tag('th', null, 'Tier'), tag('th', null, 'State'), tag('th', null, 'Title')
+    ));
+    table.appendChild(thead);
+    const tbody = tag('tbody');
+    q.forEach(c => {
+      tbody.appendChild(tag('tr', null,
+        tag('td', null, c.lab),
+        tag('td', null, c.id),
+        tag('td', null, c.type),
+        tag('td', null, c.tier ? String(c.tier) : '—'),
+        tag('td', null, tag('span', { class: 'state ' + c.state }, c.state)),
+        tag('td', null, c.title || '')
+      ));
+    });
+    table.appendChild(tbody);
+    qb.appendChild(table);
+  }
+
+  const hb = el('held-body');
+  hb.replaceChildren();
+  const heldItems = q.filter(c => c.state === 'held');
+  if (heldItems.length === 0) {
+    hb.appendChild(tag('div', { class: 'empty' }, 'no held candidates'));
+  } else {
+    heldItems.forEach(c => {
+      const wrap = tag('div', { class: 'held-item' });
+      wrap.appendChild(tag('div', { class: 'id' }, '[' + c.lab + '] ' + c.id));
+      wrap.appendChild(tag('div', null, c.title || ''));
+      wrap.appendChild(tag('div', { class: 'reason' }, c.held_reason || '(no reason recorded)'));
+      const acts = tag('div', { class: 'actions' });
+      acts.appendChild(tag('button', { class: 'act ok', onclick: () => retry(c.id) }, 'retry → pending'));
+      wrap.appendChild(acts);
+      hb.appendChild(wrap);
+    });
+  }
+
+  renderDrafts('hn-body', 'hackernews', data.channel_drafts.hackernews || []);
+  renderDrafts('li-body', 'linkedin',   data.channel_drafts.linkedin   || []);
+
+  const rb = el('runs-body');
+  rb.replaceChildren();
+  if (runs.length === 0) {
+    rb.appendChild(tag('tr', null, tag('td', { colspan: '4', class: 'empty' }, '(no runs recorded)')));
+  } else {
+    runs.forEach(r => {
+      rb.appendChild(tag('tr', null,
+        tag('td', null, r.run_id),
+        tag('td', { class: 'outcome ' + r.outcome }, r.outcome),
+        tag('td', null, String(r.candidates)),
+        tag('td', null, r.source)
+      ));
+    });
+  }
+
+  el('log-body').textContent = data.log_excerpt || '(no log for today yet)';
+  el('log-body').scrollTop = el('log-body').scrollHeight;
+}
+
+function renderDrafts(targetId, channel, items) {
+  const body = el(targetId);
+  body.replaceChildren();
+  if (items.length === 0) {
+    body.appendChild(tag('div', { class: 'empty' }, '(none)'));
+    return;
+  }
+  items.forEach(d => {
+    const row = tag('div', { class: 'draft-item' });
+    row.appendChild(tag('div', { class: 'id' }, d.id + '  · ' + fmtBytes(d.bytes)));
+    const acts = tag('div', { class: 'actions' });
+    acts.appendChild(tag('button', { class: 'act', onclick: () => openDraft(channel, d.id) }, 'view'));
+    row.appendChild(acts);
+    body.appendChild(row);
+  });
+}
+
+async function retry(id) {
+  if (!confirm('Reset "' + id + '" from held → pending?')) return;
+  const r = await fetch('/api/retry', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id }),
+  });
+  const j = await r.json();
+  if (!j.ok) alert('Failed: ' + (j.error || 'unknown'));
+  refresh();
+}
+
+async function openDraft(channel, id) {
+  currentDraft = { channel, id };
+  el('modal-title').textContent = channel + ' / ' + id;
+  el('modal-text').value = 'loading…';
+  el('modal-bg').classList.add('open');
+  const r = await fetch('/api/channel-draft?channel=' + encodeURIComponent(channel) + '&id=' + encodeURIComponent(id));
+  const j = await r.json();
+  el('modal-text').value = j.ok ? j.content : ('error: ' + (j.error || 'unknown'));
+}
+
+function closeModal() {
+  el('modal-bg').classList.remove('open');
+  currentDraft = null;
+}
+
+async function copyDraft() {
+  const text = el('modal-text').value;
+  try {
+    await navigator.clipboard.writeText(text);
+    alert('Copied to clipboard.');
+  } catch (e) {
+    alert('Copy failed — select the text manually. ' + e.message);
+  }
+}
+
+async function markPasted() {
+  if (!currentDraft) return;
+  if (!confirm('Delete the draft file for "' + currentDraft.id + '"? (Only do this after you have actually pasted it.)')) return;
+  await fetch('/api/channel-draft?channel=' + encodeURIComponent(currentDraft.channel) + '&id=' + encodeURIComponent(currentDraft.id), { method: 'DELETE' });
+  closeModal();
+  refresh();
+}
+
+function toggleAuto() {
+  auto = !auto;
+  el('auto-btn').textContent = auto ? 'pause' : 'resume';
+}
+
+setInterval(() => {
+  if (!auto) return;
+  countdown--;
+  el('countdown').textContent = Math.max(0, countdown);
+  if (countdown <= 0) {
+    refresh();
+  }
+}, 1000);
+
+refresh();
+</script>
+</body>
+</html>

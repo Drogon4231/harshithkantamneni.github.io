@@ -24,6 +24,7 @@ Other verbs:
 | `cli.sh tail` | Tail today's log |
 | `cli.sh runs [N]` | Summary of last N runs (default 10) |
 | `cli.sh audit` | Scan all pages for future dates, [VERIFY] markers, TODO/FIXME (add `--check-style` for forbidden-phrase scan) |
+| `cli.sh ui` | Launch the browser dashboard at http://127.0.0.1:8088/ — see queue/held/runs/channel drafts visually + retry buttons + draft preview with copy-to-clipboard |
 | `cli.sh help` | Print help |
 
 Convenient alias (one-time):
