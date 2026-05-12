@@ -6,7 +6,7 @@
 
 ---
 
-## All 12 tasks complete
+## All 12 tasks complete + multi-channel extension
 
 | # | Task | Commit | Quality verification |
 |---|---|---|---|
@@ -22,6 +22,9 @@
 | 10 | Provenance frontmatter | `c65e5af` | Block injects, build passes, idempotent (re-injecting replaces; cost field updates). Bug caught: bash heredoc f-string scope mismatch. Fixed with env vars. |
 | 11 | run.sh wired + launchd + E2E | `e362a52` | Full E2E pipeline ran on synthetic candidate in 183s. All 7 stages logged correctly. plutil-lint passes both plists. |
 | 12 | /now status surface | `4cbbf87` | Renders gracefully without files; renders both lab blocks with files. Schema validates. Per-lab independence (only present-file lab renders). |
+| X1 | HN + LinkedIn channel adapters | `873fdb1` | HN: deterministic suggester (no LLM). Title-trim logic verified on 95-char title (cuts at colon, lands 38 chars). LinkedIn: 261-word teaser on cross-lab-diagnosis, 0 em-dashes, on-voice (hook is specific %). forbidden_check false-positive fixed (blank-line regex bug). |
+
+Medium dropped: API key issuance stopped. HN + LinkedIn are higher-leverage for this audience anyway.
 
 ---
 
@@ -62,10 +65,19 @@ run.sh
          - Tier 1 → PR opens, human merges
          - Tier 2 → PR + gh pr merge --auto --squash
          - Tier 3 → branch + tag, veto_check.sh merges 24h later
+     ↓ Stage 8: channel adapters (per candidate's channels[] field)
+         - hackernews → deterministic suggester, writes paste-ready file
+         - linkedin   → single narrow claude --print, writes paste-ready draft
+         - failures non-blocking (website already published)
    ↓ each stage updates manifest entry's curator_state
 ```
 
 Veto check runs hourly (separate launchd job).
+
+Channel adapters never auto-post. HN is hostile to automation; LinkedIn's
+API blocks third-party posting. Both write paste-ready drafts to
+`channel_drafts/{hackernews,linkedin}/<id>.txt` for the operator to send
+when timing is right.
 
 ---
 
