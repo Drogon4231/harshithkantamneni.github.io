@@ -19,3 +19,6 @@ node_modules/
 *.swp
 
 # Vite (legacy, can remove after migration verified)
+
+__pycache__/
+*.pyc
