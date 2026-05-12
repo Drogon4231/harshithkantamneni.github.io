@@ -38,6 +38,7 @@ HIVE_DIR = Path.home() / "Desktop" / "Fun" / "lab" / "publish_candidates"
 AGI_DIR = Path.home() / "Desktop" / "AGI" / "data" / "publish_candidates"
 CHANNEL_DIR = CURATOR_DIR / "channel_drafts"
 LOG_DIR = CURATOR_DIR / "log"
+PENDING_DRAFTS_DIR = CURATOR_DIR / "pending_drafts"
 
 HOST = "127.0.0.1"
 DEFAULT_PORT = 8088
@@ -73,12 +74,18 @@ def get_status():
             "summary": c.get("summary", ""),
             "held_reason": c.get("held_reason", ""),
             "processing_started_at": c.get("processing_started_at", ""),
+            "awaiting_review_at": c.get("awaiting_review_at", ""),
             "published_at": c.get("published_at", ""),
             "channels": c.get("channels", []),
+            "scores": c.get("scores", {}),
+            "operator_notes": c.get("operator_notes", ""),
         }
 
     queue = [summarize(c) for c in candidates
              if c.get("curator_state") not in ("published", "vetoed")]
+    awaiting = [summarize(c) for c in candidates
+                if c.get("curator_state") == "awaiting_review"]
+    awaiting.sort(key=lambda x: x.get("awaiting_review_at") or "", reverse=True)
     published = [summarize(c) for c in candidates
                  if c.get("curator_state") == "published"]
     published.sort(key=lambda x: x.get("published_at") or "", reverse=True)
@@ -122,12 +129,118 @@ def get_status():
     return {
         "today": datetime.date.today().isoformat(),
         "queue": queue,
+        "awaiting_review": awaiting,
         "published_recent": published[:5],
         "channel_drafts": drafts,
         "launchd": launchd,
         "log_excerpt": log_excerpt,
         "runs": runs,
     }
+
+
+# ── Review-specific helpers ──────────────────────────────────────────────
+
+def find_candidate_by_id(target_id: str):
+    """Return (manifest_dict, file_path) or (None, None)."""
+    for c in iter_candidates():
+        if c.get("id") == target_id:
+            return c, Path(c["_file"])
+    return None, None
+
+
+def get_review(target_id: str):
+    c, f = find_candidate_by_id(target_id)
+    if not c:
+        return {"ok": False, "error": "candidate not found"}
+    draft_path = PENDING_DRAFTS_DIR / f"{target_id}.astro"
+    judges_path = PENDING_DRAFTS_DIR / f"{target_id}.judges.json"
+    source = draft_path.read_text() if draft_path.is_file() else ""
+    judges = {}
+    if judges_path.is_file():
+        try:
+            judges = json.loads(judges_path.read_text())
+        except Exception:
+            judges = {}
+    return {
+        "ok": True,
+        "id": target_id,
+        "lab": c.get("_lab"),
+        "title": c.get("title", ""),
+        "summary": c.get("summary", ""),
+        "type": c.get("type", ""),
+        "tier": c.get("risk_tier"),
+        "state": c.get("curator_state"),
+        "channels": c.get("channels", []),
+        "source": source,
+        "source_path": str(draft_path),
+        "judges": judges,
+        "operator_notes": c.get("operator_notes", ""),
+        "awaiting_review_at": c.get("awaiting_review_at", ""),
+        "cost_seconds": c.get("cost_seconds"),
+    }
+
+
+def save_review_source(target_id: str, new_source: str) -> dict:
+    c, f = find_candidate_by_id(target_id)
+    if not c:
+        return {"ok": False, "error": "candidate not found"}
+    if c.get("curator_state") != "awaiting_review":
+        return {"ok": False,
+                "error": f"state is '{c.get('curator_state')}', not awaiting_review"}
+    draft_path = PENDING_DRAFTS_DIR / f"{target_id}.astro"
+    if not draft_path.is_file():
+        return {"ok": False, "error": "pending draft file missing"}
+    draft_path.write_text(new_source)
+    return {"ok": True, "bytes": len(new_source)}
+
+
+def save_operator_notes(target_id: str, notes: str) -> dict:
+    c, f = find_candidate_by_id(target_id)
+    if not c:
+        return {"ok": False, "error": "candidate not found"}
+    d = json.loads(f.read_text())
+    d["operator_notes"] = notes
+    f.write_text(json.dumps(d, indent=2))
+    return {"ok": True}
+
+
+def run_shell(cmd: list, timeout: int = 300) -> dict:
+    """Run a curator shell script and return its combined output."""
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True,
+                          timeout=timeout, cwd=str(WEBSITE_ROOT))
+        return {
+            "ok": r.returncode == 0,
+            "returncode": r.returncode,
+            "stdout": r.stdout[-5000:],
+            "stderr": r.stderr[-5000:],
+        }
+    except subprocess.TimeoutExpired:
+        return {"ok": False, "error": f"timeout after {timeout}s"}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+def approve_candidate(target_id: str) -> dict:
+    c, f = find_candidate_by_id(target_id)
+    if not c:
+        return {"ok": False, "error": "candidate not found"}
+    if c.get("curator_state") != "awaiting_review":
+        return {"ok": False,
+                "error": f"state is '{c.get('curator_state')}', not awaiting_review"}
+    result = run_shell(["bash", "tools/curator/approve.sh", target_id], timeout=300)
+    return result
+
+
+def reject_candidate(target_id: str, reason: str) -> dict:
+    c, f = find_candidate_by_id(target_id)
+    if not c:
+        return {"ok": False, "error": "candidate not found"}
+    if c.get("curator_state") != "awaiting_review":
+        return {"ok": False,
+                "error": f"state is '{c.get('curator_state')}', not awaiting_review"}
+    result = run_shell(["bash", "tools/curator/reject.sh", target_id, reason], timeout=15)
+    return result
 
 
 def recent_runs(limit=10):
@@ -245,6 +358,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self._send_json({"ok": False, "error": "not found"}, 404)
             else:
                 self._send_json({"ok": True, "content": text})
+        elif path == "/api/review":
+            cid = qs.get("id", [""])[0]
+            if not cid:
+                self._send_json({"ok": False, "error": "id required"}, 400)
+            else:
+                self._send_json(get_review(cid))
         else:
             self.send_response(404); self.end_headers()
 
@@ -263,6 +382,37 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self._send_json({"ok": False, "error": "id required"}, 400)
                 return
             result = retry_candidate(target)
+            self._send_json(result, 200 if result.get("ok") else 400)
+        elif path == "/api/review/save":
+            target = (data.get("id") or "").strip()
+            source = data.get("source", "")
+            if not target:
+                self._send_json({"ok": False, "error": "id required"}, 400)
+                return
+            result = save_review_source(target, source)
+            self._send_json(result, 200 if result.get("ok") else 400)
+        elif path == "/api/review/notes":
+            target = (data.get("id") or "").strip()
+            notes = data.get("notes", "")
+            if not target:
+                self._send_json({"ok": False, "error": "id required"}, 400)
+                return
+            result = save_operator_notes(target, notes)
+            self._send_json(result, 200 if result.get("ok") else 400)
+        elif path == "/api/review/approve":
+            target = (data.get("id") or "").strip()
+            if not target:
+                self._send_json({"ok": False, "error": "id required"}, 400)
+                return
+            result = approve_candidate(target)
+            self._send_json(result, 200 if result.get("ok") else 400)
+        elif path == "/api/review/reject":
+            target = (data.get("id") or "").strip()
+            reason = (data.get("reason") or "operator rejected via dashboard").strip()
+            if not target:
+                self._send_json({"ok": False, "error": "id required"}, 400)
+                return
+            result = reject_candidate(target, reason)
             self._send_json(result, 200 if result.get("ok") else 400)
         else:
             self.send_response(404); self.end_headers()

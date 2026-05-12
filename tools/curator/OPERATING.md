@@ -103,9 +103,14 @@ A candidate is a JSON file at `~/Desktop/Fun/lab/publish_candidates/<id>.json` (
 
 **State machine:**
 ```
-pending → processing → (held | published | vetoed)
-held → pending (via cli.sh retry)
+pending → processing → awaiting_review → (published | held)
+held → pending (via cli.sh retry or dashboard retry button)
 ```
+
+The pipeline now PAUSES at `awaiting_review` instead of auto-publishing. The
+operator approves (→ publish) or rejects (→ held) via the dashboard. The
+staged draft sits at `tools/curator/pending_drafts/<id>.astro` and is
+editable inline through the dashboard's review modal before approval.
 
 **Operator-safe edits:**
 - `channels` — which channels to fire (re-runs won't re-fire already-done channels by default; see Stage 8 in `run.sh`)

@@ -8,6 +8,7 @@
   :root {
     --bg: #0f1011;
     --panel: #16181a;
+    --panel-2: #1c1e21;
     --border: #24272b;
     --text: #e9e9e9;
     --muted: #8b8e92;
@@ -15,6 +16,7 @@
     --ok: #6ad174;
     --warn: #ffb454;
     --err: #ff6b6b;
+    --info: #5ab4ff;
     --dim: #5a5d61;
     --mono: ui-monospace, "SF Mono", Menlo, monospace;
     --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
@@ -24,6 +26,7 @@
   body { padding: 20px 28px 40px; max-width: 1400px; margin: 0 auto; }
   h1 { font-size: 16px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
   h2 { font-size: 12px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+  h3 { font-family: var(--mono); font-size: 11px; color: var(--muted); margin: 8px 0 4px; }
   .top { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 24px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
   .top h1 { color: var(--text); font-size: 18px; }
   .top .meta { color: var(--muted); font-family: var(--mono); font-size: 12px; }
@@ -36,25 +39,39 @@
   .stat .n.warn { color: var(--warn); }
   .stat .n.err { color: var(--err); }
   .stat .n.ok { color: var(--ok); }
+  .stat .n.info { color: var(--info); }
   .stat .label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; margin-top: 5px; }
 
-  .grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; }
   .section { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; margin-bottom: 18px; }
+  .section.attn { border-color: var(--info); border-left: 3px solid var(--info); }
+
+  .grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; }
 
   table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px; }
   th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
   th { color: var(--muted); font-weight: 500; font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; }
   tr:last-child td { border-bottom: none; }
   .state { padding: 2px 6px; border-radius: 3px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; }
-  .state.pending    { background: rgba(255,209,102,0.15); color: var(--accent); }
-  .state.processing { background: rgba(255,180, 84,0.15); color: var(--warn); }
-  .state.held       { background: rgba(255,107,107,0.15); color: var(--err); }
-  .state.published  { background: rgba(106,209,116,0.15); color: var(--ok); }
+  .state.pending          { background: rgba(255,209,102,0.15); color: var(--accent); }
+  .state.processing       { background: rgba(255,180, 84,0.15); color: var(--warn); }
+  .state.awaiting_review  { background: rgba( 90,180,255,0.15); color: var(--info); }
+  .state.held             { background: rgba(255,107,107,0.15); color: var(--err); }
+  .state.published        { background: rgba(106,209,116,0.15); color: var(--ok); }
 
-  .held-item { border: 1px solid var(--border); border-left: 3px solid var(--err); padding: 10px 14px; margin-bottom: 8px; border-radius: 3px; }
-  .held-item .id { font-family: var(--mono); font-weight: 600; }
-  .held-item .reason { color: var(--err); font-size: 12px; margin: 4px 0; }
-  .held-item .actions { margin-top: 6px; }
+  .item-card { border: 1px solid var(--border); padding: 12px 14px; margin-bottom: 10px; border-radius: 3px; cursor: pointer; transition: border-color 120ms; }
+  .item-card:hover { border-color: var(--accent); }
+  .item-card.review { border-left: 3px solid var(--info); }
+  .item-card.held { border-left: 3px solid var(--err); cursor: default; }
+  .item-card .top-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .item-card .id { font-family: var(--mono); font-weight: 600; font-size: 13px; }
+  .item-card .meta { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .item-card .title { font-size: 14px; margin: 6px 0 4px; }
+  .item-card .summary { color: var(--muted); font-size: 12px; line-height: 1.45; }
+  .item-card .reason { color: var(--err); font-size: 12px; margin-top: 6px; }
+  .item-card .actions { margin-top: 8px; display: flex; gap: 6px; }
+  .item-card .scores { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .item-card .scores .ok { color: var(--ok); }
+  .item-card .scores .err { color: var(--err); }
 
   .draft-item { border: 1px solid var(--border); padding: 8px 12px; margin-bottom: 6px; border-radius: 3px; display: flex; justify-content: space-between; align-items: center; }
   .draft-item .id { font-family: var(--mono); font-size: 12px; }
@@ -62,12 +79,16 @@
 
   button.act, .top .meta button {
     background: transparent; color: var(--text); border: 1px solid var(--border);
-    border-radius: 3px; padding: 4px 10px; cursor: pointer; font-family: var(--mono);
+    border-radius: 3px; padding: 5px 12px; cursor: pointer; font-family: var(--mono);
     font-size: 11px;
   }
   button.act:hover { border-color: var(--accent); color: var(--accent); }
-  button.act.danger:hover { border-color: var(--err); color: var(--err); }
-  button.act.ok:hover { border-color: var(--ok); color: var(--ok); }
+  button.act.danger { color: var(--err); }
+  button.act.danger:hover { border-color: var(--err); background: rgba(255,107,107,0.08); }
+  button.act.ok { color: var(--ok); }
+  button.act.ok:hover { border-color: var(--ok); background: rgba(106,209,116,0.08); }
+  button.act.primary { border-color: var(--info); color: var(--info); }
+  button.act.primary:hover { background: rgba(90,180,255,0.1); }
 
   pre.log { background: #0a0b0c; color: var(--muted); padding: 12px; font-family: var(--mono); font-size: 11px; line-height: 1.5; overflow-x: auto; border-radius: 3px; max-height: 320px; overflow-y: auto; margin: 0; }
   .launchd-row { display: flex; gap: 16px; font-family: var(--mono); font-size: 12px; }
@@ -80,16 +101,36 @@
   .runs-table td.outcome.fail { color: var(--err); }
   .runs-table td.outcome.partial { color: var(--warn); }
 
-  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; z-index: 100; align-items: center; justify-content: center; padding: 24px; }
+  /* modals */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.78); display: none; z-index: 100; align-items: center; justify-content: center; padding: 16px; }
   .modal-bg.open { display: flex; }
-  .modal { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 20px; width: 100%; max-width: 720px; max-height: 90vh; display: flex; flex-direction: column; }
+  .modal { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 18px; width: 100%; max-width: 720px; max-height: 92vh; display: flex; flex-direction: column; }
+  .modal.wide { max-width: 1180px; }
   .modal h2 { color: var(--text); margin-bottom: 12px; }
-  .modal textarea { background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--mono); font-size: 12px; padding: 12px; flex: 1; min-height: 320px; resize: vertical; border-radius: 3px; }
-  .modal .actions { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+  .modal .info-strip { display: flex; gap: 16px; font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 12px; flex-wrap: wrap; }
+  .modal .info-strip span { white-space: nowrap; }
+  .modal textarea { background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--mono); font-size: 12px; padding: 10px; resize: vertical; border-radius: 3px; width: 100%; }
+  .modal textarea.source { flex: 1; min-height: 320px; }
+  .modal textarea.notes { min-height: 80px; margin-top: 8px; }
+  .modal textarea.reason { min-height: 60px; margin-top: 8px; }
+  .modal .actions { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; flex-wrap: wrap; }
+  .modal .actions .left { margin-right: auto; display: flex; gap: 8px; }
+  .modal .review-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; flex: 1; overflow: hidden; }
+  .modal .review-grid .col { display: flex; flex-direction: column; overflow: hidden; }
+  .modal .right-col h3 { margin-top: 0; }
+  .modal .meta-block { background: var(--panel-2); border: 1px solid var(--border); padding: 8px 10px; border-radius: 3px; font-family: var(--mono); font-size: 11px; margin-bottom: 8px; }
+  .modal .meta-block .row { display: flex; justify-content: space-between; padding: 2px 0; }
+  .modal .meta-block .row .k { color: var(--muted); }
+  .modal label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); margin-top: 6px; }
+  .modal .reject-block { display: none; }
+  .modal .reject-block.open { display: block; }
+  .modal .toast { padding: 6px 10px; background: var(--panel-2); border-left: 3px solid var(--ok); margin-top: 10px; font-family: var(--mono); font-size: 11px; }
+  .modal .toast.err { border-left-color: var(--err); }
 
   @media (max-width: 900px) {
     .stats { grid-template-columns: repeat(3, 1fr); }
     .grid { grid-template-columns: 1fr; }
+    .modal .review-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -105,8 +146,8 @@
 </div>
 
 <div class="stats">
+  <div class="stat"><div class="n" id="stat-review">—</div><div class="label">Awaiting review</div></div>
   <div class="stat"><div class="n" id="stat-pending">—</div><div class="label">Pending</div></div>
-  <div class="stat"><div class="n" id="stat-processing">—</div><div class="label">Processing</div></div>
   <div class="stat"><div class="n" id="stat-held">—</div><div class="label">Held</div></div>
   <div class="stat"><div class="n" id="stat-hn">—</div><div class="label">HN drafts</div></div>
   <div class="stat"><div class="n" id="stat-li">—</div><div class="label">LinkedIn drafts</div></div>
@@ -121,10 +162,16 @@
   </div>
 </div>
 
+<!-- top-priority: review queue -->
+<div class="section attn" id="review-section">
+  <h2>Awaiting your review</h2>
+  <div id="review-body"></div>
+</div>
+
 <div class="grid">
   <div>
     <div class="section">
-      <h2>Queue (non-published)</h2>
+      <h2>Queue (all non-published)</h2>
       <div id="queue-body"></div>
     </div>
 
@@ -142,9 +189,9 @@
   <div>
     <div class="section">
       <h2>Channel drafts pending paste</h2>
-      <h3 style="font-family: var(--mono); font-size: 11px; color: var(--muted); margin: 8px 0 4px;">Hacker News</h3>
+      <h3>Hacker News</h3>
       <div id="hn-body"></div>
-      <h3 style="font-family: var(--mono); font-size: 11px; color: var(--muted); margin: 12px 0 4px;">LinkedIn</h3>
+      <h3>LinkedIn</h3>
       <div id="li-body"></div>
     </div>
 
@@ -155,10 +202,47 @@
   </div>
 </div>
 
+<!-- review modal (large) -->
+<div class="modal-bg" id="review-modal" onclick="if(event.target===this)closeReview()">
+  <div class="modal wide">
+    <h2 id="review-title">Review</h2>
+    <div class="info-strip" id="review-info"></div>
+
+    <div class="review-grid">
+      <div class="col">
+        <label>Astro source (editable)</label>
+        <textarea class="source" id="review-source"></textarea>
+      </div>
+      <div class="col right-col">
+        <h3>Judge scores</h3>
+        <div class="meta-block" id="review-scores"></div>
+        <label>Operator notes (your comments, persisted to manifest)</label>
+        <textarea class="notes" id="review-notes" placeholder="leave a note for yourself or future-Claude…"></textarea>
+        <div class="reject-block" id="review-reject-block">
+          <label>Rejection reason</label>
+          <textarea class="reason" id="review-reason" placeholder="why are you rejecting this draft?"></textarea>
+        </div>
+        <div id="review-toast"></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <div class="left">
+        <button class="act" onclick="saveSource()">save edits</button>
+        <button class="act" onclick="saveNotes()">save notes</button>
+      </div>
+      <button class="act" onclick="closeReview()">close</button>
+      <button class="act danger" id="review-reject-btn" onclick="toggleReject()">reject…</button>
+      <button class="act ok" onclick="approveDraft()">approve &amp; publish</button>
+    </div>
+  </div>
+</div>
+
+<!-- channel draft modal -->
 <div class="modal-bg" id="modal-bg" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <h2 id="modal-title">Draft</h2>
-    <textarea id="modal-text" readonly></textarea>
+    <textarea id="modal-text" readonly style="min-height: 320px;"></textarea>
     <div class="actions">
       <button class="act" onclick="copyDraft()">copy to clipboard</button>
       <button class="act danger" onclick="markPasted()">mark pasted (delete file)</button>
@@ -172,14 +256,10 @@ let auto = true;
 let countdown = 5;
 const REFRESH_S = 5;
 let currentDraft = null;
+let currentReview = null;
 
-function fmtBytes(n) {
-  if (n < 1024) return n + 'B';
-  return (n/1024).toFixed(1) + 'K';
-}
+function fmtBytes(n) { return n < 1024 ? n + 'B' : (n/1024).toFixed(1) + 'K'; }
 function el(id) { return document.getElementById(id); }
-
-// Safe DOM builder — all string children become text nodes (no XSS).
 function tag(name, props, ...children) {
   const e = document.createElement(name);
   if (props) {
@@ -191,11 +271,8 @@ function tag(name, props, ...children) {
   }
   for (const c of children) {
     if (c == null) continue;
-    if (typeof c === 'string' || typeof c === 'number') {
-      e.appendChild(document.createTextNode(String(c)));
-    } else {
-      e.appendChild(c);
-    }
+    if (typeof c === 'string' || typeof c === 'number') e.appendChild(document.createTextNode(String(c)));
+    else e.appendChild(c);
   }
   return e;
 }
@@ -215,17 +292,17 @@ function render(data) {
   el('today').textContent = data.today;
 
   const q = data.queue || [];
+  const review = data.awaiting_review || [];
   const pending = q.filter(c => c.state === 'pending').length;
-  const processing = q.filter(c => c.state === 'processing').length;
   const held = q.filter(c => c.state === 'held').length;
   const hnDrafts = (data.channel_drafts.hackernews || []).length;
   const liDrafts = (data.channel_drafts.linkedin || []).length;
   const runs = data.runs || [];
   const runsOk = runs.filter(r => r.outcome === 'ok').length;
 
+  el('stat-review').textContent = review.length;
+  el('stat-review').className = 'n' + (review.length > 0 ? ' info' : '');
   el('stat-pending').textContent = pending;
-  el('stat-processing').textContent = processing;
-  el('stat-processing').className = 'n' + (processing > 0 ? ' warn' : '');
   el('stat-held').textContent = held;
   el('stat-held').className = 'n' + (held > 0 ? ' err' : '');
   el('stat-hn').textContent = hnDrafts;
@@ -240,6 +317,29 @@ function render(data) {
   el('d-veto').className = 'dot ' + (data.launchd.veto_check ? 'ok' : 'err');
   el('t-veto').textContent = data.launchd.veto_check ? 'loaded · hourly' : 'NOT LOADED';
 
+  // ── review queue ─────────────────────────────────────────────────
+  const rb = el('review-body');
+  rb.replaceChildren();
+  if (review.length === 0) {
+    el('review-section').style.display = 'none';
+  } else {
+    el('review-section').style.display = '';
+    review.forEach(c => {
+      const card = tag('div', { class: 'item-card review', onclick: () => openReview(c.id) });
+      const top = tag('div', { class: 'top-row' });
+      top.appendChild(tag('div', { class: 'id' }, '[' + c.lab + '] ' + c.id));
+      top.appendChild(tag('div', { class: 'meta' }, 'tier ' + (c.tier || '?') + ' · ' + (c.type || '?')));
+      card.appendChild(top);
+      card.appendChild(tag('div', { class: 'title' }, c.title || '(no title)'));
+      if (c.summary) card.appendChild(tag('div', { class: 'summary' }, c.summary));
+      const acts = tag('div', { class: 'actions' });
+      acts.appendChild(tag('button', { class: 'act primary', onclick: ev => { ev.stopPropagation(); openReview(c.id); } }, 'review →'));
+      card.appendChild(acts);
+      rb.appendChild(card);
+    });
+  }
+
+  // ── queue table (non-published) ──────────────────────────────────
   const qb = el('queue-body');
   qb.replaceChildren();
   if (q.length === 0) {
@@ -259,7 +359,7 @@ function render(data) {
         tag('td', null, c.id),
         tag('td', null, c.type),
         tag('td', null, c.tier ? String(c.tier) : '—'),
-        tag('td', null, tag('span', { class: 'state ' + c.state }, c.state)),
+        tag('td', null, tag('span', { class: 'state ' + c.state }, c.state.replace('_', ' '))),
         tag('td', null, c.title || '')
       ));
     });
@@ -267,6 +367,7 @@ function render(data) {
     qb.appendChild(table);
   }
 
+  // ── held ─────────────────────────────────────────────────────────
   const hb = el('held-body');
   hb.replaceChildren();
   const heldItems = q.filter(c => c.state === 'held');
@@ -274,27 +375,29 @@ function render(data) {
     hb.appendChild(tag('div', { class: 'empty' }, 'no held candidates'));
   } else {
     heldItems.forEach(c => {
-      const wrap = tag('div', { class: 'held-item' });
-      wrap.appendChild(tag('div', { class: 'id' }, '[' + c.lab + '] ' + c.id));
-      wrap.appendChild(tag('div', null, c.title || ''));
-      wrap.appendChild(tag('div', { class: 'reason' }, c.held_reason || '(no reason recorded)'));
+      const card = tag('div', { class: 'item-card held' });
+      card.appendChild(tag('div', { class: 'id' }, '[' + c.lab + '] ' + c.id));
+      card.appendChild(tag('div', null, c.title || ''));
+      card.appendChild(tag('div', { class: 'reason' }, c.held_reason || '(no reason recorded)'));
       const acts = tag('div', { class: 'actions' });
       acts.appendChild(tag('button', { class: 'act ok', onclick: () => retry(c.id) }, 'retry → pending'));
-      wrap.appendChild(acts);
-      hb.appendChild(wrap);
+      card.appendChild(acts);
+      hb.appendChild(card);
     });
   }
 
+  // ── channel drafts ───────────────────────────────────────────────
   renderDrafts('hn-body', 'hackernews', data.channel_drafts.hackernews || []);
   renderDrafts('li-body', 'linkedin',   data.channel_drafts.linkedin   || []);
 
-  const rb = el('runs-body');
-  rb.replaceChildren();
+  // ── runs ─────────────────────────────────────────────────────────
+  const runsBody = el('runs-body');
+  runsBody.replaceChildren();
   if (runs.length === 0) {
-    rb.appendChild(tag('tr', null, tag('td', { colspan: '4', class: 'empty' }, '(no runs recorded)')));
+    runsBody.appendChild(tag('tr', null, tag('td', { colspan: '4', class: 'empty' }, '(no runs recorded)')));
   } else {
     runs.forEach(r => {
-      rb.appendChild(tag('tr', null,
+      runsBody.appendChild(tag('tr', null,
         tag('td', null, r.run_id),
         tag('td', { class: 'outcome ' + r.outcome }, r.outcome),
         tag('td', null, String(r.candidates)),
@@ -324,11 +427,153 @@ function renderDrafts(targetId, channel, items) {
   });
 }
 
+// ── Review modal ──────────────────────────────────────────────────────
+async function openReview(id) {
+  currentReview = { id };
+  el('review-title').textContent = 'Review: ' + id;
+  el('review-source').value = 'loading…';
+  el('review-info').replaceChildren();
+  el('review-scores').replaceChildren();
+  el('review-notes').value = '';
+  el('review-reason').value = '';
+  el('review-reject-block').classList.remove('open');
+  el('review-toast').replaceChildren();
+  el('review-modal').classList.add('open');
+
+  try {
+    const r = await fetch('/api/review?id=' + encodeURIComponent(id));
+    const d = await r.json();
+    if (!d.ok) {
+      el('review-source').value = 'error: ' + (d.error || 'unknown');
+      return;
+    }
+    el('review-source').value = d.source || '(empty draft)';
+    el('review-notes').value = d.operator_notes || '';
+
+    const info = el('review-info');
+    info.appendChild(tag('span', null, 'lab: ' + (d.lab || '?')));
+    info.appendChild(tag('span', null, 'tier: ' + (d.tier || '?')));
+    info.appendChild(tag('span', null, 'type: ' + (d.type || '?')));
+    info.appendChild(tag('span', null, 'state: ' + (d.state || '?')));
+    info.appendChild(tag('span', null, 'channels: ' + ((d.channels || []).join(',') || 'website')));
+    if (d.cost_seconds) info.appendChild(tag('span', null, 'pipeline cost: ' + d.cost_seconds + 's'));
+
+    const sc = el('review-scores');
+    const j = d.judges || {};
+    const addRow = (k, v, colorClass) => {
+      const row = tag('div', { class: 'row' });
+      row.appendChild(tag('span', { class: 'k' }, k));
+      row.appendChild(tag('span', { class: colorClass || '' }, String(v)));
+      sc.appendChild(row);
+    };
+    if (Object.keys(j).length === 0) {
+      sc.appendChild(tag('div', { class: 'empty' }, 'no judge scores recorded'));
+    } else {
+      if (j.voice !== undefined)  addRow('voice',     j.voice,     (Number(j.voice) >= 6.5 ? 'ok' : 'err'));
+      if (j.factcheck !== undefined) addRow('factcheck', j.factcheck, (j.factcheck === true || j.factcheck === 'pass' ? 'ok' : 'err'));
+      if (j.novelty !== undefined) addRow('novelty',   j.novelty,   (Number(j.novelty) >= 6.0 ? 'ok' : 'err'));
+      Object.keys(j).forEach(k => {
+        if (['voice','factcheck','novelty'].includes(k)) return;
+        addRow(k, JSON.stringify(j[k]));
+      });
+    }
+
+    currentReview.source_path = d.source_path;
+  } catch (e) {
+    el('review-source').value = 'fetch failed: ' + e.message;
+  }
+}
+
+function closeReview() {
+  el('review-modal').classList.remove('open');
+  currentReview = null;
+  refresh();
+}
+
+function toast(msg, isErr) {
+  const t = el('review-toast');
+  t.replaceChildren();
+  const node = tag('div', { class: 'toast' + (isErr ? ' err' : '') }, msg);
+  t.appendChild(node);
+  setTimeout(() => { if (t.contains(node)) t.removeChild(node); }, 4000);
+}
+
+async function saveSource() {
+  if (!currentReview) return;
+  const source = el('review-source').value;
+  const r = await fetch('/api/review/save', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ id: currentReview.id, source })
+  });
+  const d = await r.json();
+  toast(d.ok ? ('saved · ' + d.bytes + ' bytes') : ('save failed: ' + (d.error || 'unknown')), !d.ok);
+}
+
+async function saveNotes() {
+  if (!currentReview) return;
+  const notes = el('review-notes').value;
+  const r = await fetch('/api/review/notes', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ id: currentReview.id, notes })
+  });
+  const d = await r.json();
+  toast(d.ok ? 'notes saved' : ('save failed: ' + (d.error || 'unknown')), !d.ok);
+}
+
+function toggleReject() {
+  el('review-reject-block').classList.toggle('open');
+}
+
+async function approveDraft() {
+  if (!currentReview) return;
+  if (!confirm('Approve and publish "' + currentReview.id + '"? This will run the publish flow (tier-aware) and fire channel adapters.')) return;
+  await saveSource();  // ensure edits are saved first
+  toast('publishing… (this can take up to 5 minutes)');
+  const r = await fetch('/api/review/approve', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ id: currentReview.id })
+  });
+  const d = await r.json();
+  if (d.ok) {
+    toast('approved → published');
+    setTimeout(closeReview, 1500);
+  } else {
+    toast('approve failed: ' + (d.error || ('rc=' + d.returncode)) + (d.stderr ? '\n' + d.stderr : ''), true);
+  }
+}
+
+async function rejectDraft() {
+  if (!currentReview) return;
+  const reason = el('review-reason').value.trim();
+  if (!reason) { toast('reason required', true); return; }
+  if (!confirm('Reject "' + currentReview.id + '" with reason: ' + reason)) return;
+  const r = await fetch('/api/review/reject', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ id: currentReview.id, reason })
+  });
+  const d = await r.json();
+  if (d.ok) {
+    toast('rejected → held');
+    setTimeout(closeReview, 1200);
+  } else {
+    toast('reject failed: ' + (d.error || ('rc=' + d.returncode)), true);
+  }
+}
+
+// Wire reject button second-click to actually submit when reason is filled.
+// First click toggles the reason block; if it's already open, perform the reject.
+el('review-reject-btn').addEventListener('click', (ev) => {
+  if (el('review-reject-block').classList.contains('open')) {
+    ev.preventDefault();
+    rejectDraft();
+  }
+}, true);
+
+// ── Retry / channel modal ─────────────────────────────────────────────
 async function retry(id) {
   if (!confirm('Reset "' + id + '" from held → pending?')) return;
   const r = await fetch('/api/retry', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: 'POST', headers: {'Content-Type':'application/json'},
     body: JSON.stringify({ id }),
   });
   const j = await r.json();
@@ -345,28 +590,16 @@ async function openDraft(channel, id) {
   const j = await r.json();
   el('modal-text').value = j.ok ? j.content : ('error: ' + (j.error || 'unknown'));
 }
-
-function closeModal() {
-  el('modal-bg').classList.remove('open');
-  currentDraft = null;
-}
-
+function closeModal() { el('modal-bg').classList.remove('open'); currentDraft = null; }
 async function copyDraft() {
-  const text = el('modal-text').value;
-  try {
-    await navigator.clipboard.writeText(text);
-    alert('Copied to clipboard.');
-  } catch (e) {
-    alert('Copy failed — select the text manually. ' + e.message);
-  }
+  try { await navigator.clipboard.writeText(el('modal-text').value); alert('Copied.'); }
+  catch (e) { alert('Copy failed — select manually. ' + e.message); }
 }
-
 async function markPasted() {
   if (!currentDraft) return;
-  if (!confirm('Delete the draft file for "' + currentDraft.id + '"? (Only do this after you have actually pasted it.)')) return;
+  if (!confirm('Delete the draft file for "' + currentDraft.id + '"? (Only after you actually pasted it.)')) return;
   await fetch('/api/channel-draft?channel=' + encodeURIComponent(currentDraft.channel) + '&id=' + encodeURIComponent(currentDraft.id), { method: 'DELETE' });
-  closeModal();
-  refresh();
+  closeModal(); refresh();
 }
 
 function toggleAuto() {
@@ -378,9 +611,7 @@ setInterval(() => {
   if (!auto) return;
   countdown--;
   el('countdown').textContent = Math.max(0, countdown);
-  if (countdown <= 0) {
-    refresh();
-  }
+  if (countdown <= 0) refresh();
 }, 1000);
 
 refresh();

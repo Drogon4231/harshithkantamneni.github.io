@@ -254,58 +254,32 @@ open('$candidate','w').write(json.dumps(d, indent=2))
         continue
     fi
 
-    # Stage 7: publish (tier-aware)
-    log_section "stage 7: publish (tier $TIER)"
-    if ! publish_draft "$DRAFT_PATH" "$candidate" "$JUDGES_JSON"; then
-        log_error "publish failed for $candidate"
-        python3 -c "
-import json
-d = json.load(open('$candidate'))
-d['curator_state'] = 'held'
-d['held_reason'] = 'publish flow failed'
-open('$candidate','w').write(json.dumps(d, indent=2))
-"
-        rm -f "$DRAFT_PATH" "$JUDGES_OUT"
-        continue
-    fi
-
-    # Mark published
-    python3 -c "
-import json, datetime
-d = json.load(open('$candidate'))
-d['curator_state'] = 'published'
-d['published_at'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
-open('$candidate','w').write(json.dumps(d, indent=2))
-"
-    log_info "candidate $(basename "$candidate") → published (tier $TIER, ${COST_SECONDS}s)"
-
-    # Stage 8: channel adapters (non-blocking — website is source of truth)
-    log_section "stage 8: channel adapters"
-    CHANNELS=$(CANDIDATE="$candidate" python3 -c "import os, json; print(' '.join(json.load(open(os.environ['CANDIDATE'])).get('channels', ['website'])))" 2>/dev/null || echo "website")
-    if [ "${DRY_RUN:-0}" = "1" ]; then
-        log_info "DRY_RUN active; would dispatch channels: $CHANNELS (skipping adapter calls)"
-        rm -f "$DRAFT_PATH" "$JUDGES_OUT"
-        continue
-    fi
-    for ch in $CHANNELS; do
-        case "$ch" in
-            website) ;; # already done in Stage 7
-            hackernews)
-                if ! channel_hackernews "$candidate"; then
-                    log_warn "HN adapter failed (non-blocking; website already published)"
-                fi
-                ;;
-            linkedin)
-                if ! channel_linkedin "$candidate"; then
-                    log_warn "LinkedIn adapter failed (non-blocking; website already published)"
-                fi
-                ;;
-            *)
-                log_warn "unknown channel: $ch (skipping)"
-                ;;
-        esac
-    done
-
+    # Stage 7: stage for review (NOT publish — operator approves via dashboard)
+    # The draft is moved to pending_drafts/, the candidate is marked
+    # 'awaiting_review', and the run loop continues to the next candidate.
+    # Approval (running publish_draft + channel adapters) happens via
+    # approve.sh, invoked by the dashboard's approve button.
+    log_section "stage 7: stage for review"
+    CANDIDATE_ID=$(CANDIDATE="$candidate" python3 -c "import os, json; print(json.load(open(os.environ['CANDIDATE']))['id'])")
+    PENDING_DRAFT="${CURATOR_DIR}/pending_drafts/${CANDIDATE_ID}.astro"
+    PENDING_JUDGES="${CURATOR_DIR}/pending_drafts/${CANDIDATE_ID}.judges.json"
+    mkdir -p "${CURATOR_DIR}/pending_drafts"
+    cp "$DRAFT_PATH" "$PENDING_DRAFT"
+    cp "$JUDGES_OUT" "$PENDING_JUDGES"
+    CANDIDATE="$candidate" PENDING_DRAFT="$PENDING_DRAFT" TIER="$TIER" \
+    COST_SECONDS="$COST_SECONDS" python3 <<'PYEOF'
+import os, json, datetime
+p = os.environ['CANDIDATE']
+d = json.load(open(p))
+d['curator_state'] = 'awaiting_review'
+d['pending_draft'] = os.environ['PENDING_DRAFT']
+d['awaiting_review_at'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+d['risk_tier'] = int(os.environ['TIER'])
+d['cost_seconds'] = int(os.environ['COST_SECONDS'])
+d.pop('processing_started_at', None)
+open(p, 'w').write(json.dumps(d, indent=2))
+PYEOF
+    log_info "candidate $(basename "$candidate") → awaiting_review (tier $TIER, ${COST_SECONDS}s); review via cli.sh ui"
     rm -f "$DRAFT_PATH" "$JUDGES_OUT"
 done
 
