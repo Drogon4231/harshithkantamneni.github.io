@@ -322,6 +322,98 @@ def get_diff(target_id: str) -> dict:
     return {"ok": True, "has_prev": True, "diff": "\n".join(diff_lines)}
 
 
+# ── Channel-draft editing ─────────────────────────────────────────────────
+
+def save_channel_draft(target_id: str, channel: str, content: str) -> dict:
+    if channel not in ("hackernews", "linkedin"):
+        return {"ok": False, "error": f"unknown channel: {channel}"}
+    p = PENDING_DRAFTS_DIR / f"{target_id}.{channel}.txt"
+    if not p.is_file():
+        return {"ok": False, "error": "pending channel draft missing"}
+    p.write_text(content)
+    return {"ok": True, "bytes": len(content)}
+
+
+# ── Revision history ──────────────────────────────────────────────────────
+
+def get_history(target_id: str) -> dict:
+    log = PENDING_DRAFTS_DIR / f"{target_id}.history.jsonl"
+    if not log.is_file():
+        return {"ok": True, "entries": []}
+    entries = []
+    for line in log.read_text().splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            entries.append(json.loads(line))
+        except Exception:
+            continue
+    entries.reverse()  # newest first
+    return {"ok": True, "entries": entries}
+
+
+def restore_history(target_id: str, snapshot: str) -> dict:
+    history_dir = PENDING_DRAFTS_DIR / f"{target_id}.history"
+    src = history_dir / snapshot
+    # Defensive — keep the path inside the history dir
+    try:
+        src.resolve().relative_to(history_dir.resolve())
+    except ValueError:
+        return {"ok": False, "error": "invalid snapshot path"}
+    if not src.is_file():
+        return {"ok": False, "error": "snapshot not found"}
+    draft = PENDING_DRAFTS_DIR / f"{target_id}.astro"
+    if not draft.is_file():
+        return {"ok": False, "error": "current draft missing"}
+    # Snapshot current to .prev before swapping, so undo still works.
+    shutil.copyfile(draft, draft.with_suffix(".astro.prev"))
+    shutil.copyfile(src, draft)
+    return {"ok": True, "restored": snapshot}
+
+
+# ── Real-preview helpers ──────────────────────────────────────────────────
+
+PREVIEW_LIVE_DIR = WEBSITE_ROOT / "src" / "pages" / "preview"
+
+
+def realpreview_setup(target_id: str) -> dict:
+    """Copy the pending draft to src/pages/preview/<id>.astro so that an
+    operator-running `npm run dev` server can render it at
+    http://localhost:4321/preview/<id>. Returns the URL the dashboard
+    iframe should load.
+
+    Note: src/pages/preview/ is gitignored — files placed here never
+    deploy to production.
+    """
+    draft = PENDING_DRAFTS_DIR / f"{target_id}.astro"
+    if not draft.is_file():
+        return {"ok": False, "error": "pending draft missing"}
+    PREVIEW_LIVE_DIR.mkdir(parents=True, exist_ok=True)
+    dest = PREVIEW_LIVE_DIR / f"{target_id}.astro"
+    shutil.copyfile(draft, dest)
+    # Probe dev server (timeout 1s)
+    dev_up = False
+    try:
+        import urllib.request
+        urllib.request.urlopen("http://localhost:4321/", timeout=1)
+        dev_up = True
+    except Exception:
+        dev_up = False
+    return {
+        "ok": True,
+        "url": f"http://localhost:4321/preview/{target_id}",
+        "dev_up": dev_up,
+    }
+
+
+def realpreview_teardown(target_id: str) -> dict:
+    dest = PREVIEW_LIVE_DIR / f"{target_id}.astro"
+    if dest.is_file():
+        dest.unlink()
+    return {"ok": True}
+
+
 # ── Preview rendering ─────────────────────────────────────────────────────
 
 _ASTRO_TAG_RE = re.compile(r"<([A-Z][A-Za-z0-9]*)\b([^>]*)/?>", re.DOTALL)
@@ -607,6 +699,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self._send_json({"ok": False, "error": "id required"}, 400)
             else:
                 self._send_json(get_diff(cid))
+        elif path == "/api/review/history":
+            cid = qs.get("id", [""])[0]
+            if not cid:
+                self._send_json({"ok": False, "error": "id required"}, 400)
+            else:
+                self._send_json(get_history(cid))
         elif path == "/api/review/stream":
             self._stream_action(qs)
         else:
@@ -744,6 +842,30 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 return
             result = undo_revise(target)
             self._send_json(result, 200 if result.get("ok") else 400)
+        elif path == "/api/review/channel/save":
+            target = (data.get("id") or "").strip()
+            channel = (data.get("channel") or "").strip()
+            content = data.get("content") or ""
+            if not target or not channel:
+                self._send_json({"ok": False, "error": "id and channel required"}, 400)
+                return
+            result = save_channel_draft(target, channel, content)
+            self._send_json(result, 200 if result.get("ok") else 400)
+        elif path == "/api/review/history/restore":
+            target = (data.get("id") or "").strip()
+            snapshot = (data.get("snapshot") or "").strip()
+            if not target or not snapshot:
+                self._send_json({"ok": False, "error": "id and snapshot required"}, 400)
+                return
+            result = restore_history(target, snapshot)
+            self._send_json(result, 200 if result.get("ok") else 400)
+        elif path == "/api/review/realpreview":
+            target = (data.get("id") or "").strip()
+            if not target:
+                self._send_json({"ok": False, "error": "id required"}, 400)
+                return
+            result = realpreview_setup(target)
+            self._send_json(result, 200 if result.get("ok") else 400)
         else:
             self.send_response(404); self.end_headers()
 
@@ -757,6 +879,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
             cid = qs.get("id", [""])[0]
             ok = delete_channel_draft(channel, cid)
             self._send_json({"ok": ok})
+        elif path == "/api/review/realpreview":
+            cid = qs.get("id", [""])[0]
+            if not cid:
+                self._send_json({"ok": False, "error": "id required"}, 400)
+            else:
+                self._send_json(realpreview_teardown(cid))
         else:
             self.send_response(404); self.end_headers()
 

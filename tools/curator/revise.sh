@@ -57,15 +57,36 @@ if [ -z "$REVISED" ]; then
     exit 1
 fi
 
-# Snapshot the current draft to .prev BEFORE replacing (enables one-level undo).
+# Snapshot the current draft to .prev BEFORE replacing (enables one-level undo)
+# AND append a versioned snapshot to .history/ so older versions remain
+# restorable via the dashboard's revision-history panel.
 cp "$DRAFT_FILE" "${DRAFT_FILE}.prev"
+
+HISTORY_DIR="${CURATOR_DIR}/pending_drafts/${TARGET_ID}.history"
+mkdir -p "$HISTORY_DIR"
+TS=$(date -u +%Y%m%dT%H%M%SZ)
+SNAPSHOT="${HISTORY_DIR}/${TS}.astro"
+cp "$DRAFT_FILE" "$SNAPSHOT"
+
+# Append a record to .history.jsonl (timestamp, notes excerpt, snapshot path)
+HISTORY_LOG="${CURATOR_DIR}/pending_drafts/${TARGET_ID}.history.jsonl"
+TS="$TS" NOTES_FILE="$NOTES_FILE" SNAPSHOT="$SNAPSHOT" python3 <<'PYEOF' >> "$HISTORY_LOG"
+import os, json
+notes = open(os.environ['NOTES_FILE']).read().strip()
+rec = {
+    'timestamp': os.environ['TS'],
+    'snapshot': os.path.basename(os.environ['SNAPSHOT']),
+    'notes': notes[:500],
+}
+print(json.dumps(rec))
+PYEOF
 
 # Atomically replace the pending draft file.
 TMP=$(mktemp "${CURATOR_DIR}/pending_drafts/.${TARGET_ID}.XXXXXX")
 printf "%s" "$REVISED" > "$TMP"
 mv "$TMP" "$DRAFT_FILE"
 
-log_info "revise: $TARGET_ID → updated (${#REVISED} chars; .prev saved for undo)"
+log_info "revise: $TARGET_ID → updated (${#REVISED} chars; snapshot $TS)"
 
 # Regenerate channel drafts since the main draft changed (any LinkedIn teaser
 # extracted from the old prose is now stale). Best-effort; failures non-blocking.

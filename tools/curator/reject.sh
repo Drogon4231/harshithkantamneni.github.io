@@ -53,5 +53,9 @@ rm -f "$CURATOR_DIR/pending_drafts/${TARGET_ID}.astro" \
       "$CURATOR_DIR/pending_drafts/${TARGET_ID}.astro.prev" \
       "$CURATOR_DIR/pending_drafts/${TARGET_ID}.judges.json" \
       "$CURATOR_DIR/pending_drafts/${TARGET_ID}.hackernews.txt" \
-      "$CURATOR_DIR/pending_drafts/${TARGET_ID}.linkedin.txt"
+      "$CURATOR_DIR/pending_drafts/${TARGET_ID}.linkedin.txt" \
+      "$CURATOR_DIR/pending_drafts/${TARGET_ID}.history.jsonl"
+rm -rf "$CURATOR_DIR/pending_drafts/${TARGET_ID}.history"
+# Cleanup any real-preview file that the operator may have triggered.
+rm -f "$CURATOR_DIR/../../src/pages/preview/${TARGET_ID}.astro"
 log_info "reject: $TARGET_ID → held; reason: $REASON"

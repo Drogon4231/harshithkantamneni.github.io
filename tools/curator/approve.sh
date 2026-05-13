@@ -120,5 +120,9 @@ for ch in $CHANNELS; do
     esac
 done
 
-rm -f "$PENDING_DRAFT" "$PENDING_JUDGES" "${PENDING_DRAFT}.prev"
+rm -f "$PENDING_DRAFT" "$PENDING_JUDGES" "${PENDING_DRAFT}.prev" \
+      "$CURATOR_DIR/pending_drafts/${TARGET_ID}.history.jsonl"
+rm -rf "$CURATOR_DIR/pending_drafts/${TARGET_ID}.history"
+# Cleanup any real-preview file that the operator may have triggered.
+rm -f "$WEBSITE_ROOT/src/pages/preview/${TARGET_ID}.astro"
 log_info "approve: $TARGET_ID complete"

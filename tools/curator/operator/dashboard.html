@@ -137,10 +137,20 @@
   .channel-card { background: var(--panel-2); border: 1px solid var(--border); border-radius: 3px; margin-bottom: 8px; }
   .channel-card .head { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; font-family: var(--mono); font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--border); cursor: pointer; }
   .channel-card .head .ch { color: var(--info); font-weight: 600; }
-  .channel-card .body { display: none; padding: 8px 10px; font-family: var(--mono); font-size: 11px; color: var(--text); max-height: 200px; overflow-y: auto; white-space: pre-wrap; line-height: 1.5; }
+  .channel-card .body { display: none; padding: 8px 10px; }
   .channel-card.open .body { display: block; }
+  .channel-card textarea { width: 100%; min-height: 160px; max-height: 280px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--mono); font-size: 11px; padding: 8px; resize: vertical; border-radius: 3px; line-height: 1.5; }
+  .channel-card .row { display: flex; justify-content: flex-end; gap: 6px; margin-top: 6px; }
   .channel-card .head .arrow { transition: transform 120ms; }
   .channel-card.open .head .arrow { transform: rotate(90deg); }
+  .history-list { max-height: 240px; overflow-y: auto; }
+  .history-item { background: var(--panel-2); border: 1px solid var(--border); border-radius: 3px; padding: 6px 10px; margin-bottom: 6px; font-family: var(--mono); font-size: 11px; }
+  .history-item .ts { color: var(--info); font-weight: 600; }
+  .history-item .notes { color: var(--muted); margin: 3px 0 5px; white-space: pre-wrap; line-height: 1.4; }
+  .history-item .row { display: flex; justify-content: flex-end; }
+  .modal .real-preview-warn { background: rgba(255,180,84,0.1); border: 1px solid var(--warn); color: var(--warn); padding: 8px 12px; font-family: var(--mono); font-size: 11px; border-radius: 3px; margin-bottom: 8px; display: none; }
+  .modal .real-preview-warn.show { display: block; }
+  .modal .kbd-hint { font-family: var(--mono); font-size: 10px; color: var(--dim); margin-top: 4px; }
   .modal label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); margin-top: 6px; }
   .modal .reject-block { display: none; }
   .modal .reject-block.open { display: block; }
@@ -232,10 +242,16 @@
       <div class="col">
         <div class="tabs">
           <button class="tab active" id="tab-preview" onclick="showTab('preview')">visual preview</button>
+          <button class="tab" id="tab-real" onclick="showTab('real')">real preview <span class="kbd-hint" style="display:inline">(needs npm dev)</span></button>
           <button class="tab" id="tab-source" onclick="showTab('source')">astro source</button>
           <button class="tab" id="tab-diff" onclick="showTab('diff')" style="display:none">diff vs prev</button>
         </div>
+        <div class="real-preview-warn" id="real-preview-warn">
+          npm run dev not reachable at localhost:4321. Start it in another terminal:
+          <code style="display:block;margin-top:4px;color:var(--text);">cd ~/Desktop/website &amp;&amp; npm run dev</code>
+        </div>
         <iframe id="review-preview" class="preview-frame" sandbox="allow-same-origin"></iframe>
+        <iframe id="review-real" class="preview-frame" style="display:none"></iframe>
         <textarea class="source" id="review-source" style="display:none"></textarea>
         <pre class="diff" id="review-diff" style="display:none"></pre>
         <div class="live-log" id="review-live-log"></div>
@@ -244,11 +260,15 @@
         <h3>Judge scores</h3>
         <div class="meta-block" id="review-scores"></div>
 
-        <h3>Linked channel drafts</h3>
+        <h3>Linked channel drafts (editable)</h3>
         <div id="review-channels"></div>
+
+        <h3>Revision history</h3>
+        <div id="review-history" class="history-list"></div>
 
         <label>Comments — used as revision instructions for Claude</label>
         <textarea class="notes" id="review-notes" placeholder="e.g. 'tighten the opening; drop the third paragraph; make title more specific'"></textarea>
+        <div class="kbd-hint">⌘+Enter to apply · ⌘+S to save · Esc to close</div>
         <div class="actions" style="margin-top:8px; justify-content:flex-start;">
           <button class="act" onclick="saveNotes()">save comment</button>
           <button class="act primary" onclick="applyNotes()">apply (Claude revises) →</button>
@@ -293,6 +313,7 @@ let countdown = 5;
 const REFRESH_S = 5;
 let currentDraft = null;
 let currentReview = null;
+let reviewDirty = false;  // unsaved edits in source / notes / channels
 
 function fmtBytes(n) { return n < 1024 ? n + 'B' : (n/1024).toFixed(1) + 'K'; }
 function el(id) { return document.getElementById(id); }
@@ -523,7 +544,7 @@ async function openReview(id) {
       });
     }
 
-    // Linked channel drafts (HN + LinkedIn paste-ready text)
+    // Linked channel drafts — editable in place
     const cc = el('review-channels');
     cc.replaceChildren();
     const channels = d.channels || [];
@@ -533,7 +554,7 @@ async function openReview(id) {
       cc.appendChild(tag('div', { class: 'empty' }, 'no linked channels (website-only)'));
     } else {
       nonWebsite.forEach(ch => {
-        const text = channelDrafts[ch];
+        const text = channelDrafts[ch] || '';
         const card = tag('div', { class: 'channel-card' });
         const head = tag('div', { class: 'head' });
         const left = tag('span');
@@ -543,11 +564,22 @@ async function openReview(id) {
         head.appendChild(tag('span', null, text ? (text.length + ' chars') : 'not yet generated'));
         head.onclick = () => card.classList.toggle('open');
         card.appendChild(head);
-        const body = tag('div', { class: 'body' }, text || '(will be generated during review staging)');
+        const body = tag('div', { class: 'body' });
+        const ta = document.createElement('textarea');
+        ta.value = text || '(will be generated during review staging)';
+        ta.dataset.channel = ch;
+        ta.addEventListener('input', () => { reviewDirty = true; });
+        body.appendChild(ta);
+        const row = tag('div', { class: 'row' });
+        row.appendChild(tag('button', { class: 'act', onclick: () => saveChannel(ch, ta) }, 'save ' + ch));
+        body.appendChild(row);
         card.appendChild(body);
         cc.appendChild(card);
       });
     }
+
+    // Revision history
+    loadHistory();
 
     currentReview.source_path = d.source_path;
     currentReview.has_prev = !!d.has_prev;
@@ -585,6 +617,63 @@ async function loadDiff() {
   });
 }
 
+async function loadHistory() {
+  if (!currentReview) return;
+  const wrap = el('review-history');
+  wrap.replaceChildren();
+  const r = await fetch('/api/review/history?id=' + encodeURIComponent(currentReview.id));
+  const d = await r.json();
+  if (!d.ok || !d.entries || d.entries.length === 0) {
+    wrap.appendChild(tag('div', { class: 'empty' }, '(no revisions yet)'));
+    return;
+  }
+  d.entries.forEach(e => {
+    const item = tag('div', { class: 'history-item' });
+    item.appendChild(tag('div', { class: 'ts' }, e.timestamp));
+    if (e.notes) item.appendChild(tag('div', { class: 'notes' }, e.notes));
+    const row = tag('div', { class: 'row' });
+    row.appendChild(tag('button', {
+      class: 'act',
+      onclick: () => restoreHistorySnapshot(e.snapshot)
+    }, 'restore this version'));
+    item.appendChild(row);
+    wrap.appendChild(item);
+  });
+}
+
+async function restoreHistorySnapshot(snapshot) {
+  if (!currentReview) return;
+  if (!confirm('Restore this version? The current draft will be saved to .prev so you can undo this restore.')) return;
+  const r = await fetch('/api/review/history/restore', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ id: currentReview.id, snapshot })
+  });
+  const d = await r.json();
+  if (!d.ok) { toast('restore failed: ' + (d.error || 'unknown'), true); return; }
+  toast('restored ' + snapshot);
+  // Reload state
+  el('review-preview').src = '/api/preview?id=' + encodeURIComponent(currentReview.id) + '&_=' + Date.now();
+  const r2 = await fetch('/api/review?id=' + encodeURIComponent(currentReview.id));
+  const d2 = await r2.json();
+  if (d2.ok) {
+    el('review-source').value = d2.source;
+    currentReview.has_prev = !!d2.has_prev;
+    el('tab-diff').style.display = d2.has_prev ? '' : 'none';
+    el('btn-undo').style.display = d2.has_prev ? '' : 'none';
+  }
+}
+
+async function saveChannel(channel, textarea) {
+  if (!currentReview) return;
+  const r = await fetch('/api/review/channel/save', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ id: currentReview.id, channel, content: textarea.value })
+  });
+  const d = await r.json();
+  toast(d.ok ? ('saved ' + channel + ' · ' + d.bytes + ' bytes') : ('save failed: ' + (d.error || 'unknown')), !d.ok);
+  if (d.ok) reviewDirty = false;
+}
+
 async function undoRevise() {
   if (!currentReview) return;
   if (!confirm('Revert "' + currentReview.id + '" to the version before the last revise? (One level of undo; the post-revise version becomes the next .prev so you can re-apply by clicking undo again.)')) return;
@@ -602,7 +691,17 @@ async function undoRevise() {
   if (d2.ok) el('review-source').value = d2.source;
 }
 
-function closeReview() {
+async function closeReview(force) {
+  if (!force && reviewDirty) {
+    if (!confirm('You have unsaved edits. Close anyway and discard them?')) return;
+  }
+  // Teardown real-preview staging file if any
+  if (currentReview) {
+    try {
+      await fetch('/api/review/realpreview?id=' + encodeURIComponent(currentReview.id), { method: 'DELETE' });
+    } catch (_) {}
+  }
+  reviewDirty = false;
   el('review-modal').classList.remove('open');
   currentReview = null;
   refresh();
@@ -625,6 +724,7 @@ async function saveSource() {
   });
   const d = await r.json();
   toast(d.ok ? ('saved · ' + d.bytes + ' bytes') : ('save failed: ' + (d.error || 'unknown')), !d.ok);
+  if (d.ok) reviewDirty = false;
 }
 
 async function saveNotes() {
@@ -636,6 +736,7 @@ async function saveNotes() {
   });
   const d = await r.json();
   toast(d.ok ? 'comment saved (not yet sent to Claude — click "apply" for that)' : ('save failed: ' + (d.error || 'unknown')), !d.ok);
+  if (d.ok) reviewDirty = false;
 }
 
 function appendLog(line, klass) {
@@ -712,19 +813,74 @@ async function applyNotes() {
   }
 }
 
-function showTab(which) {
+async function showTab(which) {
   const isPreview = which === 'preview';
+  const isReal    = which === 'real';
   const isSource  = which === 'source';
   const isDiff    = which === 'diff';
   el('tab-preview').classList.toggle('active', isPreview);
+  el('tab-real').classList.toggle('active', isReal);
   el('tab-source').classList.toggle('active', isSource);
   el('tab-diff').classList.toggle('active', isDiff);
   el('review-preview').style.display = isPreview ? '' : 'none';
+  el('review-real').style.display    = isReal    ? '' : 'none';
   el('review-source').style.display  = isSource  ? '' : 'none';
   el('review-diff').style.display    = isDiff    ? '' : 'none';
   el('btn-save-source').style.display = isSource ? '' : 'none';
+  el('real-preview-warn').classList.remove('show');
   if (isDiff) loadDiff();
+  if (isReal && currentReview) {
+    // Stage the file in src/pages/preview/ and probe the dev server.
+    const r = await fetch('/api/review/realpreview', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ id: currentReview.id })
+    });
+    const d = await r.json();
+    if (!d.ok) { toast('real preview setup failed', true); return; }
+    if (!d.dev_up) {
+      el('real-preview-warn').classList.add('show');
+      el('review-real').src = 'about:blank';
+    } else {
+      el('review-real').src = d.url + '?_=' + Date.now();
+    }
+  }
 }
+
+// ── Keyboard shortcuts (modal-scoped) ─────────────────────────────────
+document.addEventListener('keydown', (e) => {
+  if (!el('review-modal').classList.contains('open')) return;
+  // Esc → close (with unsaved warning)
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    closeReview();
+    return;
+  }
+  const cmd = e.metaKey || e.ctrlKey;
+  if (!cmd) return;
+  // Cmd+S → save (source if source-tab is open; otherwise notes)
+  if (e.key === 's' || e.key === 'S') {
+    e.preventDefault();
+    if (el('review-source').style.display !== 'none') saveSource();
+    else saveNotes();
+    return;
+  }
+  // Cmd+Enter → apply (revise via Claude)
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    applyNotes();
+    return;
+  }
+});
+
+// Track dirty edits on source + notes textareas (channel cards register
+// their own listeners during render).
+document.addEventListener('input', (e) => {
+  if (!el('review-modal').classList.contains('open')) return;
+  const id = e.target && e.target.id;
+  if (id === 'review-source' || id === 'review-notes') {
+    reviewDirty = true;
+  }
+});
 
 function toggleReject() {
   el('review-reject-block').classList.toggle('open');
