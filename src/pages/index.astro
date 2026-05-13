@@ -6,6 +6,38 @@ import NumberedList from '../components/NumberedList.astro';
 
 const base = '/harshithkantamneni.github.io';
 
+// Derive the writing list from actual report + note pages. Add `export const meta`
+// to any new .astro page under reports/ or notes/ and it'll auto-appear here.
+const reportModules = import.meta.glob('./reports/*.astro', { eager: true });
+const noteModules   = import.meta.glob('./notes/*.astro',   { eager: true });
+function collectMeta(modules, baseHref) {
+  const out = [];
+  for (const [path, mod] of Object.entries(modules)) {
+    if (!mod.meta) continue;
+    const slug = path.split('/').pop().replace(/\.astro$/, '');
+    if (slug === 'index') continue;
+    out.push({
+      ...mod.meta,
+      slug,
+      path: baseHref,
+      displayTitle: mod.meta.listTitle || mod.meta.title,
+    });
+  }
+  return out;
+}
+const writingList = [
+  ...collectMeta(reportModules, `${base}/reports/`),
+  ...collectMeta(noteModules,   `${base}/notes/`),
+]
+  .sort((a, b) => b.date.localeCompare(a.date))
+  .slice(0, 8);
+
+function shortDate(iso) {
+  const [, m, d] = iso.split('-');
+  const mm = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][parseInt(m,10)-1];
+  return `${mm} ${d}`;
+}
+
 const labs = [
   {
     num: '01',
@@ -68,36 +100,13 @@ const labs = [
 
   <div class="page-grid">
     <ul class="writing-list extended">
-      <li>
-        <span class="date">May 12</span>
-        <a href={`${base}/reports/recursive-verification-surface-collapse`} class="title">Recursive Verification-Surface Collapse</a>
-        <span class="length">~3,200w</span>
-      </li>
-      <li>
-        <span class="date">May 05</span>
-        <a href={`${base}/notes/byte-identical-builds`} class="title">Twelve cycles of byte-identical builds</a>
-        <span class="length">~600w</span>
-      </li>
-      <li>
-        <span class="date">May 03</span>
-        <a href={`${base}/notes/tier-per-task`} class="title">Tier dispatchers per task, not per role</a>
-        <span class="length">~500w</span>
-      </li>
-      <li>
-        <span class="date">May 02</span>
-        <a href={`${base}/notes/llm-judge-bias`} class="title">Same-family LLM judge bias is real</a>
-        <span class="length">~700w</span>
-      </li>
-      <li>
-        <span class="date">Apr 28</span>
-        <a href={`${base}/notes/six-cycles-after-the-directive`} class="title">Six cycles after the verification-depth directive</a>
-        <span class="length">~1,100w</span>
-      </li>
-      <li>
-        <span class="date">Apr 16</span>
-        <a href={`${base}/reports/cross-lab-diagnosis`} class="title">Cross-Lab Diagnosis: Why an Autonomous Research Lab Stopped Adapting</a>
-        <span class="length">~3,000w</span>
-      </li>
+      {writingList.map(w => (
+        <li>
+          <span class="date">{shortDate(w.date)}</span>
+          <a href={`${w.path}${w.slug}`} class="title">{w.displayTitle}</a>
+          <span class="length">{w.length}</span>
+        </li>
+      ))}
     </ul>
   </div>
 

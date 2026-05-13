@@ -23,6 +23,14 @@ import Default from '../../layouts/Default.astro';
 import SectionHead from '../../components/SectionHead.astro';
 import PullQuote from '../../components/PullQuote.astro';
 import MetaStrip from '../../components/MetaStrip.astro';
+
+export const meta = {
+  title: "<TITLE>",
+  date: "<ISO_DATE>",
+  type: "report",
+  length: "~<WORDCOUNT>w",
+  description: "<SUMMARY>",
+};
 ---
 ```
 
@@ -34,8 +42,19 @@ import MetaStrip from '../../components/MetaStrip.astro';
 
 const title = "<TITLE> · Harshith Kantamneni";
 const description = "<SUMMARY>";
+
+export const meta = {
+  title: "<TITLE>",
+  date: "<ISO_DATE>",
+  type: "note",
+  length: "~<WORDCOUNT>w",
+  description: "<SUMMARY>",
+  lab: "<HIVE|AUTONOMOUS RESEARCH|>",
+};
 ---
 ```
+
+**The `export const meta` block is REQUIRED.** It feeds the homepage writing list, reports/notes index pages, and the RSS feed. Use the candidate's ratified_date (or today's date) as the `<ISO_DATE>` value. Use the same string for `description` that you put on the `<Default>` `description` prop. For notes, set `lab` to the originating lab (HIVE or AUTONOMOUS RESEARCH) or omit if cross-cutting.
 
 ## Page structure for type=report
 
