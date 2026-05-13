@@ -3,6 +3,7 @@ import Default from '../../layouts/Default.astro';
 import Hero from '../../components/Hero.astro';
 import SectionHead from '../../components/SectionHead.astro';
 import PullQuote from '../../components/PullQuote.astro';
+import LabDiagram from '../../components/LabDiagram.astro';
 ---
 <Default title="Autonomous Research Lab · Harshith Kantamneni" description="A research lab doing rigorous small-model ML from scratch on an 18GB MacBook. ~30 agents across research, engineering, evaluation, and quality. No cloud compute, no frameworks." current="labs">
 
@@ -39,6 +40,13 @@ import PullQuote from '../../components/PullQuote.astro';
       <p>Work is organized into programs. Each program is a multi-cycle research arc with a pre-registered question, a defined methodology, and an end-state criterion. Programs run to completion or to a published null result; they do not get quietly abandoned. PI and Director hold co-equal authority on program selection through a unanimous-compromise gate.</p>
       <p>Within a program, cycles dispatch specialists across the layered org. Research-layer agents read papers and synthesize methodology. Engineering-layer agents implement training infrastructure. Evaluation-layer agents run benchmarks. Quality-layer agents independently audit findings. Knowledge-layer agents maintain shared memory and cross-references. Meta-layer agents handle governance, anti-forgery checks, and the unanimous-compromise mediation.</p>
       <p>All agents run on the most capable available model at maximum effort. There is no model tiering inside the lab; the bottleneck is judgment, not throughput.</p>
+    </div>
+  </div>
+
+  <div class="page-grid">
+    <div class="extended">
+      <LabDiagram kind="agi-org" caption="Lite view · PI ↔ Director with six layers" />
+      <LabDiagram kind="agi-memory" caption="Memory tiers · descending stability" />
     </div>
   </div>
 
