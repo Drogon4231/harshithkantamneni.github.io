@@ -267,6 +267,7 @@
     <textarea id="modal-text" readonly style="min-height: 320px;"></textarea>
     <div class="actions">
       <button class="act" onclick="copyDraft()">copy to clipboard</button>
+      <button class="act primary" id="btn-submit-channel" onclick="submitChannel()" style="display:none">open submit page →</button>
       <button class="act danger" onclick="markPasted()">mark pasted (delete file)</button>
       <button class="act" onclick="closeModal()">close</button>
     </div>
@@ -670,10 +671,40 @@ async function openDraft(channel, id) {
   currentDraft = { channel, id };
   el('modal-title').textContent = channel + ' / ' + id;
   el('modal-text').value = 'loading…';
+  el('btn-submit-channel').style.display = 'none';
   el('modal-bg').classList.add('open');
   const r = await fetch('/api/channel-draft?channel=' + encodeURIComponent(channel) + '&id=' + encodeURIComponent(id));
   const j = await r.json();
   el('modal-text').value = j.ok ? j.content : ('error: ' + (j.error || 'unknown'));
+  // Wire submit-page button for HN/LinkedIn
+  const btn = el('btn-submit-channel');
+  if (channel === 'hackernews' && j.ok && j.meta && j.meta.url && j.meta.title) {
+    currentDraft.submitUrl = 'https://news.ycombinator.com/submitlink?u='
+      + encodeURIComponent(j.meta.url) + '&t=' + encodeURIComponent(j.meta.title);
+    btn.textContent = 'open HN submit (pre-filled) →';
+    btn.style.display = '';
+  } else if (channel === 'linkedin' && j.ok) {
+    currentDraft.submitUrl = 'https://www.linkedin.com/post/new/';
+    btn.textContent = 'copy + open LinkedIn compose →';
+    btn.style.display = '';
+  }
+}
+
+async function submitChannel() {
+  if (!currentDraft || !currentDraft.submitUrl) return;
+  // For LinkedIn we copy text to clipboard first since the compose page
+  // doesn't accept prefill via URL params. HN takes title+url via URL,
+  // so copy is unnecessary but harmless.
+  if (currentDraft.channel === 'linkedin') {
+    try {
+      const text = el('modal-text').value;
+      // Extract just the post body (between the dashed delimiters).
+      const m = text.match(/────────\s*post body below\s*────────\n([\s\S]*?)\n────────/);
+      const body = m ? m[1].trim() : text;
+      await navigator.clipboard.writeText(body);
+    } catch (e) { /* ignore clipboard failures */ }
+  }
+  window.open(currentDraft.submitUrl, '_blank', 'noopener,noreferrer');
 }
 function closeModal() { el('modal-bg').classList.remove('open'); currentDraft = null; }
 async function copyDraft() {

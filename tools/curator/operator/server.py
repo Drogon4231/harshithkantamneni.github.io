@@ -460,6 +460,34 @@ def get_channel_draft(channel: str, draft_id: str):
     return f.read_text()
 
 
+def parse_hn_draft(text: str) -> dict:
+    """Pull the suggested title and target URL out of an HN paste-ready file.
+
+    File format (deterministic — produced by channel_hackernews.sh):
+        HACKER NEWS SUBMISSION
+        ======================
+
+        Submit at: https://news.ycombinator.com/submit
+        Account:   Drogon4231
+
+        Suggested title (38 chars):
+        Twelve cycles of byte-identical builds
+
+        URL:
+        https://drogon4231.github.io/...
+    """
+    out = {"title": "", "url": ""}
+    lines = text.splitlines()
+    for i, line in enumerate(lines):
+        if line.startswith("Suggested title"):
+            if i + 1 < len(lines):
+                out["title"] = lines[i + 1].strip()
+        elif line.strip() == "URL:":
+            if i + 1 < len(lines):
+                out["url"] = lines[i + 1].strip()
+    return out
+
+
 def delete_channel_draft(channel: str, draft_id: str) -> bool:
     if channel not in ("hackernews", "linkedin"):
         return False
@@ -512,7 +540,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
             if text is None:
                 self._send_json({"ok": False, "error": "not found"}, 404)
             else:
-                self._send_json({"ok": True, "content": text})
+                payload = {"ok": True, "content": text}
+                if channel == "hackernews":
+                    payload["meta"] = parse_hn_draft(text)
+                self._send_json(payload)
         elif path == "/api/review":
             cid = qs.get("id", [""])[0]
             if not cid:
