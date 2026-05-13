@@ -19,13 +19,16 @@ use the terminal CLI. The dashboard is a glance + light-touch tool.
 """
 import argparse
 import datetime
+import difflib
 import http.server
 import json
 import os
 import re
+import shutil
 import socketserver
 import subprocess
 import sys
+import tempfile
 import threading
 import urllib.parse
 import webbrowser
@@ -170,9 +173,13 @@ def get_review(target_id: str):
         if p.is_file():
             channel_drafts[ch] = p.read_text()
 
+    prev_path = PENDING_DRAFTS_DIR / f"{target_id}.astro.prev"
+    has_prev = prev_path.is_file()
+
     return {
         "ok": True,
         "id": target_id,
+        "has_prev": has_prev,
         "lab": c.get("_lab"),
         "title": c.get("title", ""),
         "summary": c.get("summary", ""),
@@ -267,7 +274,6 @@ def revise_candidate(target_id: str, notes: str) -> dict:
 
     save_operator_notes(target_id, notes)
 
-    import tempfile
     fd, tmp_path = tempfile.mkstemp(suffix=".txt", text=True)
     try:
         with os.fdopen(fd, "w") as t:
@@ -280,6 +286,40 @@ def revise_candidate(target_id: str, notes: str) -> dict:
         try: os.unlink(tmp_path)
         except FileNotFoundError: pass
     return result
+
+
+# ── Undo + diff ───────────────────────────────────────────────────────────
+
+def undo_revise(target_id: str) -> dict:
+    """Restore <id>.astro from <id>.astro.prev (one-level undo of last revise)."""
+    draft = PENDING_DRAFTS_DIR / f"{target_id}.astro"
+    prev = PENDING_DRAFTS_DIR / f"{target_id}.astro.prev"
+    if not prev.is_file():
+        return {"ok": False, "error": "no .prev snapshot available; nothing to undo"}
+    if not draft.is_file():
+        return {"ok": False, "error": "current draft missing"}
+    # Swap so a subsequent undo redoes (poor-man's redo via repeat-undo).
+    swap = PENDING_DRAFTS_DIR / f".{target_id}.swap"
+    shutil.copyfile(draft, swap)
+    shutil.copyfile(prev, draft)
+    shutil.move(str(swap), str(prev))
+    return {"ok": True, "message": f"{target_id} reverted to .prev"}
+
+
+def get_diff(target_id: str) -> dict:
+    """Return a unified diff between <id>.astro.prev and <id>.astro."""
+    draft = PENDING_DRAFTS_DIR / f"{target_id}.astro"
+    prev = PENDING_DRAFTS_DIR / f"{target_id}.astro.prev"
+    if not prev.is_file():
+        return {"ok": True, "has_prev": False, "diff": ""}
+    if not draft.is_file():
+        return {"ok": False, "error": "current draft missing"}
+    a = prev.read_text().splitlines(keepends=False)
+    b = draft.read_text().splitlines(keepends=False)
+    diff_lines = list(difflib.unified_diff(
+        a, b, fromfile="previous", tofile="current", lineterm="",
+    ))
+    return {"ok": True, "has_prev": True, "diff": "\n".join(diff_lines)}
 
 
 # ── Preview rendering ─────────────────────────────────────────────────────
@@ -561,8 +601,86 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.send_header("Cache-Control", "no-store")
             self.end_headers()
             self.wfile.write(html)
+        elif path == "/api/review/diff":
+            cid = qs.get("id", [""])[0]
+            if not cid:
+                self._send_json({"ok": False, "error": "id required"}, 400)
+            else:
+                self._send_json(get_diff(cid))
+        elif path == "/api/review/stream":
+            self._stream_action(qs)
         else:
             self.send_response(404); self.end_headers()
+
+    def _stream_action(self, qs):
+        """Server-Sent Events stream of a long-running curator action.
+
+        action=approve|revise; id=<candidate id>.
+        For revise: reads operator_notes from the manifest (must be set
+        via /api/review/notes beforehand).
+        """
+        action = qs.get("action", [""])[0]
+        target_id = qs.get("id", [""])[0]
+        if action not in ("approve", "revise") or not target_id:
+            self.send_response(400); self.end_headers(); return
+
+        c, mfile = find_candidate_by_id(target_id)
+        if not c or c.get("curator_state") != "awaiting_review":
+            self.send_response(409); self.end_headers(); return
+
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Accel-Buffering", "no")
+        self.end_headers()
+
+        def emit(event: str, payload: str) -> bool:
+            try:
+                msg = f"event: {event}\ndata: {json.dumps({'line': payload})}\n\n"
+                self.wfile.write(msg.encode("utf-8"))
+                self.wfile.flush()
+                return True
+            except (BrokenPipeError, ConnectionResetError):
+                return False
+
+        notes_tmp = None
+        if action == "approve":
+            cmd = ["bash", "tools/curator/approve.sh", target_id]
+        else:
+            notes = c.get("operator_notes", "") or ""
+            if not notes.strip():
+                emit("error", "operator_notes empty; save a comment first")
+                emit("done", "")
+                return
+            fd, notes_tmp = tempfile.mkstemp(suffix=".txt", text=True)
+            with os.fdopen(fd, "w") as t:
+                t.write(notes)
+            cmd = ["bash", "tools/curator/revise.sh", target_id, notes_tmp]
+
+        try:
+            proc = subprocess.Popen(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                bufsize=1, text=True, cwd=str(WEBSITE_ROOT),
+            )
+            for line in iter(proc.stdout.readline, ""):
+                line = line.rstrip("\n")
+                if not emit("log", line):
+                    proc.terminate()
+                    break
+            proc.wait(timeout=300)
+            rc = proc.returncode
+            try:
+                msg = f"event: done\ndata: {json.dumps({'rc': rc})}\n\n"
+                self.wfile.write(msg.encode("utf-8"))
+                self.wfile.flush()
+            except (BrokenPipeError, ConnectionResetError):
+                pass
+        except Exception as e:
+            emit("error", str(e))
+        finally:
+            if notes_tmp:
+                try: os.unlink(notes_tmp)
+                except FileNotFoundError: pass
 
     def do_POST(self):
         url = urllib.parse.urlparse(self.path)
@@ -618,7 +736,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self._send_json({"ok": False, "error": "id required"}, 400)
                 return
             result = revise_candidate(target, notes)
-            # Long-running; bump default status to 200 even with non-ok subset
+            self._send_json(result, 200 if result.get("ok") else 400)
+        elif path == "/api/review/undo":
+            target = (data.get("id") or "").strip()
+            if not target:
+                self._send_json({"ok": False, "error": "id required"}, 400)
+                return
+            result = undo_revise(target)
             self._send_json(result, 200 if result.get("ok") else 400)
         else:
             self.send_response(404); self.end_headers()

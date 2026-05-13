@@ -50,6 +50,7 @@ open(p, 'w').write(json.dumps(d, indent=2))
 PYEOF
 
 rm -f "$CURATOR_DIR/pending_drafts/${TARGET_ID}.astro" \
+      "$CURATOR_DIR/pending_drafts/${TARGET_ID}.astro.prev" \
       "$CURATOR_DIR/pending_drafts/${TARGET_ID}.judges.json" \
       "$CURATOR_DIR/pending_drafts/${TARGET_ID}.hackernews.txt" \
       "$CURATOR_DIR/pending_drafts/${TARGET_ID}.linkedin.txt"

@@ -115,6 +115,15 @@
   .modal .tabs button.tab { background: transparent; color: var(--muted); border: 1px solid var(--border); border-bottom: none; padding: 5px 14px; font-family: var(--mono); font-size: 11px; cursor: pointer; border-radius: 3px 3px 0 0; }
   .modal .tabs button.tab.active { background: var(--bg); color: var(--text); border-color: var(--accent); }
   .modal .preview-frame { width: 100%; flex: 1; min-height: 420px; background: white; border: 1px solid var(--border); border-radius: 0 3px 3px 3px; }
+  .modal pre.diff { flex: 1; min-height: 420px; margin: 0; background: #0a0b0c; border: 1px solid var(--border); border-radius: 0 3px 3px 3px; padding: 12px 14px; font-family: var(--mono); font-size: 12px; line-height: 1.55; color: var(--muted); overflow: auto; white-space: pre; }
+  .modal pre.diff .add { color: var(--ok); background: rgba(106,209,116,0.08); display: block; }
+  .modal pre.diff .del { color: var(--err); background: rgba(255,107,107,0.08); display: block; }
+  .modal pre.diff .hunk { color: var(--info); display: block; margin-top: 6px; }
+  .modal .live-log { background: #0a0b0c; border: 1px solid var(--info); border-left-width: 3px; border-radius: 3px; padding: 10px 14px; font-family: var(--mono); font-size: 11px; line-height: 1.55; color: var(--muted); max-height: 220px; overflow-y: auto; margin-top: 10px; white-space: pre-wrap; display: none; }
+  .modal .live-log.open { display: block; }
+  .modal .live-log .meta { color: var(--info); }
+  .modal .live-log .err { color: var(--err); }
+  .modal .live-log .ok { color: var(--ok); }
   .modal textarea.notes { min-height: 80px; margin-top: 8px; }
   .modal textarea.reason { min-height: 60px; margin-top: 8px; }
   .modal .actions { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; flex-wrap: wrap; }
@@ -224,9 +233,12 @@
         <div class="tabs">
           <button class="tab active" id="tab-preview" onclick="showTab('preview')">visual preview</button>
           <button class="tab" id="tab-source" onclick="showTab('source')">astro source</button>
+          <button class="tab" id="tab-diff" onclick="showTab('diff')" style="display:none">diff vs prev</button>
         </div>
         <iframe id="review-preview" class="preview-frame" sandbox="allow-same-origin"></iframe>
         <textarea class="source" id="review-source" style="display:none"></textarea>
+        <pre class="diff" id="review-diff" style="display:none"></pre>
+        <div class="live-log" id="review-live-log"></div>
       </div>
       <div class="col right-col">
         <h3>Judge scores</h3>
@@ -252,6 +264,7 @@
     <div class="actions">
       <div class="left">
         <button class="act" onclick="saveSource()" id="btn-save-source" style="display:none">save source edits</button>
+        <button class="act" onclick="undoRevise()" id="btn-undo" style="display:none">↶ undo last revise</button>
       </div>
       <button class="act" onclick="closeReview()">close</button>
       <button class="act danger" id="review-reject-btn" onclick="toggleReject()">reject…</button>
@@ -459,10 +472,14 @@ async function openReview(id) {
   el('review-source').value = 'loading…';
   el('review-info').replaceChildren();
   el('review-scores').replaceChildren();
+  el('review-channels').replaceChildren();
   el('review-notes').value = '';
   el('review-reason').value = '';
   el('review-reject-block').classList.remove('open');
   el('review-toast').replaceChildren();
+  clearLog();
+  el('tab-diff').style.display = 'none';
+  el('btn-undo').style.display = 'none';
   el('review-modal').classList.add('open');
   // Default to preview tab
   showTab('preview');
@@ -533,9 +550,56 @@ async function openReview(id) {
     }
 
     currentReview.source_path = d.source_path;
+    currentReview.has_prev = !!d.has_prev;
+    el('tab-diff').style.display = d.has_prev ? '' : 'none';
+    el('btn-undo').style.display = d.has_prev ? '' : 'none';
   } catch (e) {
     el('review-source').value = 'fetch failed: ' + e.message;
   }
+}
+
+async function loadDiff() {
+  if (!currentReview) return;
+  const pre = el('review-diff');
+  pre.replaceChildren(document.createTextNode('loading…'));
+  const r = await fetch('/api/review/diff?id=' + encodeURIComponent(currentReview.id));
+  const d = await r.json();
+  if (!d.ok || !d.has_prev) {
+    pre.replaceChildren(document.createTextNode('(no previous version to diff against)'));
+    return;
+  }
+  pre.replaceChildren();
+  d.diff.split('\n').forEach(line => {
+    const span = document.createElement('span');
+    if (line.startsWith('+++') || line.startsWith('---')) {
+      span.className = 'hunk';
+    } else if (line.startsWith('@@')) {
+      span.className = 'hunk';
+    } else if (line.startsWith('+')) {
+      span.className = 'add';
+    } else if (line.startsWith('-')) {
+      span.className = 'del';
+    }
+    span.textContent = line;
+    pre.appendChild(span);
+  });
+}
+
+async function undoRevise() {
+  if (!currentReview) return;
+  if (!confirm('Revert "' + currentReview.id + '" to the version before the last revise? (One level of undo; the post-revise version becomes the next .prev so you can re-apply by clicking undo again.)')) return;
+  const r = await fetch('/api/review/undo', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ id: currentReview.id })
+  });
+  const d = await r.json();
+  if (!d.ok) { toast('undo failed: ' + (d.error || 'unknown'), true); return; }
+  toast('reverted to .prev');
+  // Reload preview + source
+  el('review-preview').src = '/api/preview?id=' + encodeURIComponent(currentReview.id) + '&_=' + Date.now();
+  const r2 = await fetch('/api/review?id=' + encodeURIComponent(currentReview.id));
+  const d2 = await r2.json();
+  if (d2.ok) el('review-source').value = d2.source;
 }
 
 function closeReview() {
@@ -574,36 +638,92 @@ async function saveNotes() {
   toast(d.ok ? 'comment saved (not yet sent to Claude — click "apply" for that)' : ('save failed: ' + (d.error || 'unknown')), !d.ok);
 }
 
+function appendLog(line, klass) {
+  const log = el('review-live-log');
+  log.classList.add('open');
+  const span = document.createElement('span');
+  if (klass) span.className = klass;
+  span.textContent = line + '\n';
+  log.appendChild(span);
+  log.scrollTop = log.scrollHeight;
+}
+function clearLog() {
+  el('review-live-log').replaceChildren();
+  el('review-live-log').classList.remove('open');
+}
+
+// Stream a long-running action (approve | revise) via SSE.
+// Returns a Promise that resolves with the final exit code.
+function streamAction(action) {
+  return new Promise((resolve) => {
+    clearLog();
+    appendLog('▸ starting ' + action + '…', 'meta');
+    const src = new EventSource('/api/review/stream?action=' + action + '&id=' + encodeURIComponent(currentReview.id));
+    src.addEventListener('log', (e) => {
+      try {
+        const d = JSON.parse(e.data);
+        let klass = '';
+        if (/\[ERROR\]|FAILED/.test(d.line)) klass = 'err';
+        else if (/\[WARN\]/.test(d.line)) klass = 'meta';
+        else if (/PASS|published|complete/.test(d.line)) klass = 'ok';
+        appendLog(d.line, klass);
+      } catch (_) {}
+    });
+    src.addEventListener('error', () => {
+      appendLog('▸ stream error', 'err');
+      src.close();
+      resolve({ rc: -1 });
+    });
+    src.addEventListener('done', (e) => {
+      try {
+        const d = JSON.parse(e.data);
+        appendLog('▸ done (rc=' + d.rc + ')', d.rc === 0 ? 'ok' : 'err');
+        resolve(d);
+      } catch (_) { resolve({ rc: -1 }); }
+      src.close();
+    });
+  });
+}
+
 async function applyNotes() {
   if (!currentReview) return;
   const notes = el('review-notes').value.trim();
   if (!notes) { toast('write a comment first', true); return; }
-  if (!confirm('Send your comment to Claude to revise the draft? Takes ~30-90 seconds.')) return;
-  toast('Claude is revising the draft… (do not close)');
-  const r = await fetch('/api/review/revise', {
+  if (!confirm('Send your comment to Claude to revise the draft? Takes ~30-90 seconds. Watch the live log below.')) return;
+  // Persist notes first so the streaming endpoint can read them from manifest.
+  await fetch('/api/review/notes', {
     method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ id: currentReview.id, notes })
+    body: JSON.stringify({ id: currentReview.id, notes }),
   });
-  const d = await r.json();
-  if (d.ok) {
-    toast('revision applied — refreshing preview');
-    // Reload preview iframe + source textarea
+  const result = await streamAction('revise');
+  if (result.rc === 0) {
+    toast('revision applied — refreshing');
     el('review-preview').src = '/api/preview?id=' + encodeURIComponent(currentReview.id) + '&_=' + Date.now();
     const r2 = await fetch('/api/review?id=' + encodeURIComponent(currentReview.id));
     const d2 = await r2.json();
-    if (d2.ok) el('review-source').value = d2.source;
+    if (d2.ok) {
+      el('review-source').value = d2.source;
+      currentReview.has_prev = !!d2.has_prev;
+      el('tab-diff').style.display = d2.has_prev ? '' : 'none';
+      el('btn-undo').style.display = d2.has_prev ? '' : 'none';
+    }
   } else {
-    toast('revise failed: ' + (d.error || ('rc=' + d.returncode)) + (d.stderr ? '\n' + d.stderr.slice(0, 300) : ''), true);
+    toast('revise failed (rc=' + result.rc + ') — see live log above', true);
   }
 }
 
 function showTab(which) {
   const isPreview = which === 'preview';
+  const isSource  = which === 'source';
+  const isDiff    = which === 'diff';
   el('tab-preview').classList.toggle('active', isPreview);
-  el('tab-source').classList.toggle('active', !isPreview);
+  el('tab-source').classList.toggle('active', isSource);
+  el('tab-diff').classList.toggle('active', isDiff);
   el('review-preview').style.display = isPreview ? '' : 'none';
-  el('review-source').style.display = isPreview ? 'none' : '';
-  el('btn-save-source').style.display = isPreview ? 'none' : '';
+  el('review-source').style.display  = isSource  ? '' : 'none';
+  el('review-diff').style.display    = isDiff    ? '' : 'none';
+  el('btn-save-source').style.display = isSource ? '' : 'none';
+  if (isDiff) loadDiff();
 }
 
 function toggleReject() {
@@ -612,19 +732,17 @@ function toggleReject() {
 
 async function approveDraft() {
   if (!currentReview) return;
-  if (!confirm('Approve and publish "' + currentReview.id + '"? This will run the publish flow (tier-aware) and fire channel adapters.')) return;
-  await saveSource();  // ensure edits are saved first
-  toast('publishing… (this can take up to 5 minutes)');
-  const r = await fetch('/api/review/approve', {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ id: currentReview.id })
-  });
-  const d = await r.json();
-  if (d.ok) {
+  if (!confirm('Approve and publish "' + currentReview.id + '"? This runs the tier-aware publish + channel adapters. Watch the live log below.')) return;
+  // Save any pending source edits first if the source tab is open.
+  if (el('review-source').style.display !== 'none') {
+    await saveSource();
+  }
+  const result = await streamAction('approve');
+  if (result.rc === 0) {
     toast('approved → published');
-    setTimeout(closeReview, 1500);
+    setTimeout(closeReview, 1800);
   } else {
-    toast('approve failed: ' + (d.error || ('rc=' + d.returncode)) + (d.stderr ? '\n' + d.stderr : ''), true);
+    toast('approve failed (rc=' + result.rc + ') — see live log above', true);
   }
 }
 

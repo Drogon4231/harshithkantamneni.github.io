@@ -57,12 +57,15 @@ if [ -z "$REVISED" ]; then
     exit 1
 fi
 
+# Snapshot the current draft to .prev BEFORE replacing (enables one-level undo).
+cp "$DRAFT_FILE" "${DRAFT_FILE}.prev"
+
 # Atomically replace the pending draft file.
 TMP=$(mktemp "${CURATOR_DIR}/pending_drafts/.${TARGET_ID}.XXXXXX")
 printf "%s" "$REVISED" > "$TMP"
 mv "$TMP" "$DRAFT_FILE"
 
-log_info "revise: $TARGET_ID → updated (${#REVISED} chars)"
+log_info "revise: $TARGET_ID → updated (${#REVISED} chars; .prev saved for undo)"
 
 # Regenerate channel drafts since the main draft changed (any LinkedIn teaser
 # extracted from the old prose is now stale). Best-effort; failures non-blocking.
