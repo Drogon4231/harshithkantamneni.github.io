@@ -1,13 +1,14 @@
 ---
-// LabDiagram.astro — small inline-SVG architecture diagrams for the lab pages.
-// Same component renders one of four block layouts via the `kind` prop:
-//   - hive-org       Director at top, six lanes radiating below
-//   - hive-memory    Three stacked memory tiers
-//   - agi-org        PI ↔ Director (unanimous gate), six layers below
-//   - agi-memory     Three stacked memory tiers
+// LabDiagram.astro — inline-SVG block diagrams for the lab pages.
 //
-// All shapes use hairlines + monospace labels via currentColor so they
-// inherit the site's typography and adapt to dark/light theme tokens.
+// kinds:
+//   hive-org       Director (heavy box) + 6 lanes with role counts + outputs
+//   hive-memory    3 tiers with caps + cadence + audience callout
+//   agi-org        PI ↔ Director (heavy boxes, unanimous gate) + 7 layers + outputs
+//   agi-memory     3 tiers with caps + cadence
+//
+// Strokes use currentColor so the diagram adapts to dark/light theme tokens.
+// Apex boxes (Director, PI) use stroke-width=2 for visual hierarchy.
 
 interface Props {
   kind: 'hive-org' | 'hive-memory' | 'agi-org' | 'agi-memory';
@@ -18,119 +19,177 @@ const { kind, caption } = Astro.props;
 
 <figure class="lab-diagram">
 {kind === 'hive-org' && (
-  <svg viewBox="0 0 800 320" role="img" aria-labelledby="hive-org-t" preserveAspectRatio="xMidYMid meet">
-    <title id="hive-org-t">HIVE org architecture — Director with six lanes</title>
-    <g fill="none" stroke="currentColor" stroke-width="1">
-      <rect x="280" y="20" width="240" height="60" />
-      <line x1="400" y1="80" x2="400" y2="135" />
-      <line x1="100" y1="135" x2="700" y2="135" />
-      <line x1="100" y1="135" x2="100" y2="200" />
-      <line x1="220" y1="135" x2="220" y2="200" />
-      <line x1="340" y1="135" x2="340" y2="200" />
-      <line x1="460" y1="135" x2="460" y2="200" />
-      <line x1="580" y1="135" x2="580" y2="200" />
-      <line x1="700" y1="135" x2="700" y2="200" />
-      <rect x="45"  y="200" width="110" height="60" />
-      <rect x="165" y="200" width="110" height="60" />
-      <rect x="285" y="200" width="110" height="60" />
-      <rect x="405" y="200" width="110" height="60" />
-      <rect x="525" y="200" width="110" height="60" />
-      <rect x="645" y="200" width="110" height="60" />
+  <svg viewBox="0 0 900 440" role="img" aria-labelledby="hive-org-t" preserveAspectRatio="xMidYMid meet">
+    <title id="hive-org-t">HIVE org architecture — Director, six lanes, output streams</title>
+    <g fill="none" stroke="currentColor">
+      {/* Director apex — heavier stroke */}
+      <rect x="310" y="20" width="280" height="78" stroke-width="2" />
+      {/* Bus + drop lines */}
+      <line x1="450" y1="98"  x2="450" y2="145" stroke-width="1" />
+      <line x1="90"  y1="145" x2="810" y2="145" stroke-width="1" />
+      <line x1="90"  y1="145" x2="90"  y2="210" stroke-width="1" />
+      <line x1="234" y1="145" x2="234" y2="210" stroke-width="1" />
+      <line x1="378" y1="145" x2="378" y2="210" stroke-width="1" />
+      <line x1="522" y1="145" x2="522" y2="210" stroke-width="1" />
+      <line x1="666" y1="145" x2="666" y2="210" stroke-width="1" />
+      <line x1="810" y1="145" x2="810" y2="210" stroke-width="1" />
+      {/* 6 lane boxes — single row */}
+      <rect x="30"  y="210" width="120" height="90" stroke-width="1" />
+      <rect x="174" y="210" width="120" height="90" stroke-width="1" />
+      <rect x="318" y="210" width="120" height="90" stroke-width="1" />
+      <rect x="462" y="210" width="120" height="90" stroke-width="1" />
+      <rect x="606" y="210" width="120" height="90" stroke-width="1" />
+      <rect x="750" y="210" width="120" height="90" stroke-width="1" />
     </g>
-    <g fill="currentColor" class="diag-label">
-      <text x="400" y="56" text-anchor="middle">DIRECTOR</text>
-      <text x="100" y="236" text-anchor="middle">ENGINEERING</text>
-      <text x="220" y="236" text-anchor="middle">PRODUCT</text>
-      <text x="340" y="236" text-anchor="middle">DESIGN</text>
-      <text x="460" y="236" text-anchor="middle">LEGAL</text>
-      <text x="580" y="236" text-anchor="middle">STRATEGY</text>
-      <text x="700" y="236" text-anchor="middle">OPS</text>
+    <g fill="currentColor">
+      {/* Apex */}
+      <text x="450" y="48"  text-anchor="middle" class="diag-label-lg">DIRECTOR</text>
+      <text x="450" y="68"  text-anchor="middle" class="diag-sub">launches any agent directly · no intermediate layers</text>
+      <text x="450" y="86"  text-anchor="middle" class="diag-sub">46 agents total · 6 conceptual lanes</text>
+      {/* Bus arrow label */}
+      <text x="478" y="124" class="diag-flow">↓ directive · process changes only</text>
+      {/* Lane labels with counts */}
+      <text x="90"  y="234" text-anchor="middle" class="diag-label">ENGINEERING</text>
+      <text x="90"  y="252" text-anchor="middle" class="diag-count">22 agents</text>
+      <text x="90"  y="270" text-anchor="middle" class="diag-sub">writes code</text>
+      <text x="234" y="234" text-anchor="middle" class="diag-label">PRODUCT</text>
+      <text x="234" y="252" text-anchor="middle" class="diag-count">4 agents</text>
+      <text x="234" y="270" text-anchor="middle" class="diag-sub">owns scope</text>
+      <text x="378" y="234" text-anchor="middle" class="diag-label">DESIGN</text>
+      <text x="378" y="252" text-anchor="middle" class="diag-count">2 agents</text>
+      <text x="378" y="270" text-anchor="middle" class="diag-sub">owns surface</text>
+      <text x="522" y="234" text-anchor="middle" class="diag-label">LEGAL</text>
+      <text x="522" y="252" text-anchor="middle" class="diag-count">2 agents</text>
+      <text x="522" y="270" text-anchor="middle" class="diag-sub">flags compliance</text>
+      <text x="666" y="234" text-anchor="middle" class="diag-label">STRATEGY</text>
+      <text x="666" y="252" text-anchor="middle" class="diag-count">4 agents</text>
+      <text x="666" y="270" text-anchor="middle" class="diag-sub">reads the market</text>
+      <text x="810" y="234" text-anchor="middle" class="diag-label">OPS</text>
+      <text x="810" y="252" text-anchor="middle" class="diag-count">12 agents</text>
+      <text x="810" y="270" text-anchor="middle" class="diag-sub">cycle infra · honesty</text>
+      {/* Output streams */}
+      <text x="60"  y="355" class="diag-flow">↑ cycle review · directive feedback</text>
+      <text x="60"  y="395" class="diag-out-head">PRODUCES</text>
+      <text x="200" y="395" class="diag-out">→ Privacy-first product builds  (alpha-gated)</text>
+      <text x="200" y="418" class="diag-out">→ Reports · Notes  (about the lab itself)</text>
     </g>
-    <text x="400" y="295" text-anchor="middle" class="diag-note" fill="currentColor">
-      Director pulls perspective from any lane · execution is flat
-    </text>
   </svg>
 )}
 
 {kind === 'hive-memory' && (
-  <svg viewBox="0 0 800 320" role="img" aria-labelledby="hive-mem-t" preserveAspectRatio="xMidYMid meet">
+  <svg viewBox="0 0 900 360" role="img" aria-labelledby="hive-mem-t" preserveAspectRatio="xMidYMid meet">
     <title id="hive-mem-t">HIVE memory tiers — three layers</title>
     <g fill="none" stroke="currentColor" stroke-width="1">
-      <rect x="120" y="20"  width="560" height="70" />
-      <rect x="120" y="100" width="560" height="70" />
-      <rect x="120" y="180" width="560" height="70" stroke-dasharray="4 4" />
+      <rect x="120" y="20"  width="660" height="78" />
+      <rect x="120" y="108" width="660" height="78" />
+      <rect x="120" y="196" width="660" height="78" stroke-dasharray="4 4" />
     </g>
-    <g fill="currentColor" class="diag-label">
-      <text x="160" y="50">LONG-TERM</text>
-      <text x="160" y="72" class="diag-sub">ratified rules · cross-cycle knowledge</text>
-      <text x="160" y="130">CYCLE</text>
-      <text x="160" y="152" class="diag-sub">what is happening this run</text>
-      <text x="160" y="210">CONVERSATION</text>
-      <text x="160" y="232" class="diag-sub">per-turn · wiped between turns</text>
+    <g fill="currentColor">
+      <text x="150" y="50"  class="diag-label">LONG-TERM</text>
+      <text x="150" y="72"  class="diag-sub">ratified rules · stabilized heuristics · architectural decisions</text>
+      <text x="150" y="92"  class="diag-count">≤50 KB per file · accretes on ratification</text>
+
+      <text x="150" y="138" class="diag-label">CYCLE</text>
+      <text x="150" y="160" class="diag-sub">cycle brief · session state · dashboard · queue</text>
+      <text x="150" y="180" class="diag-count">≤40 KB per file · rotates each cycle close</text>
+
+      <text x="150" y="226" class="diag-label">CONVERSATION</text>
+      <text x="150" y="248" class="diag-sub">specialist's working hypothesis · per-turn scratch</text>
+      <text x="150" y="268" class="diag-count">wipes between turns · ephemeral by design</text>
+
+      <text x="450" y="312" text-anchor="middle" class="diag-flow">↑ accretion path · cycle ratifications promote into long-term</text>
+      <text x="450" y="340" text-anchor="middle" class="diag-note">Wipe stops one specialist's hypothesis from polluting the next.</text>
     </g>
-    <text x="400" y="290" text-anchor="middle" class="diag-note" fill="currentColor">
-      Conversation wipes between turns · stops one specialist's working hypothesis from polluting the next
-    </text>
   </svg>
 )}
 
 {kind === 'agi-org' && (
-  <svg viewBox="0 0 800 460" role="img" aria-labelledby="agi-org-t" preserveAspectRatio="xMidYMid meet">
-    <title id="agi-org-t">AGI org architecture — PI and Director, six layers</title>
-    <g fill="none" stroke="currentColor" stroke-width="1">
-      <rect x="180" y="20" width="180" height="60" />
-      <rect x="440" y="20" width="180" height="60" />
-      <line x1="360" y1="50" x2="440" y2="50" stroke-dasharray="3 3" />
-      <line x1="270" y1="80" x2="270" y2="120" />
-      <line x1="530" y1="80" x2="530" y2="120" />
-      <line x1="270" y1="120" x2="530" y2="120" />
-      <line x1="400" y1="120" x2="400" y2="145" />
-      <rect x="120" y="145" width="560" height="44" />
-      <rect x="120" y="194" width="560" height="44" />
-      <rect x="120" y="243" width="560" height="44" />
-      <rect x="120" y="292" width="560" height="44" />
-      <rect x="120" y="341" width="560" height="44" />
-      <rect x="120" y="390" width="560" height="44" />
+  <svg viewBox="0 0 900 560" role="img" aria-labelledby="agi-org-t" preserveAspectRatio="xMidYMid meet">
+    <title id="agi-org-t">AGI org architecture — PI + Director, seven layers, output streams</title>
+    <g fill="none" stroke="currentColor">
+      {/* PI + Director apex — heavier stroke */}
+      <rect x="170" y="20" width="200" height="78" stroke-width="2" />
+      <rect x="530" y="20" width="200" height="78" stroke-width="2" />
+      {/* Gate arrows between PI and Director */}
+      <line x1="370" y1="50" x2="530" y2="50" stroke-width="1" stroke-dasharray="4 3" />
+      <line x1="370" y1="68" x2="530" y2="68" stroke-width="1" stroke-dasharray="4 3" />
+      {/* Joint bus down to layers */}
+      <line x1="270" y1="98"  x2="270" y2="135" stroke-width="1" />
+      <line x1="630" y1="98"  x2="630" y2="135" stroke-width="1" />
+      <line x1="270" y1="135" x2="630" y2="135" stroke-width="1" />
+      <line x1="450" y1="135" x2="450" y2="170" stroke-width="1" />
+      {/* 7 layer bands */}
+      <rect x="120" y="170" width="660" height="42" stroke-width="1" />
+      <rect x="120" y="218" width="660" height="42" stroke-width="1" />
+      <rect x="120" y="266" width="660" height="42" stroke-width="1" />
+      <rect x="120" y="314" width="660" height="42" stroke-width="1" />
+      <rect x="120" y="362" width="660" height="42" stroke-width="1" />
+      <rect x="120" y="410" width="660" height="42" stroke-width="1" />
+      <rect x="120" y="458" width="660" height="42" stroke-width="1" />
     </g>
-    <g fill="currentColor" class="diag-label">
-      <text x="270" y="56" text-anchor="middle">PI</text>
-      <text x="530" y="56" text-anchor="middle">DIRECTOR</text>
-      <text x="400" y="104" text-anchor="middle" class="diag-sub">unanimous-compromise gate</text>
-      <text x="160" y="173">RESEARCH</text>
-      <text x="500" y="173" class="diag-sub">read papers · synthesize methodology</text>
-      <text x="160" y="222">ENGINEERING</text>
-      <text x="500" y="222" class="diag-sub">training infrastructure</text>
-      <text x="160" y="271">EVALUATION</text>
-      <text x="500" y="271" class="diag-sub">benchmarks · scoring</text>
-      <text x="160" y="320">QUALITY</text>
-      <text x="500" y="320" class="diag-sub">independent audit of findings</text>
-      <text x="160" y="369">KNOWLEDGE</text>
-      <text x="500" y="369" class="diag-sub">shared memory · cross-references</text>
-      <text x="160" y="418">META</text>
-      <text x="500" y="418" class="diag-sub">governance · anti-forgery</text>
+    <g fill="currentColor">
+      <text x="270" y="50"  text-anchor="middle" class="diag-label-lg">PI</text>
+      <text x="270" y="76"  text-anchor="middle" class="diag-sub">scientific authority · program selection</text>
+      <text x="630" y="50"  text-anchor="middle" class="diag-label-lg">DIRECTOR</text>
+      <text x="630" y="76"  text-anchor="middle" class="diag-sub">operating authority · cycle dispatch</text>
+      <text x="450" y="44"  text-anchor="middle" class="diag-flow">unanimous-compromise gate</text>
+      <text x="450" y="58"  text-anchor="middle" class="diag-flow">↔ co-equal · neither overrides</text>
+      <text x="478" y="158" class="diag-flow">↓ program selection · cycle dispatch</text>
+      {/* 7 layers */}
+      <text x="160" y="197" class="diag-label">RESEARCH</text>
+      <text x="320" y="197" class="diag-sub">read papers · synthesize methodology</text>
+      <text x="760" y="197" text-anchor="end" class="diag-count">~10</text>
+      <text x="160" y="245" class="diag-label">ENGINEERING</text>
+      <text x="320" y="245" class="diag-sub">training infrastructure · kernels</text>
+      <text x="760" y="245" text-anchor="end" class="diag-count">~8</text>
+      <text x="160" y="293" class="diag-label">EVALUATION</text>
+      <text x="320" y="293" class="diag-sub">benchmarks · scoring · ablations</text>
+      <text x="760" y="293" text-anchor="end" class="diag-count">~3</text>
+      <text x="160" y="341" class="diag-label">QUALITY</text>
+      <text x="320" y="341" class="diag-sub">independent audit of findings</text>
+      <text x="760" y="341" text-anchor="end" class="diag-count">~2</text>
+      <text x="160" y="389" class="diag-label">KNOWLEDGE</text>
+      <text x="320" y="389" class="diag-sub">shared memory · cross-references</text>
+      <text x="760" y="389" text-anchor="end" class="diag-count">~3</text>
+      <text x="160" y="437" class="diag-label">COMMUNICATION</text>
+      <text x="320" y="437" class="diag-sub">paper drafting · abstracts · external write-ups</text>
+      <text x="760" y="437" text-anchor="end" class="diag-count">~2</text>
+      <text x="160" y="485" class="diag-label">META</text>
+      <text x="320" y="485" class="diag-sub">governance · anti-forgery · pre-registration</text>
+      <text x="760" y="485" text-anchor="end" class="diag-count">~2</text>
+      {/* Output streams */}
+      <text x="60"  y="525" class="diag-out-head">PRODUCES</text>
+      <text x="200" y="525" class="diag-out">→ Positive-result papers  (ICLR/NeurIPS workshop tier)</text>
+      <text x="200" y="544" class="diag-out">→ Envelope papers  (rigorous negative results)</text>
+      <text x="200" y="563" class="diag-out">→ Methodology papers  (the lab as research artifact)</text>
     </g>
   </svg>
 )}
 
 {kind === 'agi-memory' && (
-  <svg viewBox="0 0 800 320" role="img" aria-labelledby="agi-mem-t" preserveAspectRatio="xMidYMid meet">
+  <svg viewBox="0 0 900 360" role="img" aria-labelledby="agi-mem-t" preserveAspectRatio="xMidYMid meet">
     <title id="agi-mem-t">AGI memory tiers — three layers</title>
     <g fill="none" stroke="currentColor" stroke-width="1">
-      <rect x="120" y="20"  width="560" height="70" />
-      <rect x="120" y="100" width="560" height="70" />
-      <rect x="120" y="180" width="560" height="70" stroke-dasharray="4 4" />
+      <rect x="120" y="20"  width="660" height="78" />
+      <rect x="120" y="108" width="660" height="78" />
+      <rect x="120" y="196" width="660" height="78" stroke-dasharray="4 4" />
     </g>
-    <g fill="currentColor" class="diag-label">
-      <text x="160" y="50">LONG-TERM</text>
-      <text x="160" y="72" class="diag-sub">mission · governance · shared knowledge</text>
-      <text x="160" y="130">LOG</text>
-      <text x="160" y="152" class="diag-sub">recent decisions · rolling</text>
-      <text x="160" y="210">HOT</text>
-      <text x="160" y="232" class="diag-sub">active cycle state</text>
+    <g fill="currentColor">
+      <text x="150" y="50"  class="diag-label">LONG-TERM</text>
+      <text x="150" y="72"  class="diag-sub">mission · governance · shared knowledge · killed ideas</text>
+      <text x="150" y="92"  class="diag-count">≤50 KB total · accretes on ratification</text>
+
+      <text x="150" y="138" class="diag-label">LOG</text>
+      <text x="150" y="160" class="diag-sub">recent decisions · dispatch rollup · finding records</text>
+      <text x="150" y="180" class="diag-count">≤30 KB rolling · overflow archived</text>
+
+      <text x="150" y="226" class="diag-label">HOT</text>
+      <text x="150" y="248" class="diag-sub">active cycle state · session brief · open programs</text>
+      <text x="150" y="268" class="diag-count">≤40 KB · resets each cycle</text>
+
+      <text x="450" y="312" text-anchor="middle" class="diag-flow">↑ accretion path · ratified findings promote into long-term</text>
+      <text x="450" y="340" text-anchor="middle" class="diag-note">Top tier is the lab's accumulated ground · bottom tier is workspace.</text>
     </g>
-    <text x="400" y="290" text-anchor="middle" class="diag-note" fill="currentColor">
-      Bottom tier wipes each cycle · log rolls forward · top tier is the lab's accumulated ground
-    </text>
   </svg>
 )}
 
@@ -152,17 +211,50 @@ const { kind, caption } = Astro.props;
     color: var(--ink);
   }
 
-  /* Box labels — monospace, tracked, uppercase */
   .lab-diagram .diag-label {
     font-family: var(--font-mono);
     font-size: 12px;
+    font-weight: 600;
     letter-spacing: 0.06em;
   }
+  .lab-diagram .diag-label-lg {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
   .lab-diagram .diag-sub {
-    font-size: 10px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
     fill: var(--ink-low);
-    letter-spacing: 0.04em;
-    text-transform: none;
+    letter-spacing: 0.03em;
+  }
+  .lab-diagram .diag-count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    fill: var(--ink-low);
+    letter-spacing: 0.02em;
+    font-style: italic;
+  }
+  .lab-diagram .diag-flow {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    fill: var(--ink-low);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .lab-diagram .diag-out-head {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    fill: var(--ink);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+  .lab-diagram .diag-out {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    fill: var(--ink-low);
+    letter-spacing: 0.03em;
   }
   .lab-diagram .diag-note {
     font-family: var(--font-mono);
@@ -182,7 +274,11 @@ const { kind, caption } = Astro.props;
   }
 
   @media (max-width: 640px) {
-    .lab-diagram .diag-label { font-size: 11px; }
-    .lab-diagram .diag-sub   { font-size: 9px; }
+    .lab-diagram .diag-label    { font-size: 11px; }
+    .lab-diagram .diag-label-lg { font-size: 14px; }
+    .lab-diagram .diag-sub      { font-size: 9.5px; }
+    .lab-diagram .diag-count    { font-size: 10px; }
+    .lab-diagram .diag-flow     { font-size: 9.5px; }
+    .lab-diagram .diag-out      { font-size: 10px; }
   }
 </style>
