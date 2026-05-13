@@ -168,7 +168,7 @@ def get_review(target_id: str):
 
     # Pre-generated channel drafts (from review staging)
     channel_drafts = {}
-    for ch in ("hackernews", "linkedin"):
+    for ch in ("hackernews", "linkedin", "buttondown"):
         p = PENDING_DRAFTS_DIR / f"{target_id}.{ch}.txt"
         if p.is_file():
             channel_drafts[ch] = p.read_text()
@@ -325,7 +325,7 @@ def get_diff(target_id: str) -> dict:
 # ── Channel-draft editing ─────────────────────────────────────────────────
 
 def save_channel_draft(target_id: str, channel: str, content: str) -> dict:
-    if channel not in ("hackernews", "linkedin"):
+    if channel not in ("hackernews", "linkedin", "buttondown"):
         return {"ok": False, "error": f"unknown channel: {channel}"}
     p = PENDING_DRAFTS_DIR / f"{target_id}.{channel}.txt"
     if not p.is_file():

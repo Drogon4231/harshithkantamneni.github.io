@@ -27,6 +27,7 @@ export CURATOR_DIR
 . "$CURATOR_DIR/lib/publish.sh"
 . "$CURATOR_DIR/lib/channel_hackernews.sh"
 . "$CURATOR_DIR/lib/channel_linkedin.sh"
+. "$CURATOR_DIR/lib/channel_buttondown.sh"
 
 TARGET_ID="${1:-}"
 if [ -z "$TARGET_ID" ]; then
@@ -114,6 +115,16 @@ for ch in $CHANNELS; do
                 fi
             fi
             ;;
+        buttondown)
+            # Real API call now (preview-only at staging). Operator already
+            # saw the markdown in the review modal and approved it; POST
+            # creates the draft in Buttondown's outbox for them to send.
+            if ! channel_buttondown "$CANDIDATE"; then
+                log_warn "approve: Buttondown API call failed (non-blocking; website already published)"
+            fi
+            # Remove the stale preview file (the audit file replaces it).
+            rm -f "$CURATOR_DIR/pending_drafts/${TARGET_ID}.buttondown.txt"
+            ;;
         *)
             log_warn "unknown channel: $ch"
             ;;
@@ -121,6 +132,7 @@ for ch in $CHANNELS; do
 done
 
 rm -f "$PENDING_DRAFT" "$PENDING_JUDGES" "${PENDING_DRAFT}.prev" \
+      "$CURATOR_DIR/pending_drafts/${TARGET_ID}.buttondown.txt" \
       "$CURATOR_DIR/pending_drafts/${TARGET_ID}.history.jsonl"
 rm -rf "$CURATOR_DIR/pending_drafts/${TARGET_ID}.history"
 # Cleanup any real-preview file that the operator may have triggered.

@@ -106,6 +106,7 @@ done
 if [ -n "$CANDIDATE_FILE" ]; then
     . "$CURATOR_DIR/lib/channel_hackernews.sh"
     . "$CURATOR_DIR/lib/channel_linkedin.sh"
+    . "$CURATOR_DIR/lib/channel_buttondown.sh"
     CHANNELS=$(CANDIDATE="$CANDIDATE_FILE" python3 -c "import os, json; print(' '.join(json.load(open(os.environ['CANDIDATE'])).get('channels', ['website'])))" 2>/dev/null || echo "website")
     for ch in $CHANNELS; do
         case "$ch" in
@@ -118,6 +119,11 @@ if [ -n "$CANDIDATE_FILE" ]; then
                 channel_linkedin "$CANDIDATE_FILE" "$DRAFT_FILE" \
                     "${CURATOR_DIR}/pending_drafts/${TARGET_ID}.linkedin.txt" \
                     || log_warn "revise: LinkedIn regen failed (non-blocking)"
+                ;;
+            buttondown)
+                channel_buttondown_render "$CANDIDATE_FILE" \
+                    "${CURATOR_DIR}/pending_drafts/${TARGET_ID}.buttondown.txt" \
+                    || log_warn "revise: Buttondown preview regen failed (non-blocking)"
                 ;;
         esac
     done

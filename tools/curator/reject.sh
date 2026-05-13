@@ -54,6 +54,7 @@ rm -f "$CURATOR_DIR/pending_drafts/${TARGET_ID}.astro" \
       "$CURATOR_DIR/pending_drafts/${TARGET_ID}.judges.json" \
       "$CURATOR_DIR/pending_drafts/${TARGET_ID}.hackernews.txt" \
       "$CURATOR_DIR/pending_drafts/${TARGET_ID}.linkedin.txt" \
+      "$CURATOR_DIR/pending_drafts/${TARGET_ID}.buttondown.txt" \
       "$CURATOR_DIR/pending_drafts/${TARGET_ID}.history.jsonl"
 rm -rf "$CURATOR_DIR/pending_drafts/${TARGET_ID}.history"
 # Cleanup any real-preview file that the operator may have triggered.

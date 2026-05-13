@@ -98,11 +98,11 @@
       "type": "array",
       "items": {
         "type": "string",
-        "enum": ["website", "hackernews", "linkedin"]
+        "enum": ["website", "hackernews", "linkedin", "buttondown"]
       },
       "uniqueItems": true,
       "default": ["website"],
-      "description": "Channels to cross-post to. Website is always included; HN/LinkedIn are opt-in per-piece. HN posts a paste-ready submission suggestion to the operator's log. LinkedIn generates a paste-ready teaser file under channel_drafts/. Neither auto-posts to the platform."
+      "description": "Channels to cross-post to. Website is always included; HN/LinkedIn/Buttondown are opt-in per-piece. HN + LinkedIn produce paste-ready files for manual submission (no auto-post). Buttondown creates a draft email via API (status=draft); the operator reviews + sends in Buttondown's UI."
     },
     "voice_fit_target": {
       "type": "number",

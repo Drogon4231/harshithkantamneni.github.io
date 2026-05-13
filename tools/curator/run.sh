@@ -31,6 +31,7 @@ export CURATOR_DIR
 . "$CURATOR_DIR/lib/publish.sh"
 . "$CURATOR_DIR/lib/channel_hackernews.sh"
 . "$CURATOR_DIR/lib/channel_linkedin.sh"
+. "$CURATOR_DIR/lib/channel_buttondown.sh"
 
 SKIP_RAM_CHECK=0
 for arg in "$@"; do
@@ -295,6 +296,12 @@ PYEOF
                 channel_linkedin "$candidate" "$PENDING_DRAFT" \
                     "${CURATOR_DIR}/pending_drafts/${CANDIDATE_ID}.linkedin.txt" \
                     || log_warn "channel_linkedin pre-gen failed (non-blocking)"
+                ;;
+            buttondown)
+                # Preview only at staging — real API call happens at approve.
+                channel_buttondown_render "$candidate" \
+                    "${CURATOR_DIR}/pending_drafts/${CANDIDATE_ID}.buttondown.txt" \
+                    || log_warn "channel_buttondown preview failed (non-blocking)"
                 ;;
         esac
     done
