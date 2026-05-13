@@ -279,6 +279,26 @@ d['cost_seconds'] = int(os.environ['COST_SECONDS'])
 d.pop('processing_started_at', None)
 open(p, 'w').write(json.dumps(d, indent=2))
 PYEOF
+    # Pre-generate channel drafts so the operator can review them
+    # alongside the main draft. HN is instant (deterministic); LinkedIn
+    # adds a Claude call (~60s) but is worth previewing before approval.
+    CHANNELS=$(CANDIDATE="$candidate" python3 -c "import os, json; print(' '.join(json.load(open(os.environ['CANDIDATE'])).get('channels', ['website'])))" 2>/dev/null || echo "website")
+    for ch in $CHANNELS; do
+        case "$ch" in
+            website) ;;
+            hackernews)
+                channel_hackernews "$candidate" \
+                    "${CURATOR_DIR}/pending_drafts/${CANDIDATE_ID}.hackernews.txt" \
+                    || log_warn "channel_hackernews pre-gen failed (non-blocking)"
+                ;;
+            linkedin)
+                channel_linkedin "$candidate" "$PENDING_DRAFT" \
+                    "${CURATOR_DIR}/pending_drafts/${CANDIDATE_ID}.linkedin.txt" \
+                    || log_warn "channel_linkedin pre-gen failed (non-blocking)"
+                ;;
+        esac
+    done
+
     log_info "candidate $(basename "$candidate") → awaiting_review (tier $TIER, ${COST_SECONDS}s); review via cli.sh ui"
     rm -f "$DRAFT_PATH" "$JUDGES_OUT"
 done

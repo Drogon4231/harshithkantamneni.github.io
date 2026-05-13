@@ -49,5 +49,8 @@ d.pop('awaiting_review_at', None)
 open(p, 'w').write(json.dumps(d, indent=2))
 PYEOF
 
-rm -f "$CURATOR_DIR/pending_drafts/${TARGET_ID}.astro" "$CURATOR_DIR/pending_drafts/${TARGET_ID}.judges.json"
+rm -f "$CURATOR_DIR/pending_drafts/${TARGET_ID}.astro" \
+      "$CURATOR_DIR/pending_drafts/${TARGET_ID}.judges.json" \
+      "$CURATOR_DIR/pending_drafts/${TARGET_ID}.hackernews.txt" \
+      "$CURATOR_DIR/pending_drafts/${TARGET_ID}.linkedin.txt"
 log_info "reject: $TARGET_ID → held; reason: $REASON"

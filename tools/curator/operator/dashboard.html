@@ -125,6 +125,13 @@
   .modal .meta-block { background: var(--panel-2); border: 1px solid var(--border); padding: 8px 10px; border-radius: 3px; font-family: var(--mono); font-size: 11px; margin-bottom: 8px; }
   .modal .meta-block .row { display: flex; justify-content: space-between; padding: 2px 0; }
   .modal .meta-block .row .k { color: var(--muted); }
+  .channel-card { background: var(--panel-2); border: 1px solid var(--border); border-radius: 3px; margin-bottom: 8px; }
+  .channel-card .head { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; font-family: var(--mono); font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--border); cursor: pointer; }
+  .channel-card .head .ch { color: var(--info); font-weight: 600; }
+  .channel-card .body { display: none; padding: 8px 10px; font-family: var(--mono); font-size: 11px; color: var(--text); max-height: 200px; overflow-y: auto; white-space: pre-wrap; line-height: 1.5; }
+  .channel-card.open .body { display: block; }
+  .channel-card .head .arrow { transition: transform 120ms; }
+  .channel-card.open .head .arrow { transform: rotate(90deg); }
   .modal label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); margin-top: 6px; }
   .modal .reject-block { display: none; }
   .modal .reject-block.open { display: block; }
@@ -224,6 +231,10 @@
       <div class="col right-col">
         <h3>Judge scores</h3>
         <div class="meta-block" id="review-scores"></div>
+
+        <h3>Linked channel drafts</h3>
+        <div id="review-channels"></div>
+
         <label>Comments — used as revision instructions for Claude</label>
         <textarea class="notes" id="review-notes" placeholder="e.g. 'tighten the opening; drop the third paragraph; make title more specific'"></textarea>
         <div class="actions" style="margin-top:8px; justify-content:flex-start;">
@@ -491,6 +502,32 @@ async function openReview(id) {
       Object.keys(j).forEach(k => {
         if (['voice','factcheck','novelty'].includes(k)) return;
         addRow(k, JSON.stringify(j[k]));
+      });
+    }
+
+    // Linked channel drafts (HN + LinkedIn paste-ready text)
+    const cc = el('review-channels');
+    cc.replaceChildren();
+    const channels = d.channels || [];
+    const channelDrafts = d.channel_drafts || {};
+    const nonWebsite = channels.filter(c => c !== 'website');
+    if (nonWebsite.length === 0) {
+      cc.appendChild(tag('div', { class: 'empty' }, 'no linked channels (website-only)'));
+    } else {
+      nonWebsite.forEach(ch => {
+        const text = channelDrafts[ch];
+        const card = tag('div', { class: 'channel-card' });
+        const head = tag('div', { class: 'head' });
+        const left = tag('span');
+        left.appendChild(tag('span', { class: 'arrow' }, '▸ '));
+        left.appendChild(tag('span', { class: 'ch' }, ch));
+        head.appendChild(left);
+        head.appendChild(tag('span', null, text ? (text.length + ' chars') : 'not yet generated'));
+        head.onclick = () => card.classList.toggle('open');
+        card.appendChild(head);
+        const body = tag('div', { class: 'body' }, text || '(will be generated during review staging)');
+        card.appendChild(body);
+        cc.appendChild(card);
       });
     }
 

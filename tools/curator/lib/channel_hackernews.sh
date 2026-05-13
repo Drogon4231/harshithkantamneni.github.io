@@ -17,10 +17,13 @@ export CURATOR_DIR
 HN_USERNAME="${HN_USERNAME:-Drogon4231}"
 SITE_BASE_URL="${SITE_BASE_URL:-https://drogon4231.github.io/harshithkantamneni.github.io}"
 
-# channel_hackernews <candidate.json>
-# Output: writes channel_drafts/hackernews/<id>.txt, returns 0
+# channel_hackernews <candidate.json> [out_path]
+# Default output: channel_drafts/hackernews/<id>.txt
+# If [out_path] is given, write there instead (used by the review-staging
+# flow to pre-generate the paste-ready file at pending_drafts/).
 channel_hackernews() {
     local candidate="$1"
+    local out_override="${2:-}"
     if [ ! -f "$candidate" ]; then
         log_error "channel_hackernews: candidate missing: $candidate"
         return 1
@@ -75,7 +78,12 @@ print(title)
 PYEOF
 )
 
-    local out_file="${CURATOR_DIR}/channel_drafts/hackernews/${id}.txt"
+    local out_file
+    if [ -n "$out_override" ]; then
+        out_file="$out_override"
+    else
+        out_file="${CURATOR_DIR}/channel_drafts/hackernews/${id}.txt"
+    fi
     mkdir -p "$(dirname "$out_file")"
 
     cat > "$out_file" <<EOF

@@ -162,6 +162,14 @@ def get_review(target_id: str):
             judges = json.loads(judges_path.read_text())
         except Exception:
             judges = {}
+
+    # Pre-generated channel drafts (from review staging)
+    channel_drafts = {}
+    for ch in ("hackernews", "linkedin"):
+        p = PENDING_DRAFTS_DIR / f"{target_id}.{ch}.txt"
+        if p.is_file():
+            channel_drafts[ch] = p.read_text()
+
     return {
         "ok": True,
         "id": target_id,
@@ -175,6 +183,7 @@ def get_review(target_id: str):
         "source": source,
         "source_path": str(draft_path),
         "judges": judges,
+        "channel_drafts": channel_drafts,
         "operator_notes": c.get("operator_notes", ""),
         "awaiting_review_at": c.get("awaiting_review_at", ""),
         "cost_seconds": c.get("cost_seconds"),

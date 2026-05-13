@@ -63,3 +63,38 @@ printf "%s" "$REVISED" > "$TMP"
 mv "$TMP" "$DRAFT_FILE"
 
 log_info "revise: $TARGET_ID → updated (${#REVISED} chars)"
+
+# Regenerate channel drafts since the main draft changed (any LinkedIn teaser
+# extracted from the old prose is now stale). Best-effort; failures non-blocking.
+CANDIDATE_FILE=""
+for dir in "$HOME/Desktop/Fun/lab/publish_candidates" "$HOME/Desktop/AGI/data/publish_candidates"; do
+    [ -d "$dir" ] || continue
+    for f in "$dir"/*.json; do
+        [ -f "$f" ] || continue
+        FID=$(F="$f" python3 -c "import os, json; print(json.load(open(os.environ['F'])).get('id',''))" 2>/dev/null)
+        if [ "$FID" = "$TARGET_ID" ]; then
+            CANDIDATE_FILE="$f"
+            break 2
+        fi
+    done
+done
+
+if [ -n "$CANDIDATE_FILE" ]; then
+    . "$CURATOR_DIR/lib/channel_hackernews.sh"
+    . "$CURATOR_DIR/lib/channel_linkedin.sh"
+    CHANNELS=$(CANDIDATE="$CANDIDATE_FILE" python3 -c "import os, json; print(' '.join(json.load(open(os.environ['CANDIDATE'])).get('channels', ['website'])))" 2>/dev/null || echo "website")
+    for ch in $CHANNELS; do
+        case "$ch" in
+            hackernews)
+                channel_hackernews "$CANDIDATE_FILE" \
+                    "${CURATOR_DIR}/pending_drafts/${TARGET_ID}.hackernews.txt" \
+                    || log_warn "revise: HN regen failed (non-blocking)"
+                ;;
+            linkedin)
+                channel_linkedin "$CANDIDATE_FILE" "$DRAFT_FILE" \
+                    "${CURATOR_DIR}/pending_drafts/${TARGET_ID}.linkedin.txt" \
+                    || log_warn "revise: LinkedIn regen failed (non-blocking)"
+                ;;
+        esac
+    done
+fi

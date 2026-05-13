@@ -41,10 +41,16 @@ print(text.strip())
 PYEOF
 }
 
-# channel_linkedin <candidate.json>
-# Writes channel_drafts/linkedin/<id>.txt. Returns 0 on success.
+# channel_linkedin <candidate.json> [astro_override] [out_override]
+# Default: reads from WEBSITE_ROOT/src/pages/{reports,notes}/<id>.astro
+#          writes to CURATOR_DIR/channel_drafts/linkedin/<id>.txt
+# If [astro_override] is given, read source from there (used during review
+# staging when the draft hasn't been moved into src/pages/ yet).
+# If [out_override] is given, write paste-ready file there instead.
 channel_linkedin() {
     local candidate="$1"
+    local astro_override="${2:-}"
+    local out_override="${3:-}"
     if [ ! -f "$candidate" ]; then
         log_error "channel_linkedin: candidate missing: $candidate"
         return 1
@@ -75,7 +81,11 @@ PYEOF
         note)   subpath="notes" ;;
         *) log_error "channel_linkedin: unknown type: $type"; return 1 ;;
     esac
-    astro_path="${WEBSITE_ROOT}/src/pages/${subpath}/${id}.astro"
+    if [ -n "$astro_override" ]; then
+        astro_path="$astro_override"
+    else
+        astro_path="${WEBSITE_ROOT}/src/pages/${subpath}/${id}.astro"
+    fi
     target_url="${SITE_BASE_URL}/${subpath}/${id}"
 
     if [ ! -f "$astro_path" ]; then
@@ -156,7 +166,12 @@ PYEOF
     fi
 
     # Write output file with metadata header
-    local out_file="${CURATOR_DIR}/channel_drafts/linkedin/${id}.txt"
+    local out_file
+    if [ -n "$out_override" ]; then
+        out_file="$out_override"
+    else
+        out_file="${CURATOR_DIR}/channel_drafts/linkedin/${id}.txt"
+    fi
     mkdir -p "$(dirname "$out_file")"
 
     cat > "$out_file" <<EOF

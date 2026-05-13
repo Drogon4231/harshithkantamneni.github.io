@@ -88,17 +88,31 @@ open(p, 'w').write(json.dumps(d, indent=2))
 PYEOF
 log_info "approve: $TARGET_ID → published"
 
-# Channel adapters (operator approved → fire for real, no DRY_RUN guard here).
+# Channel adapters: reuse the pre-generated drafts from review staging when
+# present (no need to re-call Claude for the LinkedIn teaser the operator
+# already saw). Only regenerate if the pending file is missing — e.g.,
+# because the operator approved via legacy path or the staging step failed.
 CHANNELS=$(CANDIDATE="$CANDIDATE" python3 -c "import os, json; print(' '.join(json.load(open(os.environ['CANDIDATE'])).get('channels', ['website'])))" 2>/dev/null || echo "website")
 log_section "channel adapters"
 for ch in $CHANNELS; do
     case "$ch" in
         website) ;;
-        hackernews)
-            channel_hackernews "$CANDIDATE" || log_warn "HN adapter failed (non-blocking)"
-            ;;
-        linkedin)
-            channel_linkedin "$CANDIDATE" || log_warn "LinkedIn adapter failed (non-blocking)"
+        hackernews|linkedin)
+            PENDING_CH="$CURATOR_DIR/pending_drafts/${TARGET_ID}.${ch}.txt"
+            FINAL_DIR="$CURATOR_DIR/channel_drafts/${ch}"
+            FINAL_PATH="${FINAL_DIR}/${TARGET_ID}.txt"
+            mkdir -p "$FINAL_DIR"
+            if [ -f "$PENDING_CH" ]; then
+                mv "$PENDING_CH" "$FINAL_PATH"
+                log_info "approve: ${ch} draft moved from review staging → $FINAL_PATH"
+            else
+                log_warn "approve: no pre-generated ${ch} draft; regenerating now"
+                if [ "$ch" = "hackernews" ]; then
+                    channel_hackernews "$CANDIDATE" || log_warn "HN adapter failed (non-blocking)"
+                else
+                    channel_linkedin "$CANDIDATE" || log_warn "LinkedIn adapter failed (non-blocking)"
+                fi
+            fi
             ;;
         *)
             log_warn "unknown channel: $ch"
