@@ -1,9 +1,35 @@
 // motion.js — brutalist redesign
 // Single interaction: cursor proximity drives Bricolage weight axis on hero.
 // Plus theme toggle.
+// Plus: external links open in a new tab (target=_blank, rel=noopener noreferrer).
 
 (function () {
   'use strict';
+
+  // External-link policy: any <a href="http(s)://OTHER_HOST"> opens in a new
+  // tab. Internal links (same-host, mailto:, tel:, #fragment, relative paths)
+  // open in-place. Applied at DOM-ready so curator-generated content inherits
+  // the behaviour with no per-page edits.
+  function applyExternalLinkPolicy() {
+    const here = location.hostname;
+    document.querySelectorAll('a[href]').forEach((a) => {
+      const href = a.getAttribute('href') || '';
+      if (!/^https?:\/\//i.test(href)) return;            // skip mailto, /, #, relative
+      let host;
+      try { host = new URL(href, location.href).hostname; } catch (_) { return; }
+      if (!host || host === here) return;                 // same-site → stay in tab
+      if (!a.target) a.target = '_blank';
+      const rels = new Set((a.rel || '').split(/\s+/).filter(Boolean));
+      rels.add('noopener');
+      rels.add('noreferrer');
+      a.rel = Array.from(rels).join(' ');
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyExternalLinkPolicy);
+  } else {
+    applyExternalLinkPolicy();
+  }
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
