@@ -189,7 +189,6 @@
   <h2>Launchd jobs</h2>
   <div class="launchd-row">
     <div><span class="dot" id="d-curator"></span>curator <span id="t-curator">—</span></div>
-    <div><span class="dot" id="d-veto"></span>veto-check <span id="t-veto">—</span></div>
   </div>
 </div>
 
@@ -385,8 +384,6 @@ function render(data) {
 
   el('d-curator').className = 'dot ' + (data.launchd.curator ? 'ok' : 'err');
   el('t-curator').textContent = data.launchd.curator ? 'loaded · daily 04:00' : 'NOT LOADED';
-  el('d-veto').className = 'dot ' + (data.launchd.veto_check ? 'ok' : 'err');
-  el('t-veto').textContent = data.launchd.veto_check ? 'loaded · hourly' : 'NOT LOADED';
 
   // ── review queue ─────────────────────────────────────────────────
   const rb = el('review-body');

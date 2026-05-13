@@ -116,7 +116,6 @@ def get_status():
         loaded = ""
     launchd = {
         "curator": "com.harshith.website-curator" in loaded,
-        "veto_check": "com.harshith.website-veto-check" in loaded,
     }
 
     today_log = LOG_DIR / f"{datetime.date.today().isoformat()}.log"

@@ -20,7 +20,6 @@ Other verbs:
 | `cli.sh queue` | Table of all non-published candidates |
 | `cli.sh held` | Held candidates + reasons + retry hint |
 | `cli.sh retry <id>` | Reset held → pending |
-| `cli.sh veto <id>` | Kill a Tier 3 publish in its 24h window |
 | `cli.sh tail` | Tail today's log |
 | `cli.sh runs [N]` | Summary of last N runs (default 10) |
 | `cli.sh audit` | Scan all pages for future dates, [VERIFY] markers, TODO/FIXME (add `--check-style` for forbidden-phrase scan) |
@@ -41,8 +40,8 @@ Then: `cur status`, `cur retry foo`, etc.
 |---|---|
 | `status` shows `held N`  | `cli.sh held` to see reasons. Fix root cause (edit voice anchor, fix MLX, etc.), then `cli.sh retry <id>`. |
 | `status` shows `processing N` (>0) but no run is happening | A previous run crashed mid-pipeline. Manually edit the manifest's `curator_state` back to `pending` and re-run. |
-| `status` shows launchd jobs `NOT LOADED` | `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.harshith.website-curator.plist` (and the veto-check plist). |
-| Tier 3 candidate is about to publish something bad | `cli.sh veto <id>` — must be within the 24h window before veto_check merges it. |
+| `status` shows launchd jobs `NOT LOADED` | `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.harshith.website-curator.plist` |
+| Want to kill a draft before it publishes | Open the review modal in `cli.sh ui` → `reject` button. The pipeline pauses at `awaiting_review`; nothing publishes until you click `approve & publish`. |
 | `runs` shows `FAIL` for recent run | `cli.sh tail` to see the last entries, or grep the day's log file. |
 | Curator runs but nothing publishes | The labs aren't writing manifests to `publish_candidates/`. See the lab-side append protocol spec. |
 
@@ -65,7 +64,6 @@ Then: `cur status`, `cur retry foo`, etc.
 | Validators (em-dash, forbidden, base path, [VERIFY], build) | `tools/curator/lib/validate.sh` |
 | Voice score threshold (currently 6.5) | `tools/curator/lib/judge.sh` (`VOICE_THRESHOLD` env var or default at line 27) |
 | Per-tier publish behavior | `tools/curator/lib/publish.sh` |
-| Veto window duration | `tools/curator/veto_check.sh` (env var `VETO_HOURS`, default 24) |
 | Manifest schema (adding a new field) | `tools/curator/schema/publish_candidate.schema.json` |
 | Daily run time | `~/Library/LaunchAgents/com.harshith.website-curator.plist` (then reload, see below) |
 | HN username, site base URL | env vars `HN_USERNAME`, `SITE_BASE_URL` (or defaults inline) |
@@ -155,7 +153,7 @@ Click any card in the "Awaiting your review" section → modal opens.
 **Don't manually edit:**
 - `scores` — comes from judges
 - `published_at` — set on publish
-- `vetoed_at` — set on veto
+- `vetoed_at` — set on legacy veto (no longer produced; kept for old manifests)
 
 ---
 

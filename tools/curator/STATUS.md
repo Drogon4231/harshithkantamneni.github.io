@@ -64,7 +64,7 @@ run.sh
      ↓ Stage 7: publish_draft
          - Tier 1 → PR opens, human merges
          - Tier 2 → PR + gh pr merge --auto --squash
-         - Tier 3 → branch + tag, veto_check.sh merges 24h later
+         - Tier 3 → PR + auto-merge (same as Tier 2; the dashboard review gate is the human checkpoint)
      ↓ Stage 8: channel adapters (per candidate's channels[] field)
          - hackernews → deterministic suggester, writes paste-ready file
          - linkedin   → single narrow claude --print, writes paste-ready draft

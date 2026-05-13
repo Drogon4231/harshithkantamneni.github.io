@@ -2,10 +2,10 @@
 # Branch + commit + publish gating per risk tier.
 # Runs after judges pass and validators pass.
 #
-# Tier 1: open PR, do not auto-merge (human merges)
-# Tier 2: open PR + label auto-merge; tools/curator/auto_merge.sh handles it
-# Tier 3: commit directly to draft/<id> branch, no PR; tools/curator/veto_check.sh
-#         auto-merges after 24h if no veto
+# Tier 1: open PR, do not auto-merge (human merges in GitHub UI)
+# Tier 2: open PR + enable gh auto-merge (squash)
+# Tier 3: same as Tier 2 — the dashboard review gate is the human checkpoint;
+#         the 24h veto-window flow was retired 2026-05-13.
 #
 # Usage:
 #   . tools/curator/lib/publish.sh
@@ -175,10 +175,19 @@ publish_draft() {
             rm -f "$body_file"
             ;;
         3)
-            log_info "publish_draft: tier 3 → committed to $branch; veto-window cron will merge in 24h"
-            # Tag the commit with curator metadata for veto_check.sh to find later
-            _run git tag "curator-tier3-${id}" "$branch"
-            _run git push origin "curator-tier3-${id}"
+            # Tier 3 used to commit directly to draft/<id> and wait 24h for
+            # veto_check.sh to auto-merge. With the dashboard review gate as
+            # the operator's explicit approval, the 24h window is redundant —
+            # Tier 3 now publishes identically to Tier 2 (PR + auto-merge).
+            log_info "publish_draft: tier 3 → opening PR + enabling auto-merge (dashboard review already approved)"
+            local body
+            body=$(_build_pr_body "$candidate" "$judges_json" "${CURATOR_RUN_ID:-manual}")
+            local body_file
+            body_file=$(mktemp /tmp/pr_body.XXXXXX.md)
+            echo "$body" > "$body_file"
+            _run gh pr create --title "Publish: $title" --body-file "$body_file" --base main --head "$branch"
+            _run gh pr merge --auto --squash "$branch" || log_warn "auto-merge enable failed (PR may still merge manually)"
+            rm -f "$body_file"
             ;;
         *) log_error "publish_draft: unknown tier: $tier"; return 2 ;;
     esac

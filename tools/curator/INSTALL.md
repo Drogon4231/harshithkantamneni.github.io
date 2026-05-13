@@ -27,21 +27,21 @@ gh auth status  # confirm authenticated
 cp ~/Desktop/website/tools/curator/launchd/com.harshith.website-curator.plist \
    ~/Library/LaunchAgents/
 
-# Hourly veto check (auto-merges Tier-3 drafts after 24h)
-cp ~/Desktop/website/tools/curator/launchd/com.harshith.website-veto-check.plist \
-   ~/Library/LaunchAgents/
-
 # Validate plist syntax
 plutil -lint ~/Library/LaunchAgents/com.harshith.website-curator.plist
-plutil -lint ~/Library/LaunchAgents/com.harshith.website-veto-check.plist
 
-# Load
-launchctl load ~/Library/LaunchAgents/com.harshith.website-curator.plist
-launchctl load ~/Library/LaunchAgents/com.harshith.website-veto-check.plist
+# Load (modern launchctl)
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.harshith.website-curator.plist
 
 # Verify loaded
 launchctl list | grep harshith
 ```
+
+> Note: the 24h Tier-3 veto window was retired 2026-05-13. The dashboard
+> review gate (`cli.sh ui`) is now the human checkpoint — Tier 3
+> publishes identically to Tier 2 (PR + auto-merge) once you click
+> 'approve & publish' in the review modal. No separate veto-check
+> launchd job is needed.
 
 ## Manual run (testing)
 
@@ -51,28 +51,25 @@ bash tools/curator/run.sh                   # full daily run
 bash tools/curator/run.sh --skip-ram-check  # skip RAM gate (testing)
 DRY_RUN=1 bash tools/curator/run.sh         # log commands without pushing
 CURATOR_DEBUG=1 bash tools/curator/run.sh   # extra log detail
-bash tools/curator/veto_check.sh            # one-shot veto-window check
 ```
 
 ## Where logs land
 
 - `tools/curator/log/YYYY-MM-DD.log` — per-day curator runs
 - `tools/curator/log/launchd.{stdout,stderr}.log` — launchd-captured stdout/err
-- `tools/curator/log/veto.log` — veto-check runs
 
 Logs are gitignored (`*.log` in `tools/curator/log/.gitignore`).
 
 ## Uninstall
 
 ```bash
-launchctl unload ~/Library/LaunchAgents/com.harshith.website-curator.plist
-launchctl unload ~/Library/LaunchAgents/com.harshith.website-veto-check.plist
-rm ~/Library/LaunchAgents/com.harshith.website-{curator,veto-check}.plist
+launchctl bootout gui/$(id -u)/com.harshith.website-curator
+rm ~/Library/LaunchAgents/com.harshith.website-curator.plist
 ```
 
 ## How it triggers
 
-The Mac must be on at 04:00 local time for the daily run to fire. If the Mac is asleep at the trigger time, launchd queues the job and runs it on next wake (per macOS launchd behavior). The veto check runs every hour the Mac is awake.
+The Mac must be on at 04:00 local time for the daily run to fire. If the Mac is asleep at the trigger time, launchd queues the job and runs it on next wake (per macOS launchd behavior).
 
 ## What happens when there's nothing to publish
 

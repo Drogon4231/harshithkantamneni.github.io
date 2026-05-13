@@ -9,7 +9,7 @@
 #   queue            List all non-published candidates with their state
 #   held             List held candidates with reasons
 #   retry <id>       Reset held candidate → pending (will run on next pass)
-#   veto <id>        Cancel Tier 3 publication in its 24h window
+#   (veto removed 2026-05-13 — review-gate replaces the 24h auto-merge window)
 #   tail             Tail today's curator log
 #   runs [N]         Summarize last N runs across all logs (default 10)
 #   help             Show usage
@@ -106,19 +106,13 @@ cli_status() {
     echo ""
 
     # launchd jobs
-    local cur_state veto_state
+    local cur_state
     cur_state=$(launchctl list 2>/dev/null | awk '$3=="com.harshith.website-curator"' | head -1)
-    veto_state=$(launchctl list 2>/dev/null | awk '$3=="com.harshith.website-veto-check"' | head -1)
     echo "  launchd:"
     if [ -n "$cur_state" ]; then
         echo "    curator       ${C_GREEN}loaded${C_OFF}  (next fire daily 04:00)"
     else
         echo "    curator       ${C_RED}NOT LOADED${C_OFF}"
-    fi
-    if [ -n "$veto_state" ]; then
-        echo "    veto-check    ${C_GREEN}loaded${C_OFF}  (next fire <1h)"
-    else
-        echo "    veto-check    ${C_RED}NOT LOADED${C_OFF}"
     fi
 
     # Queue
@@ -267,47 +261,6 @@ PYEOF
     echo "  (will run on next curator pass; trigger manually: bash tools/curator/run.sh)"
 }
 
-cli_veto() {
-    local target="${1:-}"
-    if [ -z "$target" ]; then
-        echo "usage: cli.sh veto <id>" >&2
-        return 2
-    fi
-    local branch="draft/$target"
-    cd "$WEBSITE_ROOT"
-    if ! git ls-remote --heads origin "$branch" 2>/dev/null | grep -q .; then
-        echo "${C_YELLOW}refusing:${C_OFF} no branch $branch on origin." >&2
-        echo "  (Already merged? Already vetoed? Or never a Tier 3 publish.)" >&2
-        return 1
-    fi
-    echo "${C_BOLD}About to veto:${C_OFF}"
-    echo "  delete branch ${C_CYAN}$branch${C_OFF} on origin"
-    echo "  veto_check.sh will clean up the tag on its next pass"
-    printf "Confirm (y/N)? "
-    local confirm
-    read -r confirm
-    [ "$confirm" = "y" ] || [ "$confirm" = "Y" ] || { echo "aborted"; return 1; }
-    if ! git push origin ":refs/heads/$branch"; then
-        echo "${C_RED}veto failed:${C_OFF} push delete returned nonzero" >&2
-        return 1
-    fi
-    local found
-    found=$(_find_by_id "$target")
-    if [ -n "$found" ]; then
-        F="$found" python3 <<'PYEOF'
-import os, json, datetime
-p = os.environ['F']
-d = json.load(open(p))
-d['curator_state'] = 'vetoed'
-d['vetoed_at'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
-open(p, 'w').write(json.dumps(d, indent=2))
-PYEOF
-        echo "${C_GREEN}vetoed:${C_OFF} branch $branch deleted; manifest → 'vetoed'"
-    else
-        echo "${C_GREEN}vetoed:${C_OFF} branch $branch deleted (no manifest entry found)"
-    fi
-}
-
 cli_tail() {
     local today_log="${CURATOR_DIR}/log/$(date +%Y-%m-%d).log"
     if [ ! -f "$today_log" ]; then
@@ -370,7 +323,6 @@ Verbs:
   ${C_BOLD}queue${C_OFF}              List all non-published candidates with their state
   ${C_BOLD}held${C_OFF}               List held candidates with reasons
   ${C_BOLD}retry${C_OFF} <id>         Reset held candidate → pending
-  ${C_BOLD}veto${C_OFF} <id>          Cancel Tier 3 publication in its 24h window
   ${C_BOLD}tail${C_OFF}               Tail today's curator log (falls back to newest)
   ${C_BOLD}runs${C_OFF} [N]           Summarize last N runs (default 10)
   ${C_BOLD}audit${C_OFF}              Scan src/pages/ for future dates, [VERIFY], TODO/FIXME
@@ -382,7 +334,7 @@ Verbs:
 Common workflows:
   Daily glance:           cli.sh status
   Something held:         cli.sh held → fix root cause → cli.sh retry <id>
-  Tier 3 bad publish:     cli.sh veto <id>  (within 24h)
+  Reject a draft:         in cli.sh ui review modal — reject button
   Watch live run:         cli.sh tail
 
 See ${C_DIM}tools/curator/OPERATING.md${C_OFF} for what-to-edit-where.
@@ -404,7 +356,6 @@ case "${1:-help}" in
     queue)         shift; cli_queue "$@" ;;
     held)          shift; cli_held "$@" ;;
     retry)         shift; cli_retry "${1:-}" ;;
-    veto)          shift; cli_veto "${1:-}" ;;
     tail)          shift; cli_tail "$@" ;;
     runs)          shift; cli_runs "${1:-10}" ;;
     audit)         shift; cli_audit "$@" ;;
