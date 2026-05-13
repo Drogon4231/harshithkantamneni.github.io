@@ -186,9 +186,9 @@
 </div>
 
 <div class="section">
-  <h2>Launchd jobs</h2>
+  <h2>Pipeline trigger</h2>
   <div class="launchd-row">
-    <div><span class="dot" id="d-curator"></span>curator <span id="t-curator">—</span></div>
+    <div><span style="color: var(--muted); font-family: var(--mono); font-size: 11px;">manual · run <code style="color: var(--text);">bash tools/curator/run.sh</code> from a terminal whenever a lab has new pending candidates</span></div>
   </div>
 </div>
 
@@ -382,8 +382,7 @@ function render(data) {
   el('stat-runs-ok').textContent = runsOk + '/' + runs.length;
   el('stat-runs-ok').className = 'n ok';
 
-  el('d-curator').className = 'dot ' + (data.launchd.curator ? 'ok' : 'err');
-  el('t-curator').textContent = data.launchd.curator ? 'loaded · daily 04:00' : 'NOT LOADED';
+  // (launchd block was retired 2026-05-13 — pipeline runs manually now)
 
   // ── review queue ─────────────────────────────────────────────────
   const rb = el('review-body');

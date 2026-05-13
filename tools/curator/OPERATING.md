@@ -10,7 +10,7 @@ Operator interface for the daily curator pipeline. Pair this with `STATUS.md` (i
 bash tools/curator/cli.sh status
 ```
 
-One-pager. Shows: launchd job state, queue counts, channel drafts pending, today's run summary.
+One-pager. Shows: queue counts, channel drafts pending, today's run summary. The pipeline runs manually — `bash tools/curator/run.sh` from the website root.
 
 Other verbs:
 
@@ -40,7 +40,7 @@ Then: `cur status`, `cur retry foo`, etc.
 |---|---|
 | `status` shows `held N`  | `cli.sh held` to see reasons. Fix root cause (edit voice anchor, fix MLX, etc.), then `cli.sh retry <id>`. |
 | `status` shows `processing N` (>0) but no run is happening | A previous run crashed mid-pipeline. Manually edit the manifest's `curator_state` back to `pending` and re-run. |
-| `status` shows launchd jobs `NOT LOADED` | `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.harshith.website-curator.plist` |
+| Curator never seems to run | It doesn't auto-run. Trigger it manually: `bash tools/curator/run.sh` from the website root. |
 | Want to kill a draft before it publishes | Open the review modal in `cli.sh ui` → `reject` button. The pipeline pauses at `awaiting_review`; nothing publishes until you click `approve & publish`. |
 | `runs` shows `FAIL` for recent run | `cli.sh tail` to see the last entries, or grep the day's log file. |
 | Curator runs but nothing publishes | The labs aren't writing manifests to `publish_candidates/`. See the lab-side append protocol spec. |
@@ -68,14 +68,7 @@ Then: `cur status`, `cur retry foo`, etc.
 | Daily run time | `~/Library/LaunchAgents/com.harshith.website-curator.plist` (then reload, see below) |
 | HN username, site base URL | env vars `HN_USERNAME`, `SITE_BASE_URL` (or defaults inline) |
 
-After editing a prompt, voice anchor, or forbidden list: no restart needed. The next curator run picks it up.
-
-After editing a plist:
-```
-launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.harshith.website-curator.plist
-cp tools/curator/launchd/com.harshith.website-curator.plist ~/Library/LaunchAgents/
-launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.harshith.website-curator.plist
-```
+After editing a prompt, voice anchor, or forbidden list: no restart needed. The next manual `bash tools/curator/run.sh` picks it up.
 
 ---
 

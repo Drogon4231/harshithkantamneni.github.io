@@ -107,16 +107,9 @@ def get_status():
                     ).isoformat(),
                 })
 
-    try:
-        out = subprocess.run(
-            ["launchctl", "list"], capture_output=True, text=True, timeout=2,
-        )
-        loaded = out.stdout
-    except Exception:
-        loaded = ""
-    launchd = {
-        "curator": "com.harshith.website-curator" in loaded,
-    }
+    # launchd was retired 2026-05-13 (macOS TCC blocked Desktop reads from
+    # launchd-spawned bash; manual trigger from terminal works fine).
+    launchd = None
 
     today_log = LOG_DIR / f"{datetime.date.today().isoformat()}.log"
     log_excerpt = ""

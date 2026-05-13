@@ -5,7 +5,7 @@
 #   bash tools/curator/cli.sh <verb> [args]
 #
 # Verbs:
-#   status           One-pager: queue, runs, held, channel drafts, launchd state
+#   status           One-pager: queue, runs, held, channel drafts
 #   queue            List all non-published candidates with their state
 #   held             List held candidates with reasons
 #   retry <id>       Reset held candidate → pending (will run on next pass)
@@ -104,16 +104,7 @@ _find_by_id() {
 cli_status() {
     echo "${C_BOLD}── curator status ──────────────────────────────────────${C_OFF}"
     echo ""
-
-    # launchd jobs
-    local cur_state
-    cur_state=$(launchctl list 2>/dev/null | awk '$3=="com.harshith.website-curator"' | head -1)
-    echo "  launchd:"
-    if [ -n "$cur_state" ]; then
-        echo "    curator       ${C_GREEN}loaded${C_OFF}  (next fire daily 04:00)"
-    else
-        echo "    curator       ${C_RED}NOT LOADED${C_OFF}"
-    fi
+    echo "  pipeline trigger: ${C_DIM}manual — run 'bash tools/curator/run.sh'${C_OFF}"
 
     # Queue
     local pending=0 processing=0 awaiting=0 held=0 published=0 vetoed=0 unknown=0
@@ -319,7 +310,7 @@ ${C_BOLD}curator cli${C_OFF} — operator interface to the curator pipeline
 Usage: bash tools/curator/cli.sh <verb> [args]
 
 Verbs:
-  ${C_BOLD}status${C_OFF}             One-pager: queue, runs, held, channel drafts, launchd
+  ${C_BOLD}status${C_OFF}             One-pager: queue, runs, held, channel drafts
   ${C_BOLD}queue${C_OFF}              List all non-published candidates with their state
   ${C_BOLD}held${C_OFF}               List held candidates with reasons
   ${C_BOLD}retry${C_OFF} <id>         Reset held candidate → pending

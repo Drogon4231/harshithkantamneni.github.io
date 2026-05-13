@@ -46,7 +46,7 @@ Quality gates after each task surfaced 8 real bugs that smoke tests would have m
 ## Pipeline shape (what runs daily at 04:00)
 
 ```
-launchd 04:00
+operator manually runs `bash tools/curator/run.sh`
    ↓
 run.sh
    ↓ Stage 0: ram_check (defer if <12GB free)
@@ -72,7 +72,7 @@ run.sh
    ↓ each stage updates manifest entry's curator_state
 ```
 
-Veto check runs hourly (separate launchd job).
+The pipeline runs manually (operator-triggered). The earlier daily-cron + 24h-veto-window design was retired 2026-05-13 in favor of the dashboard review gate.
 
 Channel adapters never auto-post. HN is hostile to automation; LinkedIn's
 API blocks third-party posting. Both write paste-ready drafts to
