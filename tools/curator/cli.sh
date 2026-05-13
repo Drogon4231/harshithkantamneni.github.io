@@ -122,37 +122,43 @@ cli_status() {
     fi
 
     # Queue
-    local pending=0 processing=0 held=0 published=0 vetoed=0 unknown=0
+    local pending=0 processing=0 awaiting=0 held=0 published=0 vetoed=0 unknown=0
     local lab f state
     while IFS=' ' read -r lab f; do
         [ -z "$lab" ] && continue
         state=$(_get_field "$f" "curator_state")
         case "$state" in
-            pending)    pending=$((pending + 1)) ;;
-            processing) processing=$((processing + 1)) ;;
-            held)       held=$((held + 1)) ;;
-            published)  published=$((published + 1)) ;;
-            vetoed)     vetoed=$((vetoed + 1)) ;;
-            *)          unknown=$((unknown + 1)) ;;
+            pending)          pending=$((pending + 1)) ;;
+            processing)       processing=$((processing + 1)) ;;
+            awaiting_review)  awaiting=$((awaiting + 1)) ;;
+            held)             held=$((held + 1)) ;;
+            published)        published=$((published + 1)) ;;
+            vetoed)           vetoed=$((vetoed + 1)) ;;
+            *)                unknown=$((unknown + 1)) ;;
         esac
     done < <(_iter_candidates)
 
     echo ""
     echo "  queue:"
-    echo "    pending       ${pending}"
+    echo "    pending          ${pending}"
     if [ "$processing" -gt 0 ]; then
-        echo "    processing    ${C_YELLOW}${processing} (STUCK — last run interrupted?)${C_OFF}"
+        echo "    processing       ${C_YELLOW}${processing} (STUCK — last run interrupted?)${C_OFF}"
     else
-        echo "    processing    ${processing}"
+        echo "    processing       ${processing}"
+    fi
+    if [ "$awaiting" -gt 0 ]; then
+        echo "    awaiting_review  ${C_CYAN}${awaiting}${C_OFF}  (review in dashboard: cli.sh ui)"
+    else
+        echo "    awaiting_review  ${awaiting}"
     fi
     if [ "$held" -gt 0 ]; then
-        echo "    held          ${C_YELLOW}${held}${C_OFF}  (see: cli.sh held)"
+        echo "    held             ${C_YELLOW}${held}${C_OFF}  (see: cli.sh held)"
     else
-        echo "    held          ${held}"
+        echo "    held             ${held}"
     fi
-    echo "    published     ${published}"
-    [ "$vetoed" -gt 0 ] && echo "    vetoed        ${vetoed}"
-    [ "$unknown" -gt 0 ] && echo "    ${C_RED}unknown       ${unknown}${C_OFF}"
+    echo "    published        ${published}"
+    [ "$vetoed" -gt 0 ] && echo "    vetoed           ${vetoed}"
+    [ "$unknown" -gt 0 ] && echo "    ${C_RED}unknown          ${unknown}${C_OFF}"
 
     # Channel drafts pending operator paste
     local hn_drafts li_drafts
