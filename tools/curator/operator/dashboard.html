@@ -92,6 +92,13 @@
 
   pre.log { background: #0a0b0c; color: var(--muted); padding: 12px; font-family: var(--mono); font-size: 11px; line-height: 1.5; overflow-x: auto; border-radius: 3px; max-height: 320px; overflow-y: auto; margin: 0; }
   .launchd-row { display: flex; gap: 16px; font-family: var(--mono); font-size: 12px; }
+  .pipeline-row { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; font-family: var(--mono); font-size: 12px; }
+  .pipeline-row button.act.primary { padding: 8px 14px; font-size: 12px; }
+  .pipeline-flag { color: var(--muted); font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+  .pipeline-flag input { margin: 0; cursor: pointer; }
+  .pipeline-hint { color: var(--dim); font-size: 11px; flex-basis: 100%; }
+  #pipeline-section .live-log { margin-top: 12px; }
+  #pipeline-section .live-log:empty { display: none; }
   .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
   .dot.ok { background: var(--ok); }
   .dot.err { background: var(--err); }
@@ -185,11 +192,16 @@
   <div class="stat"><div class="n" id="stat-runs-ok">—</div><div class="label">Recent runs OK</div></div>
 </div>
 
-<div class="section">
+<div class="section" id="pipeline-section">
   <h2>Pipeline trigger</h2>
-  <div class="launchd-row">
-    <div><span style="color: var(--muted); font-family: var(--mono); font-size: 11px;">manual · run <code style="color: var(--text);">bash tools/curator/run.sh</code> from a terminal whenever a lab has new pending candidates</span></div>
+  <div class="pipeline-row">
+    <button class="act primary" id="btn-run-pipeline" onclick="runPipeline()">▶ Run pipeline now</button>
+    <label class="pipeline-flag"><input type="checkbox" id="flag-skip-ram" checked> --skip-ram-check</label>
+    <label class="pipeline-flag"><input type="checkbox" id="flag-dry-run"> DRY_RUN</label>
+    <label class="pipeline-flag"><input type="checkbox" id="flag-debug"> CURATOR_DEBUG</label>
+    <span class="pipeline-hint">Scans HIVE + AGI publish_candidates/ for pending entries · stages each through classify → draft → judge → validate → review</span>
   </div>
+  <pre class="live-log" id="pipeline-log"></pre>
 </div>
 
 <!-- top-priority: review queue -->
@@ -326,6 +338,69 @@ function fmtTs(ts) {
 function setActionButtonsDisabled(disabled) {
   document.querySelectorAll('.modal .actions button.act, .modal .actions .left button.act')
     .forEach(b => { b.disabled = disabled; });
+}
+
+let pipelineEventSource = null;
+
+function appendPipelineLog(line, klass) {
+  const log = el('pipeline-log');
+  log.classList.add('open');
+  const span = document.createElement('span');
+  if (klass) span.className = klass;
+  span.textContent = line + '\n';
+  log.appendChild(span);
+  log.scrollTop = log.scrollHeight;
+}
+
+function runPipeline() {
+  if (pipelineEventSource) {
+    if (!confirm('A pipeline run is already in progress. Abort it?')) return;
+    try { pipelineEventSource.close(); } catch (_) {}
+    pipelineEventSource = null;
+  }
+  const btn = el('btn-run-pipeline');
+  btn.disabled = true;
+  btn.textContent = '⏳ running…';
+  const log = el('pipeline-log');
+  log.replaceChildren();
+  log.classList.add('open');
+
+  const params = new URLSearchParams();
+  if (el('flag-dry-run').checked)  params.set('dry_run',  '1');
+  if (el('flag-skip-ram').checked) params.set('skip_ram', '1');
+  if (el('flag-debug').checked)    params.set('debug',    '1');
+
+  const src = new EventSource('/api/run/stream?' + params.toString());
+  pipelineEventSource = src;
+
+  src.addEventListener('log', (e) => {
+    try {
+      const d = JSON.parse(e.data);
+      let klass = '';
+      if (/\[ERROR\]|FAILED|Operation not permitted/.test(d.line)) klass = 'err';
+      else if (/\[WARN\]/.test(d.line)) klass = 'meta';
+      else if (/PASS|published|awaiting_review|complete|no new candidates/.test(d.line)) klass = 'ok';
+      appendPipelineLog(d.line, klass);
+    } catch (_) {}
+  });
+  src.addEventListener('error', () => {
+    appendPipelineLog('▸ stream error', 'err');
+    src.close();
+    pipelineEventSource = null;
+    btn.disabled = false;
+    btn.textContent = '▶ Run pipeline now';
+  });
+  src.addEventListener('done', (e) => {
+    try {
+      const d = JSON.parse(e.data);
+      appendPipelineLog('▸ done (rc=' + d.rc + ')', d.rc === 0 ? 'ok' : 'err');
+    } catch (_) {}
+    src.close();
+    pipelineEventSource = null;
+    btn.disabled = false;
+    btn.textContent = '▶ Run pipeline now';
+    refresh();  // pull new awaiting_review entries the run may have produced
+  });
 }
 
 function fmtBytes(n) { return n < 1024 ? n + 'B' : (n/1024).toFixed(1) + 'K'; }

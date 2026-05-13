@@ -699,6 +699,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self._send_json(get_history(cid))
         elif path == "/api/review/stream":
             self._stream_action(qs)
+        elif path == "/api/run/stream":
+            self._stream_pipeline(qs)
         else:
             self.send_response(404); self.end_headers()
 
@@ -771,6 +773,71 @@ class Handler(http.server.BaseHTTPRequestHandler):
             if notes_tmp:
                 try: os.unlink(notes_tmp)
                 except FileNotFoundError: pass
+
+    def _stream_pipeline(self, qs):
+        """Run `bash tools/curator/run.sh` and stream stdout/stderr via SSE.
+
+        Query params:
+          dry_run=1   set DRY_RUN=1 in the subprocess environment
+          skip_ram=1  pass --skip-ram-check on the command line
+          debug=1    set CURATOR_DEBUG=1
+        """
+        dry_run  = qs.get("dry_run",  ["0"])[0] == "1"
+        skip_ram = qs.get("skip_ram", ["0"])[0] == "1"
+        debug    = qs.get("debug",    ["0"])[0] == "1"
+
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Accel-Buffering", "no")
+        self.end_headers()
+
+        def emit(event: str, payload: str) -> bool:
+            try:
+                msg = f"event: {event}\ndata: {json.dumps({'line': payload})}\n\n"
+                self.wfile.write(msg.encode("utf-8"))
+                self.wfile.flush()
+                return True
+            except (BrokenPipeError, ConnectionResetError):
+                return False
+
+        cmd = ["bash", "tools/curator/run.sh"]
+        if skip_ram:
+            cmd.append("--skip-ram-check")
+        env = os.environ.copy()
+        if dry_run:
+            env["DRY_RUN"] = "1"
+        if debug:
+            env["CURATOR_DEBUG"] = "1"
+
+        flag_summary = []
+        if dry_run:  flag_summary.append("DRY_RUN=1")
+        if skip_ram: flag_summary.append("--skip-ram-check")
+        if debug:    flag_summary.append("CURATOR_DEBUG=1")
+        emit("log", f"▸ launching: bash tools/curator/run.sh "
+                    f"{' '.join(flag_summary) if flag_summary else '(no flags)'}")
+
+        try:
+            proc = subprocess.Popen(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                bufsize=1, text=True, cwd=str(WEBSITE_ROOT), env=env,
+            )
+            for line in iter(proc.stdout.readline, ""):
+                line = line.rstrip("\n")
+                if not emit("log", line):
+                    proc.terminate()
+                    break
+            proc.wait(timeout=1800)  # 30 min ceiling; pipeline rarely exceeds 5
+            rc = proc.returncode
+            try:
+                self.wfile.write(
+                    f"event: done\ndata: {json.dumps({'rc': rc})}\n\n".encode()
+                )
+                self.wfile.flush()
+            except (BrokenPipeError, ConnectionResetError):
+                pass
+        except Exception as e:
+            emit("error", str(e))
 
     def do_POST(self):
         url = urllib.parse.urlparse(self.path)
