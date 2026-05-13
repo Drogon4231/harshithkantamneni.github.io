@@ -124,7 +124,8 @@
   .modal .live-log .meta { color: var(--info); }
   .modal .live-log .err { color: var(--err); }
   .modal .live-log .ok { color: var(--ok); }
-  .modal textarea.notes { min-height: 80px; margin-top: 8px; }
+  .modal textarea.notes { min-height: 140px; margin-top: 8px; }
+  button.act:disabled, button.act[disabled] { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
   .modal textarea.reason { min-height: 60px; margin-top: 8px; }
   .modal .actions { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; flex-wrap: wrap; }
   .modal .actions .left { margin-right: auto; display: flex; gap: 8px; }
@@ -314,6 +315,19 @@ const REFRESH_S = 5;
 let currentDraft = null;
 let currentReview = null;
 let reviewDirty = false;  // unsaved edits in source / notes / channels
+let currentEventSource = null;  // active SSE stream, if any
+
+// Format an ISO-ish timestamp like '20260512T210258Z' → '2026-05-12 21:02:58 UTC'.
+function fmtTs(ts) {
+  const m = ts && ts.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z?$/);
+  if (!m) return ts || '';
+  return `${m[1]}-${m[2]}-${m[3]} ${m[4]}:${m[5]}:${m[6]} UTC`;
+}
+
+function setActionButtonsDisabled(disabled) {
+  document.querySelectorAll('.modal .actions button.act, .modal .actions .left button.act')
+    .forEach(b => { b.disabled = disabled; });
+}
 
 function fmtBytes(n) { return n < 1024 ? n + 'B' : (n/1024).toFixed(1) + 'K'; }
 function el(id) { return document.getElementById(id); }
@@ -553,9 +567,9 @@ async function openReview(id) {
     if (nonWebsite.length === 0) {
       cc.appendChild(tag('div', { class: 'empty' }, 'no linked channels (website-only)'));
     } else {
-      nonWebsite.forEach(ch => {
+      nonWebsite.forEach((ch, idx) => {
         const text = channelDrafts[ch] || '';
-        const card = tag('div', { class: 'channel-card' });
+        const card = tag('div', { class: 'channel-card' + (idx === 0 ? ' open' : '') });
         const head = tag('div', { class: 'head' });
         const left = tag('span');
         left.appendChild(tag('span', { class: 'arrow' }, '▸ '));
@@ -585,6 +599,9 @@ async function openReview(id) {
     currentReview.has_prev = !!d.has_prev;
     el('tab-diff').style.display = d.has_prev ? '' : 'none';
     el('btn-undo').style.display = d.has_prev ? '' : 'none';
+    // Focus the notes textarea so the operator can start typing a comment
+    // immediately. Defer one tick so layout settles.
+    setTimeout(() => { el('review-notes').focus(); }, 80);
   } catch (e) {
     el('review-source').value = 'fetch failed: ' + e.message;
   }
@@ -629,7 +646,7 @@ async function loadHistory() {
   }
   d.entries.forEach(e => {
     const item = tag('div', { class: 'history-item' });
-    item.appendChild(tag('div', { class: 'ts' }, e.timestamp));
+    item.appendChild(tag('div', { class: 'ts' }, fmtTs(e.timestamp)));
     if (e.notes) item.appendChild(tag('div', { class: 'notes' }, e.notes));
     const row = tag('div', { class: 'row' });
     row.appendChild(tag('button', {
@@ -692,10 +709,17 @@ async function undoRevise() {
 }
 
 async function closeReview(force) {
+  // Block close if a stream is actively running (avoids dangling subprocess).
+  if (currentEventSource && !force) {
+    if (!confirm('A pipeline action is running. Close anyway and abort it?')) return;
+    try { currentEventSource.close(); } catch (_) {}
+    currentEventSource = null;
+    setActionButtonsDisabled(false);
+  }
   if (!force && reviewDirty) {
     if (!confirm('You have unsaved edits. Close anyway and discard them?')) return;
   }
-  // Teardown real-preview staging file if any
+  // Teardown real-preview staging file if any.
   if (currentReview) {
     try {
       await fetch('/api/review/realpreview?id=' + encodeURIComponent(currentReview.id), { method: 'DELETE' });
@@ -758,8 +782,15 @@ function clearLog() {
 function streamAction(action) {
   return new Promise((resolve) => {
     clearLog();
+    setActionButtonsDisabled(true);
     appendLog('▸ starting ' + action + '…', 'meta');
     const src = new EventSource('/api/review/stream?action=' + action + '&id=' + encodeURIComponent(currentReview.id));
+    currentEventSource = src;
+    const finish = (result) => {
+      setActionButtonsDisabled(false);
+      currentEventSource = null;
+      resolve(result);
+    };
     src.addEventListener('log', (e) => {
       try {
         const d = JSON.parse(e.data);
@@ -773,15 +804,18 @@ function streamAction(action) {
     src.addEventListener('error', () => {
       appendLog('▸ stream error', 'err');
       src.close();
-      resolve({ rc: -1 });
+      finish({ rc: -1 });
     });
     src.addEventListener('done', (e) => {
       try {
         const d = JSON.parse(e.data);
         appendLog('▸ done (rc=' + d.rc + ')', d.rc === 0 ? 'ok' : 'err');
-        resolve(d);
-      } catch (_) { resolve({ rc: -1 }); }
-      src.close();
+        src.close();
+        finish(d);
+      } catch (_) {
+        src.close();
+        finish({ rc: -1 });
+      }
     });
   });
 }

@@ -24,7 +24,7 @@ Other verbs:
 | `cli.sh tail` | Tail today's log |
 | `cli.sh runs [N]` | Summary of last N runs (default 10) |
 | `cli.sh audit` | Scan all pages for future dates, [VERIFY] markers, TODO/FIXME (add `--check-style` for forbidden-phrase scan) |
-| `cli.sh ui` | Launch the browser dashboard at http://127.0.0.1:8088/ — see queue/held/runs/channel drafts visually + retry buttons + draft preview with copy-to-clipboard |
+| `cli.sh ui` | Launch the browser dashboard at http://127.0.0.1:8088/ — review modal with preview/source/diff/real-preview tabs, editable channel drafts, comment-as-prompt + Claude revise, revision history, live log streaming, keyboard shortcuts |
 | `cli.sh help` | Print help |
 
 Convenient alias (one-time):
@@ -111,6 +111,41 @@ The pipeline now PAUSES at `awaiting_review` instead of auto-publishing. The
 operator approves (→ publish) or rejects (→ held) via the dashboard. The
 staged draft sits at `tools/curator/pending_drafts/<id>.astro` and is
 editable inline through the dashboard's review modal before approval.
+
+---
+
+## Dashboard review modal — what's where
+
+Launch: `bash tools/curator/cli.sh ui` → opens http://127.0.0.1:8088/
+
+Click any card in the "Awaiting your review" section → modal opens.
+
+**Tabs above the preview pane:**
+- **visual preview** — server-rendered approximation (Astro components stripped, basic typography). Fast, always available.
+- **real preview** — actual Astro page in an iframe. Requires `npm run dev` running in another terminal (`cd ~/Desktop/website && npm run dev`). If dev server isn't up, the tab shows a banner with the startup command.
+- **astro source** — full editable .astro source. Edit, then "save source edits" button to persist.
+- **diff vs prev** — unified diff between the pre-revise and post-revise versions (appears only after first revise).
+
+**Right column:**
+- Judge scores (voice / factcheck / novelty) with thresholds color-coded
+- Linked channel drafts — first one auto-expands. HN and LinkedIn paste-ready text rendered as editable textareas with "save channel" buttons. Approve picks up your edits.
+- Revision history — every Claude revision logged with timestamp + your prompt + a "restore this version" button (deep undo across all rounds).
+- Comments / revision instructions textarea — what you type here is sent to Claude as the revision prompt when you click "apply".
+
+**Bottom actions:**
+- `↶ undo last revise` — one-step swap to .prev (appears only when .prev exists)
+- `reject…` — two-click: first click reveals a reason textarea; second click submits (state → held)
+- `approve & publish` — runs the tier-aware publish flow with live log streaming
+
+**Keyboard shortcuts (modal-scoped):**
+- `Esc` → close (warns on unsaved edits / aborts active stream)
+- `⌘+S` (or `Ctrl+S`) → save (source if source tab is active, else notes)
+- `⌘+Enter` (or `Ctrl+Enter`) → apply notes (Claude revises)
+
+**Live log panel** (info-bordered, opens during approve/revise):
+- Streams stdout + stderr from approve.sh / revise.sh via SSE line-by-line
+- Color codes: ERROR/FAILED red, WARN amber, PASS/published/complete green
+- Stays open after the action so you can review what happened
 
 **Operator-safe edits:**
 - `channels` — which channels to fire (re-runs won't re-fire already-done channels by default; see Stage 8 in `run.sh`)
