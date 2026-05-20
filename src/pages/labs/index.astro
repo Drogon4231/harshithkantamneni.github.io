@@ -4,6 +4,16 @@ import Hero from '../../components/Hero.astro';
 import SectionHead from '../../components/SectionHead.astro';
 import NumberedList from '../../components/NumberedList.astro';
 
+export const meta = {
+  title: "Labs Overview",
+  date: "2026-04-15",
+  type: "lab-page",
+  freshness_class: "time-sensitive",
+  last_verified: "2026-05-20",
+  verification_interval_days: 2,
+  verification_subject: "Which labs are active, per-lab agent counts (~46 HIVE / ~30 research), one-line lab descriptors",
+};
+
 const base = '/harshithkantamneni.github.io';
 
 const labs = [

@@ -150,6 +150,59 @@ Click any card in the "Awaiting your review" section → modal opens.
 
 ---
 
+## Site-quality audits (run on pre-commit; also runnable manually)
+
+Three independent audits enforce hygiene on every commit:
+
+### 1. `audit_site.py` — content correctness (staged-file scope)
+
+```
+python3 tools/curator/audit_site.py
+```
+
+Checks future dates, leftover `[VERIFY ...]` markers, TODO/FIXME/XXX/HACK, forbidden phrases (from `forbidden_phrases.txt`). Runs on STAGED files in pre-commit; runnable site-wide for ad-hoc audit.
+
+### 2. `check_links.py` — link integrity (site-wide scope)
+
+```
+python3 tools/curator/check_links.py                    # human report, exits 1 on issues
+python3 tools/curator/check_links.py --json             # machine output
+python3 tools/curator/check_links.py --check-external   # also HEAD external URLs (slow)
+```
+
+Walks `src/pages/` + `src/components/` + `src/layouts/`. Validates: internal `<a href>` resolves to a real page; `<img src>` resolves under `public/`; `<a href="*.pdf">` style asset hrefs resolve under `public/`; anchor fragments (`/foo#bar`) match a heading slug OR `id="..."` attribute on the target page; relative frontmatter imports resolve. Astro `base:` from `astro.config.mjs` is auto-detected and stripped before resolution.
+
+### 3. `check_freshness.py` — content staleness (site-wide scope)
+
+```
+python3 tools/curator/check_freshness.py                          # report stale pages
+python3 tools/curator/check_freshness.py --grace-days 14          # also warn on expiring-soon
+python3 tools/curator/check_freshness.py --json                   # machine output
+python3 tools/curator/check_freshness.py --mark-verified <path>   # update last_verified to today
+```
+
+For pages that reference current state (lab cycle counts, telemetry numbers, "currently we…" claims), add to the meta block:
+
+```js
+export const meta = {
+  ...,
+  freshness_class: "time-sensitive",   // or "evergreen" / "factual-snapshot"
+  last_verified: "2026-05-20",
+  verification_interval_days: 60,      // default 90 for time-sensitive
+  verification_subject: "HIVE cycle count, RUSTSEC waiver list",
+};
+```
+
+Defaults if `freshness_class` is absent: `pages/labs/` + `pages/now.astro` → time-sensitive; `pages/notes/` + `pages/reports/` → factual-snapshot (date-stamped analytical posts, never stale); `about`/`contact`/`index` → evergreen.
+
+Re-verify workflow: when you've rechecked a page's claims still hold, run `--mark-verified <path>` to update its `last_verified` to today.
+
+### Pre-commit hook chains all three
+
+`tools/curator/hooks/pre-commit` (symlinked into `.git/hooks/pre-commit`) runs all three audits in sequence on every commit. Bypass with `git commit --no-verify` if you must.
+
+---
+
 ## Trigger a run manually
 
 ```

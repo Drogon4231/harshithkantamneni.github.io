@@ -6,6 +6,16 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
+export const meta = {
+  title: "Now",
+  date: "2026-05-13",
+  type: "now-page",
+  freshness_class: "time-sensitive",
+  last_verified: "2026-05-20",
+  verification_interval_days: 2,
+  verification_subject: "Current month's lab status entries, HIVE cycle count, AGI lab Program phase, recent shipping milestones",
+};
+
 const updated = '2026-05-13';
 const entries = [
   { date: 'May 2026', body: 'HIVE past cycle 99 and inside its alpha-gate run on the privacy-first product. Autonomous Research Lab mid-flight on Program 2 (dense vs MoE at sub-100M). Curator pipeline now runs the writing on this site end-to-end, with a human-in-the-loop review gate at the dashboard.' },
